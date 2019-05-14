@@ -1,0 +1,1686 @@
+{
+  "items": [
+    {
+      "id": "1553024007",
+      "fullname": "Blessed Scroll: Enchant Weapon (Grade S)",
+      "shortname": "BEWS",
+      "image": "/items/consumables/bews.png",
+      "type": "сonsumables",
+      "grade": "S"
+    },
+    {
+      "id": "1553024008",
+      "fullname": "Blessed Scroll: Enchant Armor (Grade S)",
+      "shortname": "BEAS",
+      "image": "/items/consumables/beas.png",
+      "type": "сonsumables",
+      "grade": "S"
+    },
+    {
+      "id": "1553024009",
+      "fullname": "Arcana Mace",
+      "shortname": "AM",
+      "image": "/items/full/Arcana-Mace.png",
+      "type": "weapon",
+      "grade": "S",
+      "weaponType": "blunt"
+    },
+    {
+      "id": "1553024010",
+      "fullname": "Angel Slayer",
+      "shortname": "AS",
+      "image": "/items/full/Angel-Slayer.png",
+      "type": "weapon",
+      "grade": "S",
+      "weaponType": "dagger"
+    },
+    {
+      "id": "1553024011",
+      "fullname": "Basalt Battlehammer",
+      "shortname": "Basalt",
+      "image": "/items/full/Basalt-Battlehammer.png",
+      "type": "weapon",
+      "grade": "S",
+      "weaponType": "blunt"
+    },
+    {
+      "id": "1553024012",
+      "fullname": "Demon Splinter",
+      "shortname": "DS",
+      "image": "/items/full/Demon-Splinter.png",
+      "type": "weapon",
+      "grade": "S",
+      "weaponType": "fist"
+    },
+    {
+      "id": "1553024013",
+      "fullname": "Draconic Bow",
+      "shortname": "DB",
+      "image": "/items/full/Draconic-Bow.png",
+      "type": "weapon",
+      "grade": "S",
+      "weaponType": "bow"
+    },
+    {
+      "id": "1553024014",
+      "fullname": "Dragon Hunter Axe",
+      "shortname": "DHA",
+      "image": "/items/full/Dragon-Hunter-Axe.png",
+      "type": "weapon",
+      "grade": "S",
+      "weaponType": "blunt"
+    },
+    {
+      "id": "1553024015",
+      "fullname": "Forgotten Blade",
+      "shortname": "FB",
+      "image": "/items/full/Forgotten-Blade.png",
+      "type": "weapon",
+      "grade": "S",
+      "weaponType": "sword"
+    },
+    {
+      "id": "1553024016",
+      "fullname": "Heavens Divider",
+      "shortname": "HD",
+      "image": "/items/full/Heavens-Divider.png",
+      "type": "weapon",
+      "grade": "S",
+      "weaponType": "sword"
+    },
+    {
+      "id": "1553024017",
+      "fullname": "Imperial Staff",
+      "shortname": "IS",
+      "image": "/items/full/Imperial-Staff.png",
+      "type": "weapon",
+      "grade": "S",
+      "weaponType": "blunt"
+    },
+    {
+      "id": "15530240018",
+      "fullname": "Tallum Blade*Dark Legion's Edge",
+      "shortname": "S-duals",
+      "image": "/items/full/S-duals.png",
+      "type": "weapon",
+      "grade": "S",
+      "weaponType": "dual"
+    },
+    {
+      "id": "1553024019",
+      "fullname": "Sealed Major Arcana Robe",
+      "shortname": "MA robe",
+      "image": "/items/full/sealed-ma-robe.png",
+      "type": "armor",
+      "grade": "S",
+      "armorType": "fullbody"
+    },
+    {
+      "id": "1553251053",
+      "fullname": "Soul Crystal с 12 на 13 уровни",
+      "shortname": "SA 12->13",
+      "type": "sa",
+      "image": "/items/full/Soul-Crystal.png"
+    },
+    {
+      "id": "1553251596",
+      "fullname": "Soul Crystal с 10 по 12 уровни",
+      "shortname": "SA 10->12",
+      "type": "sa",
+      "image": "/items/full/Soul-Crystal.png"
+    },
+    {
+      "id": "1553251556",
+      "fullname": "Imperial Staff Head",
+      "image": "/items/pieces/Imperial-Staff-Head.png",
+      "type": "pieces",
+      "shortname": "IS Head"
+    },
+    {
+      "id": "1553251597",
+      "fullname": "Arcana Mace Head",
+      "image": "/items/pieces/head.png",
+      "type": "pieces",
+      "shortname": "AM Head"
+    },
+    {
+      "id": "1553251598",
+      "fullname": "Demon Splinter Blade",
+      "image": "/items/pieces/blade.png",
+      "type": "pieces",
+      "shortname": "DS Blade"
+    },
+    {
+      "id": "1553251599",
+      "fullname": "Sealed Major Arcana Robe Part",
+      "image": "/items/pieces/part.png",
+      "type": "pieces",
+      "shortname": "MA Robe Part"
+    },
+    {
+      "id": "1553251512",
+      "fullname": "Scroll: Enchant Armor (Grade S)",
+      "image": "/items/consumables/eas.png",
+      "type": "сonsumables",
+      "grade": "S",
+      "shortname": "EAS"
+    },
+    {
+      "id": "1553251515",
+      "fullname": "Scroll: Enchant Weapon (Grade S)",
+      "image": "/items/consumables/ews.png",
+      "type": "сonsumables",
+      "grade": "S",
+      "shortname": "EWS"
+    },
+    {
+      "id": "1553426217",
+      "fullname": "Sealed Major Arcana Circlet",
+      "type": "armor",
+      "shortname": "MA Circlet",
+      "image": "/items/full/sealed-circlet.png",
+      "grade": "S",
+      "armorType": "helmet"
+    },
+    {
+      "id": "1553426719",
+      "fullname": "Sealed Draconic Leather Helmet",
+      "type": "armor",
+      "shortname": "Drac Helmet",
+      "image": "/items/full/sealed-circlet.png",
+      "grade": "S",
+      "armorType": "helmet"
+    },
+    {
+      "id": "1553426806",
+      "fullname": "Sealed Imperial Crusader Helmet",
+      "type": "armor",
+      "shortname": "IC Helmet",
+      "image": "/items/full/sealed-helmet.png",
+      "grade": "S",
+      "armorType": "helmet"
+    },
+    {
+      "id": "1553426899",
+      "fullname": "Sealed Imperial Crusader Shield",
+      "type": "armor",
+      "shortname": "IC Shield",
+      "image": "/items/full/shield-imperial-crusader-shield.png",
+      "grade": "S",
+      "armorType": "shield"
+    },
+    {
+      "id": "1553427014",
+      "fullname": "Dragon Hunter Axe Blade",
+      "type": "pieces",
+      "image": "/items/pieces/blade.png",
+      "shortname": "DHA Blade"
+    },
+    {
+      "id": "1553427269",
+      "fullname": "Basalt Battlehammer Head",
+      "type": "pieces",
+      "image": "/items/pieces/head.png",
+      "shortname": "Basalt Head"
+    },
+    {
+      "id": "1553427411",
+      "fullname": "Sealed Imperial Crusader Shield Part",
+      "type": "pieces",
+      "image": "/items/pieces/chest.png",
+      "shortname": "IC Shield Part"
+    },
+    {
+      "id": "1553427499",
+      "fullname": "Sealed Imperial Crusader Helmet Pattern",
+      "type": "pieces",
+      "image": "/items/pieces/brown-pouch.png",
+      "shortname": "IC Helmet Pattern"
+    },
+    {
+      "id": "1553427542",
+      "fullname": "Sealed Draconic Leather Helmet Pattern",
+      "type": "pieces",
+      "image": "/items/pieces/brown-pouch.png",
+      "shortname": "Drac Helmet Pattern"
+    },
+    {
+      "id": "1553427580",
+      "fullname": "Sealed Major Arcana Circlet Pattern",
+      "type": "pieces",
+      "image": "/items/pieces/brown-pouch.png",
+      "shortname": "MA Circlet Pattern"
+    },
+    {
+      "id": "1554390008",
+      "fullname": "Elysian",
+      "type": "weapon",
+      "shortname": "Elysian",
+      "image": "/items/full/elysian.png",
+      "grade": "A",
+      "weaponType": "blunt"
+    },
+    {
+      "id": "1554919606",
+      "fullname": "Ring of Queen Ant",
+      "type": "jewelry",
+      "shortname": "Ring of Queen Ant",
+      "image": "/items/full/ring-of-queen-ant.png",
+      "grade": "B",
+      "jewelryType": "ring"
+    },
+    {
+      "id": "1554919808",
+      "fullname": "Earring of Orfen",
+      "type": "jewelry",
+      "shortname": "Earring of Orfen",
+      "image": "/items/full/earring-orfen.png",
+      "grade": "A",
+      "jewelryType": "earning"
+    },
+    {
+      "id": "1554920230",
+      "fullname": "Ring of Core",
+      "type": "jewelry",
+      "shortname": "Ring of Core",
+      "image": "/items/full/ring-of-core.png",
+      "grade": "A",
+      "jewelryType": "ring"
+    },
+    {
+      "id": "1554920459",
+      "fullname": "Zaken Earring",
+      "type": "jewelry",
+      "shortname": "Zaken Earring",
+      "image": "/items/full/zaken-earring.png",
+      "grade": "S",
+      "jewelryType": "earning"
+    },
+    {
+      "id": "1554920660",
+      "fullname": "Saint Spear",
+      "type": "weapon",
+      "shortname": "SS",
+      "image": "/items/full/Saint-Spear.png",
+      "grade": "S",
+      "weaponType": "pole"
+    },
+    {
+      "id": "1554921092",
+      "fullname": "Ring of Baium",
+      "type": "jewelry",
+      "shortname": "Ring of Baium",
+      "image": "/items/full/ring-of-baium.png",
+      "grade": "S",
+      "jewelryType": "ring"
+    },
+    {
+      "id": "1554921148",
+      "fullname": "Tallum Blade",
+      "type": "weapon",
+      "shortname": "TB",
+      "image": "/items/full/tallum-blade.png",
+      "grade": "A",
+      "weaponType": "sword"
+    },
+    {
+      "id": "1554921185",
+      "fullname": "Elemental Sword",
+      "type": "weapon",
+      "shortname": "ES",
+      "image": "/items/full/elemental-sword.png",
+      "grade": "A",
+      "weaponType": "sword"
+    },
+    {
+      "id": "1554921255",
+      "fullname": "Halberd",
+      "type": "weapon",
+      "shortname": "Halberd",
+      "image": "/items/full/halberd.png",
+      "grade": "A",
+      "weaponType": "pole"
+    },
+    {
+      "id": "1554921288",
+      "fullname": "Blood Tornado",
+      "type": "weapon",
+      "shortname": "Tornado",
+      "image": "/items/full/blood-tornado.png",
+      "grade": "A",
+      "weaponType": "fist"
+    },
+    {
+      "id": "1554921330",
+      "fullname": "Carnage Bow",
+      "type": "weapon",
+      "shortname": "Carnage",
+      "image": "/items/full/carnage-bow.png",
+      "grade": "A",
+      "weaponType": "bow"
+    },
+    {
+      "id": "1554921382",
+      "fullname": "Meteor Shower",
+      "type": "weapon",
+      "shortname": "Meteor",
+      "image": "/items/full/meteor-shower.png",
+      "grade": "A",
+      "weaponType": "blunt"
+    },
+    {
+      "id": "1554921413",
+      "fullname": "Bloody Orchid",
+      "type": "weapon",
+      "shortname": "Orchid",
+      "image": "/items/full/bloody-orchid.png",
+      "grade": "A",
+      "weaponType": "dagger"
+    },
+    {
+      "id": "1554921448",
+      "fullname": "Dasparions Staff",
+      "type": "weapon",
+      "shortname": "Dasparion",
+      "image": "/items/full/dasparions-staff.png",
+      "grade": "A",
+      "weaponType": "blunt"
+    },
+    {
+      "id": "1554926236",
+      "fullname": "Sealed Draconic Leather Armor",
+      "type": "armor",
+      "shortname": "Drac Armor",
+      "image": "/items/full/sealed-draconic-armor.png",
+      "grade": "S",
+      "armorType": "fullbody"
+    },
+    {
+      "id": "1554926277",
+      "fullname": "Sealed Imperial Crusader Breastplate",
+      "type": "armor",
+      "shortname": "IC Plate",
+      "image": "/items/full/sealed-ic-breastplate.png",
+      "grade": "S",
+      "armorType": "chest"
+    },
+    {
+      "id": "1554926322",
+      "fullname": "Sealed Imperial Crusader Gaiters",
+      "type": "armor",
+      "shortname": "IC Gaiters",
+      "image": "/items/full/sealed-ic-gaiters.png",
+      "grade": "S",
+      "armorType": "legs"
+    },
+    {
+      "id": "1554926382",
+      "fullname": "Sealed Major Arcana Boots",
+      "type": "armor",
+      "shortname": "MA Boots",
+      "image": "/items/full/sealed-ma-boots.png",
+      "grade": "S",
+      "armorType": "boots"
+    },
+    {
+      "id": "1554926424",
+      "fullname": "Sealed Major Arcana Glove",
+      "type": "armor",
+      "shortname": "MA Glove",
+      "image": "/items/full/sealed-ma-gloves.png",
+      "grade": "S",
+      "armorType": "gloves"
+    },
+    {
+      "id": "1554926471",
+      "fullname": "Sealed Draconic Leather Boots",
+      "type": "armor",
+      "shortname": "Drac Boots",
+      "image": "/items/full/sealed-draconic-boots.png",
+      "grade": "S",
+      "armorType": "boots"
+    },
+    {
+      "id": "1554926510",
+      "fullname": "Sealed Draconic Leather Glove",
+      "type": "armor",
+      "shortname": "Drac Glove",
+      "image": "/items/full/sealed-draconic-gloves.png",
+      "grade": "S",
+      "armorType": "gloves"
+    },
+    {
+      "id": "1554926574",
+      "fullname": "Sealed Imperial Crusader Boots",
+      "type": "armor",
+      "shortname": "IC Boots",
+      "image": "/items/full/sealed-ic-boots.png",
+      "grade": "S",
+      "armorType": "boots"
+    },
+    {
+      "id": "1554926832",
+      "fullname": "Sealed Imperial Crusader Gauntlet",
+      "type": "armor",
+      "shortname": "IC Gauntlet",
+      "image": "/items/full/sealed-ic-gauntlets.png",
+      "grade": "S",
+      "armorType": "gloves"
+    },
+    {
+      "id": "1554926869",
+      "fullname": "Sealed Tateossian Ring",
+      "type": "jewelry",
+      "shortname": "TT Ring",
+      "image": "/items/full/sealed-tateossian-ring.png",
+      "grade": "S",
+      "jewelryType": "necklace"
+    },
+    {
+      "id": "1554926904",
+      "fullname": "Sealed Tateossian Earring",
+      "type": "jewelry",
+      "shortname": "TT Earning",
+      "image": "/items/full/sealed-tateossian-earring.png",
+      "grade": "S",
+      "jewelryType": "earning"
+    },
+    {
+      "id": "1554926935",
+      "fullname": "Sealed Tateossian Necklace",
+      "type": "jewelry",
+      "shortname": "TT Necklace",
+      "image": "/items/full/sealed-tateossian-necklace.png",
+      "grade": "S",
+      "jewelryType": "necklace"
+    },
+    {
+      "id": "1554927009",
+      "fullname": "Scroll: Enchant Weapon (Grade A)",
+      "type": "сonsumables",
+      "shortname": "EWA",
+      "image": "/items/consumables/ewa.png",
+      "grade": "A"
+    },
+    {
+      "id": "1554927090",
+      "fullname": "Blessed Scroll of Resurrection",
+      "type": "сonsumables",
+      "shortname": "BRES",
+      "image": "/items/consumables/bless-res.png",
+      "grade": "NG"
+    },
+    {
+      "id": "1554927126",
+      "fullname": "Blessed Scroll of Escape",
+      "type": "сonsumables",
+      "shortname": "BSOE",
+      "image": "/items/consumables/bless-soe.png",
+      "grade": "NG"
+    },
+    {
+      "id": "1554927176",
+      "fullname": "Ancient Book - Divine Inspiration (Manuscript)",
+      "type": "сonsumables",
+      "shortname": "Ancient Book - Divine Inspiration (Manuscript)",
+      "image": "/items/consumables/divine-inspiration-manuscript.png",
+      "grade": "NG"
+    },
+    {
+      "id": "1554927237",
+      "fullname": "High-Grade Life Stone: level 76",
+      "type": "сonsumables",
+      "shortname": "High LS 76",
+      "image": "/items/consumables/high-life-stone-76.png",
+      "grade": "S"
+    },
+    {
+      "id": "1554927271",
+      "fullname": "High-Grade Life Stone: level 70",
+      "type": "сonsumables",
+      "shortname": "High LS 70",
+      "image": "/items/consumables/high-life-stone-70.png",
+      "grade": "A"
+    },
+    {
+      "id": "1554927306",
+      "fullname": "Top-Grade Life Stone: level 76",
+      "type": "сonsumables",
+      "shortname": "Top LS 76",
+      "image": "/items/consumables/top-life-stone-76.png",
+      "grade": "S"
+    },
+    {
+      "id": "1554927334",
+      "fullname": "Earring of Antharas",
+      "type": "jewelry",
+      "shortname": "Earring of Antharas",
+      "image": "/items/full/earring-antharas.png",
+      "grade": "S",
+      "jewelryType": "earning"
+    },
+    {
+      "id": "1554927385",
+      "fullname": "Dark Legions Edge",
+      "type": "weapon",
+      "shortname": "DLE",
+      "image": "/items/full/dark-legions-edge.png",
+      "grade": "A",
+      "weaponType": "sword"
+    },
+    {
+      "id": "1554927420",
+      "fullname": "Sword of Miracles",
+      "type": "weapon",
+      "shortname": "SoM",
+      "image": "/items/full/sword-of-miracles.png",
+      "grade": "A",
+      "weaponType": "sword"
+    },
+    {
+      "id": "1554927496",
+      "fullname": "Dragon Slayer",
+      "type": "weapon",
+      "shortname": "Dragon Slayer",
+      "image": "/items/full/dragon-slayer.png",
+      "grade": "A",
+      "weaponType": "sword"
+    },
+    {
+      "id": "1554927547",
+      "fullname": "Branch of The Mother Tree",
+      "type": "weapon",
+      "shortname": "Branch",
+      "image": "/items/full/branch.png",
+      "grade": "A",
+      "weaponType": "blunt"
+    },
+    {
+      "id": "1554927640",
+      "fullname": "Tallum Glaive",
+      "type": "weapon",
+      "shortname": "TG",
+      "image": "/items/full/tallum-glaive.png",
+      "grade": "A",
+      "weaponType": "pole"
+    },
+    {
+      "id": "1554927675",
+      "fullname": "Dragon Grinder",
+      "type": "weapon",
+      "shortname": "DG",
+      "image": "/items/full/dragon-grinder.png",
+      "grade": "A",
+      "weaponType": "fist"
+    },
+    {
+      "id": "1554927698",
+      "fullname": "Soul Bow",
+      "type": "weapon",
+      "shortname": "Soul Bow",
+      "image": "/items/full/soul-bow.png",
+      "grade": "A",
+      "weaponType": "bow"
+    },
+    {
+      "id": "1554927727",
+      "fullname": "Soul Separator",
+      "type": "weapon",
+      "shortname": "Sepor",
+      "image": "/items/full/soul-separator.png",
+      "grade": "A",
+      "weaponType": "dagger"
+    },
+    {
+      "id": "1554927776",
+      "fullname": "Sealed Majestic Ring",
+      "type": "jewelry",
+      "shortname": "MJ Ring",
+      "image": "/items/full/sealed-majestic-ring.png",
+      "grade": "A",
+      "jewelryType": "ring"
+    },
+    {
+      "id": "1554927808",
+      "fullname": "Sealed Majestic Earring",
+      "type": "jewelry",
+      "shortname": "MJ Earning",
+      "image": "/items/full/sealed-majestic-earring.png",
+      "grade": "A",
+      "jewelryType": "earning"
+    },
+    {
+      "id": "1554927846",
+      "fullname": "Sealed Majestic Necklace",
+      "type": "jewelry",
+      "shortname": "MJ Necklace",
+      "image": "/items/full/sealed-majestic-necklace.png",
+      "grade": "A",
+      "jewelryType": "necklace"
+    },
+    {
+      "id": "1554927896",
+      "fullname": "Sealed Phoenix Ring",
+      "type": "jewelry",
+      "shortname": "Ph Ring",
+      "image": "/items/full/sealed-phoenix-ring.png",
+      "grade": "A",
+      "jewelryType": "ring"
+    },
+    {
+      "id": "1554927925",
+      "fullname": "Sealed Phoenix Earring",
+      "type": "jewelry",
+      "shortname": "Ph Earning",
+      "image": "/items/full/sealed-phoenix-earring.png",
+      "grade": "A",
+      "jewelryType": "earning"
+    },
+    {
+      "id": "1554927951",
+      "fullname": "Sealed Phoenix Necklace",
+      "type": "jewelry",
+      "shortname": "Ph Necklace",
+      "image": "/items/full/sealed-phoenix-necklace.png",
+      "grade": "A",
+      "jewelryType": "necklace"
+    },
+    {
+      "id": "1554927999",
+      "fullname": "Sealed Majestic Robe",
+      "type": "armor",
+      "shortname": "Mj Robe",
+      "image": "/items/full/sealed-majestic-robe.png",
+      "grade": "A",
+      "armorType": "fullbody"
+    },
+    {
+      "id": "1554928026",
+      "fullname": "Sealed Nightmare Robe",
+      "type": "armor",
+      "shortname": "NM Robe",
+      "image": "/items/full/sealed-nightmare-robe.png",
+      "grade": "A",
+      "armorType": "fullbody"
+    },
+    {
+      "id": "1554928073",
+      "fullname": "Sealed Majestic Plate Armor",
+      "type": "armor",
+      "shortname": "MJ Plate",
+      "image": "/items/full/sealed-majestic-plate-armor.png",
+      "grade": "A",
+      "armorType": "fullbody"
+    },
+    {
+      "id": "1554928113",
+      "fullname": "Sealed Armor of Nightmare",
+      "type": "armor",
+      "shortname": "NM Armor",
+      "image": "/items/full/sealed-armor-nightmare.png",
+      "grade": "A",
+      "armorType": "fullbody"
+    },
+    {
+      "id": "1554928144",
+      "fullname": "Sealed Majestic Leather Armor",
+      "type": "armor",
+      "shortname": "MJ Light",
+      "image": "/items/full/sealed-majestic-leather-armor.png",
+      "grade": "A",
+      "armorType": "fullbody"
+    },
+    {
+      "id": "1554928186",
+      "fullname": "Sealed Leather Armor of Nightmare",
+      "type": "armor",
+      "shortname": "NM Light Armor",
+      "image": "/items/full/sealed-leather-armor-of-nightmare.png",
+      "grade": "A",
+      "armorType": "fullbody"
+    },
+    {
+      "id": "1554928240",
+      "fullname": "Sealed Gauntlets of Nightmare",
+      "type": "armor",
+      "shortname": "NM Gauntlets",
+      "image": "/items/full/sealed-gauntlets-nightmare.png",
+      "grade": "A",
+      "armorType": "gloves"
+    },
+    {
+      "id": "1554928268",
+      "fullname": "Sealed Boots of Nightmare",
+      "type": "armor",
+      "shortname": "NM Boots",
+      "image": "/items/full/sealed-boots-nightmare.png",
+      "grade": "A",
+      "armorType": "boots"
+    },
+    {
+      "id": "1554928306",
+      "fullname": "Sealed Majestic Gauntlets",
+      "type": "armor",
+      "shortname": "MJ Gauntlets",
+      "image": "/items/full/sealed-majestic-gauntlets.png",
+      "grade": "A",
+      "armorType": "gloves"
+    },
+    {
+      "id": "1554928336",
+      "fullname": "Sealed Majestic Boots",
+      "type": "armor",
+      "shortname": "MJ Boots",
+      "image": "/items/full/sealed-majestic-boots.png",
+      "grade": "A",
+      "armorType": "boots"
+    },
+    {
+      "id": "1554928369",
+      "fullname": "Sealed Shield of Nightmare",
+      "type": "armor",
+      "shortname": "NM Shield",
+      "image": "/items/full/sealed-shield-nightmare.png",
+      "grade": "A",
+      "armorType": "shield"
+    },
+    {
+      "id": "1554928416",
+      "fullname": "Sealed Majestic Circlet",
+      "type": "armor",
+      "shortname": "MJ Circlet",
+      "image": "/items/full/sealed-circlet.png",
+      "grade": "A",
+      "armorType": "helmet"
+    },
+    {
+      "id": "1554928477",
+      "fullname": "Sealed Helm of Nightmare",
+      "type": "armor",
+      "shortname": "NM Helm",
+      "image": "/items/full/sealed-circlet.png",
+      "grade": "B",
+      "armorType": "helmet"
+    },
+    {
+      "id": "1554928511",
+      "fullname": "Sealed Tallum Leather Armor",
+      "type": "armor",
+      "shortname": "TM Light Armor",
+      "image": "/items/full/sealed-tallum-leather-armor.png",
+      "grade": "A",
+      "armorType": "fullbody"
+    },
+    {
+      "id": "1554928554",
+      "fullname": "Sealed Dark Crystal Leather Armor",
+      "type": "armor",
+      "shortname": "DC Light Armor",
+      "image": "/items/full/sealed-dark-crystal-leather-armor.png",
+      "grade": "A",
+      "armorType": "chest"
+    },
+    {
+      "id": "1554928607",
+      "fullname": "Sealed Dark Crystal Leggings",
+      "type": "armor",
+      "shortname": "DC Leggins",
+      "image": "/items/full/sealed-dark-crystal-leggings.png",
+      "grade": "A",
+      "armorType": "legs"
+    },
+    {
+      "id": "1554928638",
+      "fullname": "Sealed Dark Crystal Gloves",
+      "type": "armor",
+      "shortname": "DC Gloves",
+      "image": "/items/full/sealed-dark-crystal-gloves.png",
+      "grade": "A",
+      "armorType": "gloves"
+    },
+    {
+      "id": "1554928667",
+      "fullname": "Sealed Dark Crystal Boots",
+      "type": "armor",
+      "shortname": "DC Boots",
+      "image": "/items/full/sealed-dark-crystal-boots.png",
+      "grade": "A",
+      "armorType": "boots"
+    },
+    {
+      "id": "1554928696",
+      "fullname": "Sealed Tallum Gloves",
+      "type": "armor",
+      "shortname": "TM Gloves",
+      "image": "/items/full/sealed-tallum-gloves.png",
+      "grade": "A",
+      "armorType": "gloves"
+    },
+    {
+      "id": "1554928723",
+      "fullname": "Sealed Tallum Boots",
+      "type": "armor",
+      "shortname": "TM Boots",
+      "image": "/items/full/sealed-tallum-boots.png",
+      "grade": "A",
+      "armorType": "boots"
+    },
+    {
+      "id": "1554928768",
+      "fullname": "Sealed Tallum Plate Armor",
+      "type": "armor",
+      "shortname": "TM Plate",
+      "image": "/items/full/sealed-tallum-plate-armor.png",
+      "grade": "A",
+      "armorType": "fullbody"
+    },
+    {
+      "id": "1554928807",
+      "fullname": "Sealed Dark Crystal Breastplate",
+      "type": "armor",
+      "shortname": "DC Plate",
+      "image": "/items/full/sealed-dark-crystal-breastplate.png",
+      "grade": "A",
+      "armorType": "chest"
+    },
+    {
+      "id": "1554928836",
+      "fullname": "Sealed Dark Crystal Gaiters",
+      "type": "armor",
+      "shortname": "DC Gaiters",
+      "image": "/items/full/sealed-dark-crystal-gaiters.png",
+      "grade": "A",
+      "armorType": "legs"
+    },
+    {
+      "id": "1554928887",
+      "fullname": "Sealed Dark Crystal Robe",
+      "type": "armor",
+      "shortname": "DC Robe",
+      "image": "/items/full/sealed-dark-crystal-robe.png",
+      "grade": "A",
+      "armorType": "fullbody"
+    },
+    {
+      "id": "1554928912",
+      "fullname": "Sealed Tallum Tunic",
+      "type": "armor",
+      "shortname": "TM Tunic",
+      "image": "/items/full/sealed-tallum-tunic.png",
+      "grade": "A",
+      "armorType": "chest"
+    },
+    {
+      "id": "1554928978",
+      "fullname": "Sealed Tallum Stockings",
+      "type": "armor",
+      "shortname": "TM Stockings",
+      "image": "/items/full/sealed-tallum-stockings.png",
+      "grade": "A",
+      "armorType": "legs"
+    },
+    {
+      "id": "1554929066",
+      "fullname": "Sealed Dark Crystal Helmet",
+      "type": "armor",
+      "shortname": "DC Helmet",
+      "image": "/items/full/sealed-helmet.png",
+      "grade": "A",
+      "armorType": "helmet"
+    },
+    {
+      "id": "1554929095",
+      "fullname": "Sealed Tallum Helmet",
+      "type": "armor",
+      "shortname": "TM Helmet",
+      "image": "/items/full/sealed-helmet.png",
+      "grade": "A",
+      "armorType": "helmet"
+    },
+    {
+      "id": "1554929123",
+      "fullname": "Sealed Dark Crystal Shield",
+      "type": "armor",
+      "shortname": "DC Shield",
+      "image": "/items/full/sealed-dark-crystal-shield.png",
+      "grade": "A",
+      "armorType": "shield"
+    },
+    {
+      "id": "1554929742",
+      "fullname": "Necklace of Valakas",
+      "type": "jewelry",
+      "shortname": "Necklace of Valakas",
+      "image": "/items/full/necklace-valakas.png",
+      "grade": "S",
+      "jewelryType": "necklace"
+    },
+    {
+      "id": "1554930744",
+      "fullname": "Frintezza Necklace",
+      "type": "jewelry",
+      "shortname": "Frintezza Necklace",
+      "image": "/items/full/frintezza-necklace.png",
+      "grade": "A",
+      "jewelryType": "necklace"
+    },
+    {
+      "id": "1554933179",
+      "fullname": "Angel Slayer Blade",
+      "type": "pieces",
+      "shortname": "AS Blade",
+      "image": "/items/pieces/blade.png"
+    },
+    {
+      "id": "1554933383",
+      "fullname": "Heavens Divider Edge",
+      "type": "pieces",
+      "shortname": "HD Edge",
+      "image": "/items/pieces/blade.png"
+    },
+    {
+      "id": "1554933413",
+      "fullname": "Forgotten Blade Edge",
+      "type": "pieces",
+      "shortname": "FB Edge",
+      "image": "/items/pieces/blade.png"
+    },
+    {
+      "id": "1554933460",
+      "fullname": "Draconic Bow Shaft",
+      "type": "pieces",
+      "shortname": "DB Shafr",
+      "image": "/items/pieces/shaft.png"
+    },
+    {
+      "id": "1554933663",
+      "fullname": "Sealed Draconic Leather Armor Part",
+      "type": "pieces",
+      "shortname": "DC Leather Armor Part",
+      "image": "/items/pieces/gray-fabric.png"
+    },
+    {
+      "id": "1554933783",
+      "fullname": "Sealed Imperial Crusader Breastplate Part",
+      "type": "pieces",
+      "shortname": "IC Plate part",
+      "image": "/items/pieces/part.png"
+    },
+    {
+      "id": "1554933820",
+      "fullname": "Sealed Imperial Crusader Gaiters Pattern",
+      "type": "pieces",
+      "shortname": "IC Gaiters Pattern",
+      "image": "/items/pieces/brown-pouch.png"
+    },
+    {
+      "id": "1554934625",
+      "fullname": "Saint Spear Blade",
+      "type": "pieces",
+      "shortname": "SS Blade",
+      "image": "/items/pieces/blade.png"
+    },
+    {
+      "id": "1554934849",
+      "fullname": "Sealed Tateossian Necklace Chain",
+      "type": "pieces",
+      "shortname": "TT Necklace chain",
+      "image": "/items/pieces/chest.png"
+    },
+    {
+      "id": "1554934885",
+      "fullname": "Sealed Tateossian Ring Gem",
+      "type": "pieces",
+      "shortname": "TT Ring Gem",
+      "image": "/items/pieces/gem-gold.png"
+    },
+    {
+      "id": "1554934919",
+      "fullname": "Sealed Tateossian Earring Part",
+      "type": "pieces",
+      "shortname": "TT Earning Part",
+      "image": "/items/pieces/moon-shard.png"
+    },
+    {
+      "id": "1554935082",
+      "fullname": "Sealed Imperial Crusader Boots Design",
+      "type": "pieces",
+      "shortname": "IC Boots Design",
+      "image": "/items/pieces/brown-pouch.png"
+    },
+    {
+      "id": "1554935120",
+      "fullname": "Sealed Imperial Crusader Gauntlets Design",
+      "type": "pieces",
+      "shortname": "IC Gauntlets Design",
+      "image": "/items/pieces/brown-pouch.png"
+    },
+    {
+      "id": "1554935148",
+      "fullname": "Sealed Draconic Leather Boots Design",
+      "type": "pieces",
+      "shortname": "Drac Boots Design",
+      "image": "/items/pieces/brown-pouch.png"
+    },
+    {
+      "id": "1554935225",
+      "fullname": "Sealed Major Arcana Boots Design",
+      "type": "pieces",
+      "shortname": "MA boots design",
+      "image": "/items/pieces/brown-pouch.png"
+    },
+    {
+      "id": "1554935256",
+      "fullname": "Sealed Draconic Leather Gloves Fabric",
+      "type": "pieces",
+      "shortname": "Drac gloves fabric",
+      "image": "/items/pieces/gray-fabric.png"
+    },
+    {
+      "id": "1554935309",
+      "fullname": "Sealed Major Arcana Gloves Fabric",
+      "type": "pieces",
+      "shortname": "MA gloves fabric",
+      "image": "/items/pieces/gray-fabric.png"
+    },
+    {
+      "id": "1554969772",
+      "fullname": "Top-Grade Life Stone: level 70",
+      "type": "сonsumables",
+      "shortname": "Top LS 70",
+      "image": "/items/consumables/top-life-stone-70.png",
+      "grade": "A"
+    },
+    {
+      "id": "1554973715",
+      "fullname": "Destruction Tombstone",
+      "type": "сonsumables",
+      "shortname": "Destruction Tombstone",
+      "image": "/items/consumables/tumbstone.png",
+      "grade": "NG"
+    },
+    {
+      "id": "1554973747",
+      "fullname": "Egg of Earth: A-Grade",
+      "type": "сonsumables",
+      "shortname": "Egg of Earth: A-Grade",
+      "image": "/items/consumables/egg-earth-a.png",
+      "grade": "A"
+    },
+    {
+      "id": "1554973798",
+      "fullname": "Ancient Book - Divine Inspiration (Original Language Version)",
+      "type": "сonsumables",
+      "shortname": "Ancient Book - Divine Inspiration (Original Language Version)",
+      "image": "/items/consumables/divine-inspiration-original.png",
+      "grade": "NG"
+    },
+    {
+      "id": "1554973941",
+      "fullname": "Dark Legions Edge Blade",
+      "type": "pieces",
+      "shortname": "DLE Blade",
+      "image": "/items/pieces/blade.png"
+    },
+    {
+      "id": "1554973969",
+      "fullname": "Sword of Miracles Edge",
+      "type": "pieces",
+      "shortname": "SoM Edge",
+      "image": "/items/pieces/blade.png"
+    },
+    {
+      "id": "1554973994",
+      "fullname": "Dragon Slayer Edge",
+      "type": "pieces",
+      "shortname": "DS Edge",
+      "image": "/items/pieces/blade.png"
+    },
+    {
+      "id": "1554974033",
+      "fullname": "Sealed Majestic Robe Fabric",
+      "type": "pieces",
+      "shortname": "MJ Robe Fabric",
+      "image": "/items/pieces/gray-fabric.png"
+    },
+    {
+      "id": "1554974055",
+      "fullname": "Sealed Nightmare Robe Fabric",
+      "type": "pieces",
+      "shortname": "NM Robe Fabric",
+      "image": "/items/pieces/gray-fabric.png"
+    },
+    {
+      "id": "1554974317",
+      "fullname": "Scroll: Enchant Armor (Grade A)",
+      "type": "сonsumables",
+      "shortname": "EAA",
+      "image": "/items/consumables/eaa.png",
+      "grade": "A"
+    },
+    {
+      "id": "1554974388",
+      "fullname": "Sealed Majestic Ring Gemstone",
+      "type": "pieces",
+      "shortname": "MJ Ring Gemstone",
+      "image": "/items/pieces/asofe.png"
+    },
+    {
+      "id": "1554974412",
+      "fullname": "Sealed Majestic Earring Gemstone",
+      "type": "pieces",
+      "shortname": "MJ Earning Gemstone",
+      "image": "/items/pieces/asofe.png"
+    },
+    {
+      "id": "1554974439",
+      "fullname": "Sealed Majestic Necklace Beads",
+      "type": "pieces",
+      "shortname": "MJ Necklace Beads",
+      "image": "/items/pieces/gem-c.png"
+    },
+    {
+      "id": "1554974482",
+      "fullname": "Elysian Head",
+      "type": "pieces",
+      "shortname": "Elysian Head",
+      "image": "/items/pieces/white-head.png"
+    },
+    {
+      "id": "1554974519",
+      "fullname": "Branch of The Mother Tree Head",
+      "type": "pieces",
+      "shortname": "BOTMT Head",
+      "image": "/items/pieces/white-head.png"
+    },
+    {
+      "id": "1554974549",
+      "fullname": "Skull of the Dead: A-Grade",
+      "type": "сonsumables",
+      "shortname": "Skull of the Dead: A-Grade",
+      "image": "/items/consumables/skull-dead-a.png",
+      "grade": "A"
+    },
+    {
+      "id": "1554974626",
+      "fullname": "False Nucleus of Life: A-Grade",
+      "type": "сonsumables",
+      "shortname": "False Nucleus of Life: A-Grade",
+      "image": "/items/consumables/false-nucleus-life-a.png",
+      "grade": "A"
+    },
+    {
+      "id": "1554974776",
+      "fullname": "Tallum Glaive Edge",
+      "type": "pieces",
+      "shortname": "TG Edge",
+      "image": "/items/pieces/blade.png"
+    },
+    {
+      "id": "1554974813",
+      "fullname": "Sealed Majestic Plate Armor Pattern",
+      "type": "pieces",
+      "shortname": "MJ Plate Pattern",
+      "image": "/items/pieces/pattern.png"
+    },
+    {
+      "id": "1554974839",
+      "fullname": "Sealed Armor of Nightmare Pattern",
+      "type": "pieces",
+      "shortname": "NM Armor Pattern",
+      "image": "/items/pieces/pattern.png"
+    },
+    {
+      "id": "1554974896",
+      "fullname": "Blessed Scroll: Enchant Armor (Grade A)",
+      "type": "сonsumables",
+      "shortname": "BEAA",
+      "image": "/items/consumables/beaa.png",
+      "grade": "A"
+    },
+    {
+      "id": "1554977745",
+      "fullname": "Sealed Majestic Leather Armor Fabric",
+      "type": "pieces",
+      "shortname": "MJ Armor Fabric",
+      "image": "/items/pieces/gray-fabric.png"
+    },
+    {
+      "id": "1554977778",
+      "fullname": "Sealed Leather Armor of Nightmare Fabric",
+      "type": "pieces",
+      "shortname": "NM Armor Fabric",
+      "image": "/items/pieces/gray-fabric.png"
+    },
+    {
+      "id": "1554977932",
+      "fullname": "Dragon Grinder Edge",
+      "type": "pieces",
+      "shortname": "DG Edge",
+      "image": "/items/pieces/blade.png"
+    },
+    {
+      "id": "1554978145",
+      "fullname": "Sealed Majestic Gauntlets Design",
+      "type": "pieces",
+      "shortname": "MJ Gauntlets Design",
+      "image": "/items/pieces/brown-pouch.png"
+    },
+    {
+      "id": "1554978176",
+      "fullname": "Sealed Gauntlets of Nightmare Design",
+      "type": "pieces",
+      "shortname": "NM Gauntlets Design",
+      "image": "/items/pieces/brown-pouch.png"
+    },
+    {
+      "id": "1554978232",
+      "fullname": "Sealed Majestic Boots Lining",
+      "type": "pieces",
+      "shortname": "MJ Boots Lining",
+      "image": "/items/pieces/black-fabric.png"
+    },
+    {
+      "id": "1554978253",
+      "fullname": "Sealed Boots of Nightmare Lining",
+      "type": "pieces",
+      "shortname": "NM Boots Lining",
+      "image": "/items/pieces/black-fabric.png"
+    },
+    {
+      "id": "1554978273",
+      "fullname": "Soul Bow Stave",
+      "type": "pieces",
+      "shortname": "Soul Bow Stave",
+      "image": "/items/pieces/shaft.png"
+    },
+    {
+      "id": "1554978458",
+      "fullname": "Sealed Helm of Nightmare Design",
+      "type": "pieces",
+      "shortname": "NM Helmet Design",
+      "image": "/items/pieces/brown-pouch.png"
+    },
+    {
+      "id": "1554978481",
+      "fullname": "Sealed Majestic Circlet Design",
+      "type": "pieces",
+      "shortname": "MJ Circlet Design",
+      "image": "/items/pieces/brown-pouch.png"
+    },
+    {
+      "id": "1554978509",
+      "fullname": "Sealed Shield of Nightmare Fragment",
+      "type": "pieces",
+      "shortname": "NM Shield Fragment",
+      "image": "/items/pieces/chest.png"
+    },
+    {
+      "id": "1554978539",
+      "fullname": "Soul Separator Head",
+      "type": "pieces",
+      "shortname": "Separator Head",
+      "image": "/items/pieces/blade.png"
+    },
+    {
+      "id": "1554979139",
+      "fullname": "Dragon's Heart: A-Grade",
+      "type": "сonsumables",
+      "shortname": "Dragon's Heart: A-Grade",
+      "image": "/items/consumables/dragons-heart-a.png",
+      "grade": "A"
+    },
+    {
+      "id": "1554979773",
+      "fullname": "Angel's Soul: A-Grade",
+      "type": "сonsumables",
+      "shortname": "Angel's Soul: A-Grade",
+      "image": "/items/consumables/angels-soul-a.png",
+      "grade": "A"
+    },
+    {
+      "id": "1554980368",
+      "fullname": "Blessed Scroll: Enchant Weapon (Grade A)",
+      "type": "сonsumables",
+      "shortname": "BEWA",
+      "image": "/items/consumables/bewa.png",
+      "grade": "A"
+    },
+    {
+      "id": "1554999399",
+      "fullname": "Thread",
+      "type": "resources",
+      "shortname": "Thread",
+      "image": "/items/resources/Thread.png"
+    },
+    {
+      "id": "1554999624",
+      "fullname": "Animal Skin",
+      "type": "resources",
+      "shortname": "Animal Skin",
+      "image": "/items/resources/Animal-Skin.png"
+    },
+    {
+      "id": "1554999687",
+      "fullname": "Animal Bone",
+      "type": "resources",
+      "shortname": "Animal Bone",
+      "image": "/items/resources/animal-bone.png"
+    },
+    {
+      "id": "1554999715",
+      "fullname": "Stem",
+      "type": "resources",
+      "shortname": "Stem",
+      "image": "/items/resources/Stem.png"
+    },
+    {
+      "id": "1554999745",
+      "fullname": "Suede",
+      "type": "resources",
+      "shortname": "Suede",
+      "image": "/items/resources/Suede.png"
+    },
+    {
+      "id": "1554999776",
+      "fullname": "Coal",
+      "type": "resources",
+      "shortname": "Coal",
+      "image": "/items/resources/coal.png"
+    },
+    {
+      "id": "1554999804",
+      "fullname": "Varnish",
+      "type": "resources",
+      "shortname": "Varnish",
+      "image": "/items/resources/Varnish.png"
+    },
+    {
+      "id": "1555000056",
+      "fullname": "Charcoal",
+      "type": "resources",
+      "shortname": "Charcoal",
+      "image": "/items/resources/Charcoal.png"
+    },
+    {
+      "id": "1555000084",
+      "fullname": "Iron Ore",
+      "type": "resources",
+      "shortname": "Iron Ore",
+      "image": "/items/resources/Iron-Ore.png"
+    },
+    {
+      "id": "1555000139",
+      "fullname": "Cord",
+      "type": "resources",
+      "shortname": "Cord",
+      "image": "/items/resources/metallic-thread.png"
+    },
+    {
+      "id": "1555000563",
+      "fullname": "Silver Nugget",
+      "type": "resources",
+      "shortname": "Silver Nugget",
+      "image": "/items/resources/Silver-Nugget.png"
+    },
+    {
+      "id": "1555000599",
+      "fullname": "Cokes",
+      "type": "resources",
+      "shortname": "Cokes",
+      "image": "/items/resources/Cokes.png"
+    },
+    {
+      "id": "1555000630",
+      "fullname": "Braided Hemp",
+      "type": "resources",
+      "shortname": "Braided Hemp",
+      "image": "/items/resources/Braided-Hemp.png"
+    },
+    {
+      "id": "1555000660",
+      "fullname": "Metallic Fiber",
+      "type": "resources",
+      "shortname": "Metallic Fiber",
+      "image": "/items/resources/Metallic-Fiber.png"
+    },
+    {
+      "id": "1555000686",
+      "fullname": "Steel",
+      "type": "resources",
+      "shortname": "Steel",
+      "image": "/items/resources/Steel.png"
+    },
+    {
+      "id": "1555000710",
+      "fullname": "Mithril Ore",
+      "type": "resources",
+      "shortname": "MO",
+      "image": "/items/resources/Mithril-Ore.png"
+    },
+    {
+      "id": "1555000788",
+      "fullname": "Oriharukon Ore",
+      "type": "resources",
+      "shortname": "Oriharukon Ore",
+      "image": "/items/resources/Oriharukon-Ore.png"
+    },
+    {
+      "id": "1555000887",
+      "fullname": "Coarse Bone Powder",
+      "type": "resources",
+      "shortname": "CBP",
+      "image": "/items/resources/cbp.png"
+    },
+    {
+      "id": "1555000911",
+      "fullname": "Stone of Purity",
+      "type": "resources",
+      "shortname": "sop",
+      "image": "/items/resources/sop.png"
+    },
+    {
+      "id": "1555000993",
+      "fullname": "Metallic Thread",
+      "type": "resources",
+      "shortname": "mt",
+      "image": "/items/resources/metallic-thread.png"
+    },
+    {
+      "id": "1555001020",
+      "fullname": "Compound Braid",
+      "type": "resources",
+      "shortname": "Compound Braid",
+      "image": "/items/resources/Compound-Braid.png"
+    },
+    {
+      "id": "1555001058",
+      "fullname": "High Grade Suede",
+      "type": "resources",
+      "shortname": "High Grade Suede",
+      "image": "/items/resources/Varnish.png"
+    },
+    {
+      "id": "1555001204",
+      "fullname": "Adamantite Nugget",
+      "type": "resources",
+      "shortname": "Adamantite Nugget",
+      "image": "/items/resources/Adamantite-Nugget.png"
+    },
+    {
+      "id": "1555001231",
+      "fullname": "Asofe",
+      "type": "resources",
+      "shortname": "Asofe",
+      "image": "/items/resources/Asofe.png"
+    },
+    {
+      "id": "1555001264",
+      "fullname": "Enria",
+      "type": "resources",
+      "shortname": "Enria",
+      "image": "/items/resources/Enria.png"
+    },
+    {
+      "id": "1555001286",
+      "fullname": "Thons",
+      "type": "resources",
+      "shortname": "Thons",
+      "image": "/items/resources/Thons.png"
+    },
+    {
+      "id": "1555001314",
+      "fullname": "Mold Hardener",
+      "type": "resources",
+      "shortname": "Mold Hardener",
+      "image": "/items/resources/Mold-Hardener.png"
+    },
+    {
+      "id": "1555001339",
+      "fullname": "Mold Glue",
+      "type": "resources",
+      "shortname": "Mold Glue",
+      "image": "/items/resources/Mold-Glue.png"
+    },
+    {
+      "id": "1555001402",
+      "fullname": "Mold Lubricant",
+      "type": "resources",
+      "shortname": "Mold Lubricant",
+      "image": "/items/resources/Mold-Lubricant.png"
+    },
+    {
+      "id": "1555001474",
+      "fullname": "Durable Metal Plate",
+      "type": "resources",
+      "shortname": "DMP",
+      "image": "/items/resources/dmp.png"
+    },
+    {
+      "id": "1555001518",
+      "fullname": "Leolin's Mold",
+      "type": "resources",
+      "shortname": "Leolin's Mold",
+      "image": "/items/resources/Warsmiths-Mold.png"
+    },
+    {
+      "id": "1555001535",
+      "fullname": "Warsmith's Mold",
+      "type": "resources",
+      "shortname": "Warsmith's Mold",
+      "image": "/items/resources/Warsmiths-Mold.png"
+    },
+    {
+      "id": "1555001555",
+      "fullname": "Arcsmith's Anvil",
+      "type": "resources",
+      "shortname": "Arcsmith's Anvil",
+      "image": "/items/resources/Warsmiths-Mold.png"
+    },
+    {
+      "id": "1555001568",
+      "fullname": "Warsmith's Holder",
+      "type": "resources",
+      "shortname": "Warsmith's Holder",
+      "image": "/items/resources/Warsmiths-Mold.png"
+    },
+    {
+      "id": "1555001753",
+      "fullname": "Maestro Holder",
+      "type": "resources",
+      "shortname": "Maestro Holder",
+      "image": "/items/resources/Maestro-Holder.png"
+    },
+    {
+      "id": "1555001794",
+      "fullname": "Maestro Anvil Lock",
+      "type": "resources",
+      "shortname": "Maestro Anvil Lock",
+      "image": "/items/resources/Maestro-Anvil-Lock.png"
+    },
+    {
+      "id": "1555001827",
+      "fullname": "Craftsman Mold",
+      "type": "resources",
+      "shortname": "Craftsman Mold",
+      "image": "/items/resources/Craftsman-Mold.png"
+    },
+    {
+      "id": "1555001929",
+      "fullname": "Maestro Mold",
+      "type": "resources",
+      "shortname": "Maestro Mold",
+      "image": "/items/resources/Maestro-Mold.png"
+    },
+    {
+      "id": "1555002108",
+      "fullname": "Varnish of Purity ",
+      "type": "resources",
+      "shortname": "vop",
+      "image": "/items/resources/vop.png"
+    },
+    {
+      "id": "1555002135",
+      "fullname": "Synthetic Cokes",
+      "type": "resources",
+      "shortname": "Synthetic Cokes",
+      "image": "/items/resources/Synthetic-Cokes.png"
+    },
+    {
+      "id": "1555002170",
+      "fullname": "Mithril Alloy",
+      "type": "resources",
+      "shortname": "Mithril Alloy",
+      "image": "/items/resources/ma.png"
+    },
+    {
+      "id": "1555002199",
+      "fullname": "Artisan's Frame",
+      "type": "resources",
+      "shortname": "Artisan's Frame",
+      "image": "/items/resources/Artisans-Frame.png"
+    },
+    {
+      "id": "1555002344",
+      "fullname": "Blacksmith's Frame",
+      "type": "resources",
+      "shortname": "Blacksmith's Frame",
+      "image": "/items/resources/Blacksmiths-Frame.png"
+    },
+    {
+      "id": "1555002419",
+      "fullname": "Crafted Leather",
+      "type": "resources",
+      "shortname": "CL",
+      "image": "/items/resources/cl.png"
+    },
+    {
+      "id": "1555002487",
+      "fullname": "Gemstone S",
+      "type": "resources",
+      "shortname": "Gemstone S",
+      "image": "/items/resources/gemstone-s.png"
+    },
+    {
+      "id": "1555002887",
+      "fullname": "Leather",
+      "type": "resources",
+      "shortname": "Leather",
+      "image": "/items/resources/leather.png"
+    },
+    {
+      "id": "1555003020",
+      "fullname": "Steel Mold",
+      "type": "resources",
+      "shortname": "Steel Mold",
+      "image": "/items/resources/Craftsman-Mold.png"
+    },
+    {
+      "id": "1555003066",
+      "fullname": "Silver Mold",
+      "type": "resources",
+      "shortname": "Silver Mold",
+      "image": "/items/resources/silver-mold.png"
+    }
+  ]
+}
