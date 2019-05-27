@@ -7,12 +7,11 @@
   "author": "frt <ectoprime@gmail.com>",
   "private": true,
   "scripts": {
-    "quasar": "quasar dev --mode ssr",
+    "app": "quasar dev --mode ssr",
     "api": "nodemon api/server.js",
-    "dev": "concurrently --kill-others \"npm run quasar\" \"npm run express\"",
+    "dev": "concurrently --kill-others \"npm run app\" \"npm run api\"",
     "docker": "docker-compose up -d",
     "build": "quasar build --mode ssr",
-    "test": "echo \"No test specified\" && exit 0",
     "lint": "eslint --ext .js,.vue --ignore-path .gitignore .",
     "precommit": "npm run lint",
     "postinstall": "link-module-alias",
@@ -34,12 +33,9 @@
     "graphql-request": "^1.8.2",
     "js-cookie": "^2.2.0",
     "jsonwebtoken": "^8.5.1",
-    "lowdb": "^1.0.0",
-    "mysql2": "^1.6.5",
     "pg": "^7.11.0",
     "quasar": "^1.0.0-beta.0",
-    "sequelize": "^5.8.2",
-    "sequelize-cli": "^5.4.0",
+    "uuid": "^3.3.2",
     "vue": "^2.6.10"
   },
   "devDependencies": {
@@ -63,10 +59,10 @@
     "last 1 version, not dead, ie >= 11"
   ],
   "resolutions": {
-    "ajv": "6.8.1"
+    "ajv": "^6.9.1"
   },
   "_moduleAliases": {
-    "~api": "./api",
-    "~root": "."
+    "api": "./api",
+    "root": "."
   }
 }

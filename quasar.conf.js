@@ -1,11 +1,12 @@
 // Configuration for your app
+const path = require('path');
 
 module.exports = function(ctx) {
   return {
     preFetch: true,
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
-    boot: ['axios', 'mixins'],
+    boot: ['axios'],
 
     css: ['app.styl'],
 
@@ -36,6 +37,9 @@ module.exports = function(ctx) {
         'QList',
         'QItem',
         'QItemSection',
+        'QInput',
+        'QForm',
+        'QSpinnerPuff',
       ],
 
       directives: ['Ripple'],
@@ -56,7 +60,15 @@ module.exports = function(ctx) {
       gzip: true,
       // analyze: true,
       // extractCSS: false,
-      extendWebpack(cfg) {},
+      extendWebpack(cfg) {
+        cfg.resolve.alias = {
+          ...cfg.resolve.alias, // This adds the existing alias
+
+          // Add your own alias like this
+          component: path.resolve(__dirname, './src/components'),
+          mixin: path.resolve(__dirname, './src/mixins'),
+        };
+      },
     },
 
     devServer: {

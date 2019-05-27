@@ -34,7 +34,7 @@
 
       <q-card-section class="text-body2">
         <div class="drop-list">
-          <a class="drop" v-for="item in $getFullDrop(boss.drop)" :key="item.id">
+          <a class="drop" v-for="item in getFullDrop(boss.drop)" :key="item.id">
             <span class="item-name">{{item.shortname}}</span>
           </a>
         </div>
@@ -44,7 +44,9 @@
 </template>
 
 <script>
+import rbMixins from "mixin/rb";
 export default {
+  mixins: [rbMixins],
   data() {
     return {
       menuNode: null
