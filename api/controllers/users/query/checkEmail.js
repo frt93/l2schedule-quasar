@@ -1,18 +1,27 @@
-const mutation = `query findByEmail ($email: String) {
-  users(where: {email: {_ilike: $email}}) {
+/**
+ * Компонуем запрос поиска пользователя с указанным email адресом
+ *
+ * @param {String} email     Email адрес
+ * @return {String}
+ */
+const query = email => {
+  return `query findByEmail{
+  users(where: {email: {_ilike: "${email}"}}) {
     email
   }
 }`;
-
-const variable = email => {
-  return {
-    email,
-  };
 };
 
+/**
+ * Обрабатываем полученные в результате запроса данные, добираясь до необходимого уровня вложенности,
+ * в котором непосредственно находится либо пользователь с искомым email адресом либо пустой объект
+ *
+ * @param {Object} data     Данные, полученные с сервера
+ * @return {String} email
+ */
 const response = data => {
   const users = data.users;
-  return users.length ? users[0].email : '';
+  return users.length ? users[0].email : null;
 };
 
-module.exports = { mutation, variable, response };
+module.exports = { query, response };

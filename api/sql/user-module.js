@@ -32,7 +32,7 @@ module.exports = {
           type: 'run_sql',
           args: {
             sql:
-              'CREATE TABLE "public"."user_metadata"("user_id" serial NOT NULL, "emailVerification" uuid, "newPassword" text , "passwordConfirmation" text , "createdAt" timestamp with time zone NOT NULL DEFAULT now(), PRIMARY KEY ("user_id") , UNIQUE ("user_id"));',
+              'CREATE TABLE "public"."user_metadata"("user_id" serial NOT NULL, "emailVerification" uuid, "repairKey" uuid, "newPassword" text , "passwordConfirmation" text , "createdAt" timestamp with time zone NOT NULL DEFAULT now(), PRIMARY KEY ("user_id") , UNIQUE ("user_id"), UNIQUE("repairKey"));',
           },
         },
         { type: 'add_existing_table_or_view', args: { name: 'user_metadata', schema: 'public' } },
@@ -47,6 +47,21 @@ module.exports = {
               manual_configuration: {
                 remote_table: { name: 'user_metadata', schema: 'public' },
                 column_mapping: { id: 'user_id' },
+              },
+            },
+          },
+        },
+
+        // В свою очередь каждому экземпляру метаданных соответствует 1 пользователь
+        {
+          type: 'create_object_relationship',
+          args: {
+            name: 'user',
+            table: { name: 'user_metadata', schema: 'public' },
+            using: {
+              manual_configuration: {
+                remote_table: { name: 'users', schema: 'public' },
+                column_mapping: { user_id: 'id' },
               },
             },
           },

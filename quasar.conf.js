@@ -11,10 +11,10 @@ module.exports = function(ctx) {
     css: ['app.styl'],
 
     extras: [
-      'material-icons', // optional, you are not bound to it
+      // 'material-icons', // optional, you are not bound to it
       // 'ionicons-v4',
       // 'mdi-v3',
-      // 'fontawesome-v5',
+      'fontawesome-v5',
       // 'eva-icons'
     ],
 
@@ -34,21 +34,28 @@ module.exports = function(ctx) {
         'QMenu',
         'QTabs',
         'QRouteTab',
+        'QTab',
+        'QSpace',
         'QList',
         'QItem',
         'QItemSection',
         'QInput',
         'QForm',
         'QSpinnerPuff',
+        'QAvatar',
+        'QSeparator',
+        'QStepper',
+        'QStep',
+        'QStepperNavigation',
       ],
 
       directives: ['Ripple'],
 
       // Quasar plugins
-      plugins: ['Notify'],
+      plugins: ['Notify', 'Cookies', 'SessionStorage'],
 
-      // iconSet: 'ionicons-v4'
-      // lang: 'de' // Quasar language
+      iconSet: 'fontawesome-v5',
+      lang: 'ru', // Quasar language
     },
 
     supportIE: false,

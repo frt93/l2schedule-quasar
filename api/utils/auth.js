@@ -1,7 +1,7 @@
 /**
  * Валидируем никнейм пользователя
  *
- * @param username          Указанный пользователем никнейм
+ * @param {String} username   Указанный пользователем никнейм
  */
 module.exports.validateUsername = username => {
   let message = '',
@@ -42,7 +42,7 @@ module.exports.validateUsername = username => {
 /**
  * Валидируем email адрес пользователя. В email адресе запрещены только пробелы
  *
- * @param email             Указанный пользователем email
+ * @param {String} email    Указанный пользователем email
  */
 module.exports.validateEmail = email => {
   let message = '';
@@ -66,7 +66,7 @@ module.exports.validateEmail = email => {
 /**
  * Валидируем пароль пользователя. Запрещены только пробелы. Длина от 7 до 30 символов
  *
- * @param password          Указанный пользователем пароль
+ * @param {String} password   Указанный пользователем пароль
  */
 module.exports.validatePassword = password => {
   let message = '';
@@ -89,17 +89,30 @@ module.exports.validatePassword = password => {
 };
 
 /**
- * Проверяем переданный объект пользователя на наличие нарушений правил валидации.
+ * Проверяем переданный объект пользователя (email, username, password или все вместе) на наличие нарушений правил валидации.
  * Эта проверка проводится на случай, если по каким-то причинам аналогичная валидация на клиенте не сработала или ее удалось обойти
  *
- *  @param user              Экземпляр пользователя
+ *  @param {String} user     Экземпляр пользователя
  *  @param res               Объект ответа сервера
  */
 module.exports.validateUser = (user, res) => {
-  let error = {};
-  const usernameError = this.validateUsername(user.username);
-  const emailError = this.validateEmail(user.email);
-  const passwordError = this.validatePassword(user.password);
+  let error = {},
+    usernameError,
+    emailError,
+    passwordError;
+
+  // Следующие конструкции if проверяют какие данные переданы для валидации, т.к. наборы эти данных при передачи с разных роутов отличаются
+  if (user.username) {
+    usernameError = this.validateUsername(user.username);
+  }
+  if (user.email) {
+    emailError = this.validateEmail(user.email);
+  }
+
+  if (user.password) {
+    passwordError = this.validatePassword(user.password);
+  }
+
   if (usernameError) {
     error.username = true;
     error.usernameErrorMessage = usernameError;
@@ -115,8 +128,51 @@ module.exports.validateUser = (user, res) => {
 
   if (usernameError || emailError || passwordError) {
     res.status(500).send(error);
-    return;
+    return false;
   }
 
-  return;
+  return true;
+};
+
+/**
+ * Валидируем ключ подтверждения для восстановления пользователю доступа к аккаунту.
+ * Эта проверка проводится на случай, если по каким-то причинам аналогичная валидация на клиенте не сработала или ее удалось обойти
+ *
+ * @param {String} key        Указанный пользователем никнейм
+ * @param res                 Объект ответа сервера
+ */
+module.exports.validateRepairKey = (key, res) => {
+  const pattern = /[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}/gi.test(key);
+  if (!pattern) {
+    res.status(500).send({ name: 'Invalid repair key', message: 'Неверный формат ключа' });
+  }
+
+  return true;
+};
+
+/**
+ * Обрабатываем ошибки, возникшие в результате запросов к GraphQL движку
+ *
+ * @param {Error} e           Экземпляр ошибки
+ * @param res                 Объект ответа сервера
+ */
+module.exports.handleErrors = (e, res) => {
+  let error = {};
+
+  // Ошибка подключения к hasura
+  if (e.name === 'FetchError') {
+    error.name = 'Database connection failed';
+    error.message = 'Не удалось связаться с базой данных. Попробуйте снова';
+  }
+
+  // Неправильный формат uuid идентификатора в запросе в методе repairConfirm
+  if (
+    e.message.indexOf('invalid input syntax for type uuid') !== -1 &&
+    e.message.indexOf('repairKey:') !== -1
+  ) {
+    error.name = 'Invalid repair key';
+    error.message = 'Неверный формат ключа';
+  }
+
+  res.status(500).send(error);
 };

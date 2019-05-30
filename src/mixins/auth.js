@@ -2,15 +2,24 @@ import { debounce } from 'quasar';
 export default {
   data() {
     return {
+      login: '', // Только для компонента авторизации
+      username: '',
+      email: '',
+      password: '',
+      hidePwd: true,
+
       usernameError: false,
       emailError: false,
       passwordError: false,
+
       usernameErrorMessage: '',
       emailErrorMessage: '',
       passwordErrorMessage: '',
+
       loading: {
         username: false,
         email: false,
+        repair: false,
       },
     };
   },
@@ -19,14 +28,18 @@ export default {
     /**
      * Валидируем никнейм пользователя
      *
-     * @param username          Указанный пользователем никнейм
+     * @param {String} username   Указанный пользователем никнейм
+     * @param {String} page       Параметр, определяющий источник вызова метода (компонент). По умолчанию предполагается, что метод вызван на странице регистрации.
+     *                            Со страниц логина и восстановления доступа вызывается со значениями 'signin' и 'repair' соответственно
      */
-    validateUsername: debounce(function(username) {
+    validateUsername: debounce(function(username, page = 'signup') {
       this.usernameError = false;
       this.usernameErrorMessage = '';
 
-      // Начинаем валидацию только если передано какое-то значение, а не пустая строка
-      if (username.length) {
+      // Начинаем валидацию только:
+      // 1. Если передано какое-то значение, а не пустая строка
+      // 2. Если на момент начала срабатывания метода в компоненте авторизации в качестве ключа авторизации используется никнейм
+      if (username.length && this.loginKey !== 'email') {
         let message = '',
           charsToRemove = '',
           chars;
@@ -59,9 +72,7 @@ export default {
           this.usernameError = true;
           this.usernameErrorMessage = message;
         } else {
-          this.usernameError = false;
-          this.usernameErrorMessage = '';
-          this.checkUsername(username);
+          if (page === 'signup') this.checkUsername(username, page);
         }
       }
 
@@ -71,14 +82,18 @@ export default {
     /**
      * Валидируем email адрес пользователя. В email адресе запрещены только пробелы
      *
-     * @param email             Указанный пользователем email
+     * @param {String} email    Указанный пользователем email
+     * @param {String} page     Параметр, определяющий источник вызова метода (компонент). По умолчанию предполагается, что метод вызван на странице регистрации.
+     *                          Со страниц логина и восстановления доступа вызывается со значениями 'signin' и 'repair' соответственно
      */
-    validateEmail: debounce(function(email) {
+    validateEmail: debounce(function(email, page = 'signup') {
       this.emailError = false;
       this.emailErrorMessage = '';
 
-      // Начинаем валидацию только если передано какое-то значение, а не пустая строка
-      if (email.length) {
+      // Начинаем валидацию только:
+      // 1. Если передано какое-то значение, а не пустая строка
+      // 2. Если на момент начала срабатывания метода в компоненте авторизации в качестве ключа авторизации используется email адрес
+      if (email.length && this.loginKey !== 'username') {
         let message = '';
         const spaces = /\s/g.test(email);
         if (spaces) {
@@ -94,9 +109,7 @@ export default {
           this.emailError = true;
           this.emailErrorMessage = message;
         } else {
-          this.emailError = false;
-          this.emailErrorMessage = '';
-          this.checkEmail(email);
+          if (page !== 'signin') this.checkEmail(email, page);
         }
       }
 
@@ -106,7 +119,7 @@ export default {
     /**
      * Валидируем пароль пользователя. Запрещены только пробелы
      *
-     * @param password          Указанный пользователем пароль
+     * @param {String} password   Указанный пользователем пароль
      */
     validatePassword(password) {
       this.passwordError = false;
@@ -120,7 +133,28 @@ export default {
         this.passwordError = true;
         this.passwordErrorMessage = message;
       }
+      return;
     },
+
+    /**
+     * Валидируем ключ подтверждения для восстановления пользователю доступа к аккаунту
+     *
+     * @param {String} key        Указанный пользователем никнейм
+     */
+    validateRepairKey: debounce(function(key) {
+      this.repairKeyError = false;
+      this.repairKeyErrorMessage = '';
+
+      const pattern = /[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}/gi.test(key);
+
+      if (!pattern) {
+        this.repairKeyError = true;
+        this.repairKeyErrorMessage = 'Неверный ключ подтверждения';
+      }
+
+      this.loading.repair = false;
+      return;
+    }, 1500),
 
     /**
      * Если нет ошибок и поля с никнеймом или почтовым адресом не в процессе валидации - форма заполнила корректно
@@ -138,9 +172,10 @@ export default {
     /**
      * Проверяем свободен ли указанный при регистрации пользователем никнейм
      *
-     * @param username          Указанный никнейм
+     * @param {String} username   Указанный никнейм
+     * @param {String} page       Страница, вызвавшая метод
      */
-    checkUsername(username) {
+    checkUsername(username, page) {
       this.$axios
         .post('/users/check/username', { username })
         .then(res => {
@@ -158,15 +193,19 @@ export default {
     /**
      * Проверяем свободен ли указанный при регистрации пользователем email адрес
      *
-     * @param email             Указанный адрес электронной почты
+     * @param {String} email    Указанный адрес электронной почты
+     * @param {String} page     Страница, вызвавшая метод
      */
-    checkEmail(email) {
+    checkEmail(email, page) {
       this.$axios
         .post('/users/check/email', { email })
         .then(res => {
-          if (res.data) {
+          if (res.data && page === 'signup') {
             this.emailError = true;
-            this.emailErrorMessage = `Адрес ${email} уже используется другим пользователем`;
+            this.emailErrorMessage = `Адрес ${res.data} уже используется другим пользователем`;
+          } else if (!res.data && page === 'repair') {
+            this.emailError = true;
+            this.emailErrorMessage = `Пользователь с данным адресом не найден`;
           }
         })
         .catch(e => {
@@ -174,19 +213,61 @@ export default {
         });
     },
 
+    /**
+     * Обрабатываем ошибки, полученные в результате отправки формы
+     *
+     * @param {Object} e        Экземпляр ошибки
+     */
     handleErrors(e) {
-      if (e.username) {
-        this.usernameError = true;
-        this.usernameErrorMessage = e.usernameErrorMessage;
+      // Описанные на стороне сервера ошибки
+      if (e.response) {
+        if (e.response.data.username) {
+          this.usernameError = true;
+          this.usernameErrorMessage = e.usernameErrorMessage;
+        }
+        if (e.response.data.email) {
+          this.emailError = true;
+          this.emailErrorMessage = e.emailErrorMessage;
+        }
+        if (e.response.data.password) {
+          this.passwordError = true;
+          this.passwordErrorMessage = e.passwordErrorMessage;
+        }
+        if (e.response.data.name === 'Invalid repair key') {
+          this.repairKeyError = true;
+          this.repairKeyErrorMessage = e.response.data.message;
+        }
+
+        if (e.response.data.name === 'Repair key not found') {
+          this.repairKeyError = true;
+          this.repairKeyErrorMessage = e.response.data.message;
+        }
+
+        if (e.response.data.name === 'Database connection failed') {
+          this.errorNotify(e.response.data.message);
+        }
       }
-      if (e.email) {
-        this.emailError = true;
-        this.emailErrorMessage = e.emailErrorMessage;
+
+      // Сгенерированные сервером/браузером ошибки
+      if (e.message === 'Network Error') {
+        this.errorNotify(
+          'Не удалось связаться с сервером. Проверьте свое соединение с интернетом и попробуйте снова'
+        );
       }
-      if (e.password) {
-        this.passwordError = true;
-        this.passwordErrorMessage = e.passwordErrorMessage;
-      }
+    },
+
+    /**
+     * Вызов оповещения об ошибке
+     *
+     * @param {String} message   Текст ошибки
+     */
+    errorNotify(message) {
+      this.$q.notify({
+        color: 'negative',
+        position: 'bottom',
+        icon: 'fas fa-exclamation',
+        message,
+      });
     },
   },
 };

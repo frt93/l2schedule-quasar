@@ -8,13 +8,13 @@ export default {
     setUser(state, user) {
       state.user = user;
     },
-  },
 
-  actions: {
-    setUser(state, user) {
-      state.user = user;
+    resetUser(state) {
+      state.user = null;
     },
   },
+
+  actions: {},
 
   getters: {
     getUser(state) {

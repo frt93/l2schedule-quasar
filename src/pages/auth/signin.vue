@@ -1,5 +1,5 @@
 <script>
-import signup from "component/auth/signin";
+import signin from "component/auth/signin";
 export default {
   name: "loginPage",
   components: {

@@ -1,18 +1,13 @@
 <script>
 import auth from "mixin/auth";
 export default {
-  name: "signupComponent",
+  name: "registrationComponent",
   mixins: [auth],
-  data() {
-    return {
-      username: "",
-      email: "",
-      password: "",
-      hidePwd: true
-    };
-  },
 
   computed: {
+    /**
+     * Компонуем экземпляр данных авторизации пользователя для отправки на сервер
+     */
     user() {
       return {
         username: this.username,
@@ -23,7 +18,7 @@ export default {
 
     /**
      * Проверяем готовность формы к отправке.
-     * Если все поля заполнены и соблюдены нормы по длине никнейма и паролей - запускаем метод валидации формы.
+     * Если все поля заполнены и соблюдены нормы по длине никнейма и пароля - запускаем метод валидации формы.
      */
     canSubmit() {
       if (
@@ -45,7 +40,7 @@ export default {
         .dispatch("auth/signUp", this.user)
         .then(res => {})
         .catch(e => {
-          this.handleErrors(e.response.data);
+          this.handleErrors(e);
         });
     }
   },
@@ -61,6 +56,9 @@ export default {
           "q-form",
           {
             class: "q-gutter-md",
+            attrs: {
+              autocomplete: "off"
+            },
             on: {
               submit: () => {
                 this.submit();
@@ -97,6 +95,12 @@ export default {
                     color: this.usernameError ? "negative" : "primary"
                   },
                   slot: "loading"
+                }),
+                h("q-icon", {
+                  attrs: {
+                    name: "fas fa-user-alt"
+                  },
+                  slot: "prepend"
                 })
               ]
             ),
@@ -127,6 +131,12 @@ export default {
                     color: this.emailError ? "negative" : "primary"
                   },
                   slot: "loading"
+                }),
+                h("q-icon", {
+                  attrs: {
+                    name: "fas fa-envelope"
+                  },
+                  slot: "prepend"
                 })
               ]
             ),
@@ -153,20 +163,28 @@ export default {
               },
               [
                 h("q-icon", {
-                  class: "cursor-pointer",
+                  class: "cursor-pointer q-ml-sm",
                   slot: "append",
-                  props: {
-                    name: this.hidePwd ? "visibility_off" : "visibility"
+                  attrs: {
+                    name: this.hidePwd ? "fas fa-eye" : "fas fa-eye-slash"
                   },
                   on: {
                     click: () => {
                       this.hidePwd = !this.hidePwd;
                     }
                   }
+                }),
+                h("q-icon", {
+                  attrs: {
+                    name:
+                      this.password.length < 7 ? "fas fa-unlock" : "fas fa-lock"
+                  },
+                  slot: "prepend"
                 })
               ]
             ),
             h("q-btn", {
+              class: "float-right q-my-xl",
               attrs: {
                 label: "Зарегистрироваться",
                 type: "submit",

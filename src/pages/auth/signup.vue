@@ -1,7 +1,7 @@
 <script>
 import signup from "component/auth/signup";
 export default {
-  name: "registerPage",
+  name: "registrationPage",
   components: {
     signup
   },

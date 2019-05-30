@@ -6,7 +6,10 @@
 
 <script>
 export default {
-  name: "App"
+  name: "App",
+  async preFetch({ store, ssrContext }) {
+    await store.dispatch("auth/authorize", ssrContext);
+  }
 };
 </script>
 

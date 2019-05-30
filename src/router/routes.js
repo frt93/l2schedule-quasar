@@ -1,12 +1,13 @@
 const routes = [
   {
     path: '/',
-    component: () => import('layouts/MyLayout.vue'),
+    component: () => import('layouts/mainLayout.vue'),
     children: [
       { path: '', component: () => import('pages/Index.vue') },
       { path: 'rb', component: () => import('pages/rb.vue') },
       { path: 'auth/signup', component: () => import('pages/auth/signup') },
-      { path: 'auth/signin', component: () => import('pages/auth/signin.vue') },
+      { path: 'auth/signin', component: () => import('pages/auth/signin') },
+      { path: 'auth/repair', component: () => import('pages/auth/repair') },
     ],
   },
 ];
