@@ -91,26 +91,26 @@ module.exports.signin = async (req, res) => {
   await GraphQLClient.request(query)
     .then(async data => {
       user = await response(data);
+
+      if (!user) {
+        // Пользователь не найден - выбрасываем ошибку (тело ошибки в переменной error)
+        res.status(500).send(error);
+      } else {
+        // Пользователь найден. Сверяем введенный и хранящийся в БД пароли
+        const comparePasswords = await this.comparePassword(credentials.password, user.password);
+        if (comparePasswords) {
+          // Пароль правльный. Генерируем токен авторизации и отправляем данные пользователю
+          const { token } = await this.generateToken(user.id);
+          res.send({ token, user });
+        } else {
+          // Пароль неверен.Выбрасываем ошибку
+          res.status(500).send({ password: true, passwordErrorMessage: 'Неверный пароль' });
+        }
+      }
     })
     .catch(e => {
       res.status(500).send(e);
     });
-
-  if (!user) {
-    // Пользователь не найден - выбрасываем ошибку (тело ошибки в переменной error)
-    res.status(500).send(error);
-  } else {
-    // Пользователь найден. Сверяем введенный и хранящийся в БД пароли
-    const comparePasswords = await this.comparePassword(credentials.password, user.password);
-    if (comparePasswords) {
-      // Пароль правльный. Генерируем токен авторизации и отправляем данные пользователю
-      const { token } = await this.generateToken(user.id);
-      res.send({ token, user });
-    } else {
-      // Пароль неверен.Выбрасываем ошибку
-      res.status(500).send({ password: true, passwordErrorMessage: `Неверный пароль` });
-    }
-  }
 };
 
 /**
@@ -140,14 +140,16 @@ module.exports.authorize = (req, res) => {
     await GraphQLClient.request(query)
       .then(async data => {
         user = await response(data);
+
+        if (!user) {
+          res.status(403).send('User not found.');
+        } else {
+          res.send(user);
+        }
       })
       .catch(e => {
-        res.status(500).send(e);
+        handleErrors(e, res);
       });
-
-    if (!user) res.status(403).send('User not found.');
-
-    res.send(user);
   });
 };
 
@@ -270,6 +272,45 @@ module.exports.repairConfirm = async (req, res) => {
       }
 
       res.send(user);
+    })
+    .catch(e => {
+      handleErrors(e, res);
+    });
+};
+
+/**
+ * Изменяем пароль пользователя
+ *
+ * @param req               Объект запроса сервера
+ * @param res               Объект ответа сервера
+ */
+module.exports.changePassword = async (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+
+  const valid = await validateUser(req.body, res);
+  //Если валидация провалилась - прекращаем выполнение
+  if (!valid) return;
+
+  const hashedPassword = await this.hashPassword(password);
+  const {
+    composeMutation,
+    composeResponse,
+  } = require('api/controllers/users/mutations/change-password');
+  const mutation = composeMutation(email, hashedPassword);
+  GraphQLClient.request(mutation)
+    .then(async data => {
+      const response = await composeResponse(data);
+
+      if (!response) {
+        res.status(500).send({
+          name: 'Operation failed',
+          message: 'Смена пароля не удалась. Попробуйте снова',
+        });
+        return;
+      }
+
+      res.send(response);
     })
     .catch(e => {
       handleErrors(e, res);

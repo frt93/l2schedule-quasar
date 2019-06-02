@@ -43,7 +43,9 @@ export default {
     submit() {
       this.$store
         .dispatch("auth/signIn", this.credentials)
-        .then(res => {})
+        .then(res => {
+          this.$router.push({ name: "main" });
+        })
         .catch(e => {
           this.handleErrors(e);
         });
@@ -81,7 +83,7 @@ export default {
           {
             class: "q-gutter-md",
             attrs: {
-              autocomplete: "off"
+              autocomplete: false
             },
             on: {
               submit: () => {
@@ -97,7 +99,7 @@ export default {
                     attrs: {
                       key: "username",
                       autofocus: true,
-                      autocomplete: "off",
+                      autocomplete: false,
                       value: this.login,
                       label: "Логин",
                       hint: "Ваш никнейм или email адрес",
@@ -131,7 +133,7 @@ export default {
                   {
                     attrs: {
                       key: "email",
-                      autocomplete: "off",
+                      autocomplete: false,
                       value: this.login,
                       label: "Логин",
                       hint: "Ваш никнейм или email адрес",
@@ -164,7 +166,7 @@ export default {
               "q-input",
               {
                 attrs: {
-                  autocomplete: "off",
+                  autocomplete: false,
                   maxlength: "30",
                   type: this.hidePwd ? "password" : "text",
                   value: this.password,
@@ -220,7 +222,7 @@ export default {
               },
               on: {
                 click: () => {
-                  this.$router.push({ path: "/auth/repair" });
+                  this.$router.push({ name: "repair" });
                 }
               }
             })

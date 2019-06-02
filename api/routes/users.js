@@ -13,4 +13,6 @@ router.post('/signin', users.signin);
 router.post('/repair', users.repair);
 router.post('/confirm-repair', users.repairConfirm);
 
+router.post('/change/password', users.changePassword);
+
 module.exports = router;

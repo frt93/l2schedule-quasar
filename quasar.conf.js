@@ -52,7 +52,7 @@ module.exports = function(ctx) {
       directives: ['Ripple'],
 
       // Quasar plugins
-      plugins: ['Notify', 'Cookies', 'SessionStorage'],
+      plugins: ['Notify', 'Cookies', 'Meta'],
 
       iconSet: 'fontawesome-v5',
       lang: 'ru', // Quasar language
@@ -73,6 +73,8 @@ module.exports = function(ctx) {
 
           // Add your own alias like this
           component: path.resolve(__dirname, './src/components'),
+          store: path.resolve(__dirname, './src/store'),
+          boot: path.resolve(__dirname, './src/boot'),
           mixin: path.resolve(__dirname, './src/mixins'),
         };
       },

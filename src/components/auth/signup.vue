@@ -38,7 +38,9 @@ export default {
     submit() {
       this.$store
         .dispatch("auth/signUp", this.user)
-        .then(res => {})
+        .then(res => {
+          this.$router.push({ name: "main" });
+        })
         .catch(e => {
           this.handleErrors(e);
         });
@@ -57,7 +59,7 @@ export default {
           {
             class: "q-gutter-md",
             attrs: {
-              autocomplete: "off"
+              autocomplete: false
             },
             on: {
               submit: () => {
@@ -71,7 +73,7 @@ export default {
               {
                 attrs: {
                   autofocus: true,
-                  autocomplete: "off",
+                  autocomplete: false,
                   maxlength: "16",
                   value: this.username,
                   label: "Никнейм",
@@ -108,7 +110,7 @@ export default {
               "q-input",
               {
                 attrs: {
-                  autocomplete: "off",
+                  autocomplete: false,
                   type: "email",
                   value: this.email,
                   label: "Email",
@@ -144,7 +146,7 @@ export default {
               "q-input",
               {
                 attrs: {
-                  autocomplete: "off",
+                  autocomplete: false,
                   maxlength: "30",
                   type: this.hidePwd ? "password" : "text",
                   value: this.password,
@@ -163,7 +165,7 @@ export default {
               },
               [
                 h("q-icon", {
-                  class: "cursor-pointer q-ml-sm",
+                  staticClass: "cursor-pointer q-ml-sm",
                   slot: "append",
                   attrs: {
                     name: this.hidePwd ? "fas fa-eye" : "fas fa-eye-slash"

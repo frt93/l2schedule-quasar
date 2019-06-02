@@ -1,5 +1,5 @@
 <script>
-import { mapState } from "vuex";
+import { mapState, mapGetters } from "vuex";
 import userMenu from "component/ui/userMenu";
 export default {
   name: "mainLayout",
@@ -14,10 +14,13 @@ export default {
       user: state => state.user.user
     }),
 
+    // ...mapGetters({ user: "user/getUser" }),
+
     __routeTabs() {
       const tabs = [
         { to: "/", label: "Главная" },
-        { to: "/rb", label: "Рейдовые боссы" }
+        { to: "/rb", label: "Рейдовые боссы" },
+        { to: "/forum", label: "Форум" }
       ];
 
       if (!this.user)
@@ -57,7 +60,7 @@ export default {
         h("q-tabs", { props: { align: "right" } }, [
           h("q-avatar", [
             h("img", {
-              attrs: { src: "https://cdn.quasar.dev/img/avatar.png" }
+              attrs: { src: "statics/avatar.png" }
             }),
             h("userMenu", { props: { user: this.user } })
           ])

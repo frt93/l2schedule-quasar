@@ -223,15 +223,15 @@ export default {
       if (e.response) {
         if (e.response.data.username) {
           this.usernameError = true;
-          this.usernameErrorMessage = e.usernameErrorMessage;
+          this.usernameErrorMessage = e.response.data.usernameErrorMessage;
         }
         if (e.response.data.email) {
           this.emailError = true;
-          this.emailErrorMessage = e.emailErrorMessage;
+          this.emailErrorMessage = e.response.data.emailErrorMessage;
         }
         if (e.response.data.password) {
           this.passwordError = true;
-          this.passwordErrorMessage = e.passwordErrorMessage;
+          this.passwordErrorMessage = e.response.data.passwordErrorMessage;
         }
         if (e.response.data.name === 'Invalid repair key') {
           this.repairKeyError = true;
@@ -244,6 +244,10 @@ export default {
         }
 
         if (e.response.data.name === 'Database connection failed') {
+          this.errorNotify(e.response.data.message);
+        }
+
+        if (e.response.data.name === 'Operation failed') {
           this.errorNotify(e.response.data.message);
         }
       }

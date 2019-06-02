@@ -24,9 +24,6 @@ const composeQuery = (key, value) => {
 
     metadata{
       createdAt
-      emailVerification
-      newPassword
-      passwordConfirmation
     }
 
     party {

@@ -1,30 +1,26 @@
-import axios from 'axios';
+import { axiosInstance } from 'boot/axios';
 import { Cookies } from 'quasar';
 
 export default {
   namespaced: true,
   // otherwise we're on client
-  state: {},
 
   mutations: {
     /**
      *
      * @todo Проверить соблюдение продолжительности жизни токена
      */
-    setAuthCookie(state, token) {
-      Cookies.set('authenticate', token, { expires: 365, path: '/' });
+    setAuth(state, token) {
+      Cookies.set('auth', token, { expires: 365, path: '/' });
     },
 
-    resetAuthCookie() {
-      Cookies.remove('authenticate');
+    resetAuth() {
+      Cookies.remove('auth', { path: '/' });
+      delete axiosInstance.defaults.headers.common['auth'];
     },
 
     setAxiosAuthHeaders(state, token) {
-      axios.defaults.headers.common['authorization'] = token;
-    },
-
-    resetAxiosAuthHeaders() {
-      delete axios.defaults.headers.common['authorization'];
+      axiosInstance.defaults.headers.common['auth'] = token;
     },
   },
 
@@ -35,11 +31,15 @@ export default {
      *
      * @param credentials       Регистрационные данные пользователя
      */
-    async signUp({ commit }, credentials) {
-      const { data } = await this._vm.$axios.post('/users/create', credentials);
-      commit('user/setUser', data.user, { root: true });
-      commit('setAuthCookie', data.token);
-      commit('setAxiosAuthHeaders', data.token);
+    signUp({ commit }, credentials) {
+      axiosInstance
+        .post('/users/create', credentials)
+        .then(res => {
+          commit('user/setUser', res.data.user, { root: true });
+          commit('setAuth', res.data.token);
+          commit('setAxiosAuthHeaders', res.data.token);
+        })
+        .catch(e => {});
     },
 
     /**
@@ -48,44 +48,31 @@ export default {
      *
      * @param credentials       Авторизационные данные пользователя
      */
-    async signIn({ commit }, credentials) {
-      const { data } = await this._vm.$axios.post('/users/signin', credentials);
-      await commit('user/setUser', data.user, { root: true });
-      await commit('setAuthCookie', data.token);
-      await commit('setAxiosAuthHeaders', data.token);
+    signIn({ commit }, credentials) {
+      axiosInstance
+        .post('/users/signin', credentials)
+        .then(res => {
+          commit('user/setUser', res.data.user, { root: true });
+          commit('setAuth', res.data.token);
+          commit('setAxiosAuthHeaders', res.data.token);
+        })
+        .catch(e => {});
     },
 
     /**
-     * Пытаемся авторизовать пользователя при инициализации приложения.
+     * Авторизуем пользователя при инициализации приложения.
+     * Метод вызывается из auth middleware
      *
      * @param credentials       Авторизационные данные пользователя
      */
-    async authorize({ commit, dispatch }, ssrContext) {
-      const cookies = () => {
-        return process.env.SERVER ? Cookies.parseSSR(ssrContext) : Cookies;
-      };
-
-      if (cookies().has('authenticate')) {
-        const token = await cookies().get('authenticate');
-
-        await this._vm.$axios
-          .post('/users/authorize', { token })
-          .then(res => {
-            commit('user/setUser', res.data, { root: true });
-            commit('setAxiosAuthHeaders', token);
-          })
-          .catch(e => {});
-      } else {
-        commit('user/resetUser', null, { root: true });
-      }
+    authorize({ commit }, { user, token }) {
+      commit('user/setUser', user, { root: true });
+      commit('setAxiosAuthHeaders', token);
     },
 
     logout({ commit }) {
-      commit('resetAuthCookie');
-      commit('resetAxiosAuthHeaders');
-      commit('user/resetUser', null, { root: true });
+      commit('resetAuth');
+      commit('user/setUser', null, { root: true });
     },
   },
-
-  getters: {},
 };

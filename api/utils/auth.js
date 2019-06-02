@@ -166,12 +166,14 @@ module.exports.handleErrors = (e, res) => {
   }
 
   // Неправильный формат uuid идентификатора в запросе в методе repairConfirm
-  if (
+  else if (
     e.message.indexOf('invalid input syntax for type uuid') !== -1 &&
     e.message.indexOf('repairKey:') !== -1
   ) {
     error.name = 'Invalid repair key';
     error.message = 'Неверный формат ключа';
+  } else {
+    error = e;
   }
 
   res.status(500).send(error);
