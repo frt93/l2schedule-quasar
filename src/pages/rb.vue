@@ -1,8 +1,3 @@
-<template>
-  <q-page>
-    <rbList></rbList>
-  </q-page>
-</template>
 <script>
 import rbList from "../components/rbList";
 export default {
@@ -11,7 +6,7 @@ export default {
     rbList
   },
   preFetch({ store }) {
-    return store.dispatch("fetch");
+    // return store.dispatch("fetch");
   },
   meta() {
     return {
@@ -19,6 +14,10 @@ export default {
       // whenever "title" prop changes, your meta will automatically update
       title: "РБшки"
     };
+  },
+
+  render(h) {
+    return h("q-page", [h(rbList)]);
   }
 };
 </script>

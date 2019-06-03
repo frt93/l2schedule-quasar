@@ -36,10 +36,14 @@ export default {
 
   methods: {
     submit() {
-      this.$store
-        .dispatch("auth/signUp", this.user)
+      this.$axios
+        .post("/users/create", this.user)
         .then(res => {
-          this.$router.push({ name: "main" });
+          this.$store.dispatch("auth/signUp", {
+            user: res.data.user,
+            token: res.data.token,
+            router: this.$router
+          });
         })
         .catch(e => {
           this.handleErrors(e);

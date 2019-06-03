@@ -10,7 +10,7 @@ export default {
 
   methods: {
     logout() {
-      this.$store.dispatch("auth/logout");
+      this.$store.dispatch("auth/logout", this.$router);
     }
   },
 
@@ -20,7 +20,8 @@ export default {
       {
         props: {
           anchor: "bottom right",
-          self: "top right"
+          self: "top right",
+          autoClose: true
         }
       },
       [
@@ -31,9 +32,11 @@ export default {
           h(
             "q-item",
             {
-              class: this.user.metadata.emailVerification ? "bg-red-6" : null,
+              class: this.user.metadata.emailVerification
+                ? "bg-red-6 menu-link"
+                : null,
               attrs: {
-                clickable: true
+                to: { name: "settings" }
               }
             },
             [h("q-item-section", "Настройки")]
@@ -58,3 +61,9 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.menu-link {
+  color: #fff;
+}
+</style>

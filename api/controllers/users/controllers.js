@@ -48,7 +48,7 @@ module.exports.create = async (req, res) => {
       res.send({ user: createdUser, token });
     })
     .catch(e => {
-      res.status(500).send(e);
+      handleErrors(e, res);
     });
 };
 
@@ -124,6 +124,7 @@ module.exports.signin = async (req, res) => {
 module.exports.authorize = (req, res) => {
   let query, user;
   const token = req.body.token;
+  console.log('fetch user2');
   if (!token)
     return res.status(400).send({ type: 'error', message: 'Authorization header not found.' });
 
@@ -348,6 +349,6 @@ module.exports.generateToken = async (id, key) => {
     key = await uuid();
   }
 
-  const token = await jwt.sign({ id, key }, jwtKey);
+  const token = await jwt.sign({ id }, jwtKey);
   return { key, token };
 };

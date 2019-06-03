@@ -41,10 +41,14 @@ export default {
   },
   methods: {
     submit() {
-      this.$store
-        .dispatch("auth/signIn", this.credentials)
+      this.$axios
+        .post("/users/signin", this.credentials)
         .then(res => {
-          this.$router.push({ name: "main" });
+          this.$store.dispatch("auth/signIn", {
+            user: res.data.user,
+            token: res.data.token,
+            router: this.$router
+          });
         })
         .catch(e => {
           this.handleErrors(e);

@@ -2,10 +2,10 @@ import { debounce } from 'quasar';
 export default {
   data() {
     return {
-      login: '', // Только для компонента авторизации
+      login: 'frt', // Только для компонента авторизации
       username: '',
       email: '',
-      password: '',
+      password: '123456789',
       hidePwd: true,
 
       usernameError: false,

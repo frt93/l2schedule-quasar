@@ -5,7 +5,7 @@ import { axiosInstance } from 'boot/axios';
  * Пробуем авторизовать пользователя при запуске приложения
  */
 export const autologin = async ({ store, ssrContext, next }) => {
-  if (ssrContext) {
+  if (process.env.SERVER) {
     const cookies = Cookies.parseSSR(ssrContext);
     const token = cookies.get('auth');
 
@@ -29,12 +29,12 @@ export const autologin = async ({ store, ssrContext, next }) => {
 /**
  * Пропускаем только гостей
  */
-export const isGuest = ({ next, to, from, Router, store, ssrContext }) => {
-  // const token = authToken(ssrContext);
+export const guest = ({ next, to, from, Router, store, ssrContext }) => {
+  const token = authToken(ssrContext);
   const user = getUser(store);
 
-  if (user !== null) {
-    Router.push({ name: 'main' });
+  if (user !== null || token) {
+    Router.replace({ name: 'home' });
   }
 
   return next();
@@ -43,15 +43,33 @@ export const isGuest = ({ next, to, from, Router, store, ssrContext }) => {
 /**
  * Пропускаем только авторизованных пользователей
  */
-export const isUser = ({ next, to, from, Router, store, ssrContext }) => {
+export const user = ({ next, to, from, Router, store, ssrContext }) => {
+  const token = authToken(ssrContext);
   const user = getUser(store);
-  // const token = authToken(ssrContext);
 
-  if (!user) {
-    Router.push({ name: 'signin' });
+  if (user === null || !token) {
+    next({
+      name: 'signin',
+      params: {
+        redirect: to.name,
+      },
+    });
   }
 
   return next();
+};
+
+/**
+ * Пропускаем только админов
+ */
+export const admin = ({ next, to, from, Router, store, ssrContext }) => {
+  const user = getUser(store);
+
+  if (user) {
+    next({
+      path: '/fuckoff',
+    });
+  } else next();
 };
 
 /**
@@ -67,6 +85,7 @@ const getUser = store => {
  * Парсим куки и проверяем наличие в них токена авторизации
  *
  * @param {*} ssrContext
+ * @todo Убрать, если не понадобится. Так же вызывается в функциях выше
  */
 const authToken = ssrContext => {
   const cookies = () => {

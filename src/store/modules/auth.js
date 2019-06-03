@@ -1,5 +1,5 @@
 import { axiosInstance } from 'boot/axios';
-import { Cookies } from 'quasar';
+import cookies from 'js-cookie';
 
 export default {
   namespaced: true,
@@ -7,61 +7,72 @@ export default {
 
   mutations: {
     /**
-     *
+     * Устанавливаем куки авторизации
      * @todo Проверить соблюдение продолжительности жизни токена
      */
     setAuth(state, token) {
-      Cookies.set('auth', token, { expires: 365, path: '/' });
+      cookies.set('auth', token, { expires: 365, secure: true });
     },
 
-    resetAuth() {
-      Cookies.remove('auth', { path: '/' });
-      delete axiosInstance.defaults.headers.common['auth'];
-    },
-
+    /**
+     * Устанавливаем заголовки авторизации http-клиенту
+     *
+     */
     setAxiosAuthHeaders(state, token) {
       axiosInstance.defaults.headers.common['auth'] = token;
+    },
+
+    /**
+     * Удаляем заголовки авторизации и сбрасываем куки
+     */
+    resetAuth() {
+      delete axiosInstance.defaults.headers.common['auth'];
+      cookies.remove('auth'); // Сторонний пакет
     },
   },
 
   actions: {
     /**
-     * Отправляем запрос с данными для регистрации пользователя.
-     * Если регистрация успешна - коммитим мутации
+     * Пользователь зарегистрировался.
+     * Записываем пользователя в стор, устанавливаем куки и заголовки авторизации http-клиенту.
+     * Затем переадресовываем пользователя на главную
      *
-     * @param credentials       Регистрационные данные пользователя
+     * @param user              Экземпляр авторизовавшегося пользователя
+     * @param token             Токен авторизации
+     * @param router            Экземпляр VueRouter
      */
-    signUp({ commit }, credentials) {
-      axiosInstance
-        .post('/users/create', credentials)
-        .then(res => {
-          commit('user/setUser', res.data.user, { root: true });
-          commit('setAuth', res.data.token);
-          commit('setAxiosAuthHeaders', res.data.token);
-        })
-        .catch(e => {});
+    signUp({ commit }, { user, token, router }) {
+      commit('user/setUser', user, { root: true });
+      commit('setAuth', token);
+      commit('setAxiosAuthHeaders', token);
+
+      router.replace({ name: 'home' });
     },
 
     /**
-     * Отправляем запрос на авторизацию пользователя
-     * Если авторизация успешна - коммитим мутации
+     * Авторизация пользователя прошла успешно.
+     * Записываем пользователя в стор, устанавливаем куки и заголовки авторизации http-клиенту.
+     * Затем переадресовываем пользователя на соответствующий роут
      *
-     * @param credentials       Авторизационные данные пользователя
+     * @param user              Экземпляр авторизовавшегося пользователя
+     * @param token             Токен авторизации
+     * @param router            Экземпляр VueRouter
      */
-    signIn({ commit }, credentials) {
-      axiosInstance
-        .post('/users/signin', credentials)
-        .then(res => {
-          commit('user/setUser', res.data.user, { root: true });
-          commit('setAuth', res.data.token);
-          commit('setAxiosAuthHeaders', res.data.token);
-        })
-        .catch(e => {});
+    signIn({ commit }, { user, token, router }) {
+      commit('user/setUser', user, { root: true });
+      commit('setAuth', token);
+      commit('setAxiosAuthHeaders', token);
+
+      // Проверяем наличие параметра переадресации в текущем роуте.
+      // Если он есть - перенаправляем пользователя на указанный маршрут. В противном случае отправляем на главную страницу
+      const redirect = router.currentRoute.params.redirect;
+      const next = redirect ? redirect : 'home';
+      router.replace({ name: next });
     },
 
     /**
-     * Авторизуем пользователя при инициализации приложения.
-     * Метод вызывается из auth middleware
+     * Пользователь авторизовался при инициализации приложения
+     * Метод вызывается из router/middleware/auth
      *
      * @param credentials       Авторизационные данные пользователя
      */
@@ -70,9 +81,23 @@ export default {
       commit('setAxiosAuthHeaders', token);
     },
 
-    logout({ commit }) {
+    /**
+     * Пользователь вышел из аккаунта.
+     * Сбрасываем авторизацию. Удаляем информацию о пользователе из стора
+     *
+     * @param router            Экземпляр VueRouter
+     */
+    logout({ commit }, router) {
       commit('resetAuth');
       commit('user/setUser', null, { root: true });
+
+      // Перебираем список middleware. Если среди них есть middleware авторизации - перенаправляем разлогиневшегося пользователя
+      // на главную, т.к. страница, на которой он разлогинился, доступна только для авторизованных
+      router.currentRoute.meta.middleware.map(guard => {
+        if (guard.name === 'user') {
+          router.push({ name: 'home' });
+        }
+      });
     },
   },
 };

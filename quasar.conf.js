@@ -39,6 +39,7 @@ module.exports = function(ctx) {
         'QList',
         'QItem',
         'QItemSection',
+        'QItemLabel',
         'QInput',
         'QForm',
         'QSpinnerPuff',
@@ -81,7 +82,7 @@ module.exports = function(ctx) {
     },
 
     devServer: {
-      // https: true,
+      https: true,
       port: 8000,
       open: false, // opens browser window automatically
     },

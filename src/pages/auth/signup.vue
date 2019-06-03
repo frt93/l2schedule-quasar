@@ -6,11 +6,16 @@ export default {
     signup
   },
 
+  data() {
+    return {
+      previous: ""
+    };
+  },
+
   meta() {
     return {
-      // this accesses the "title" property in your Vue "data";
-      // whenever "title" prop changes, your meta will automatically update
-      title: "Регистрация"
+      title: "Регистрация",
+      titleTemplate: title => `${title} - L2Schedule`
     };
   },
 
