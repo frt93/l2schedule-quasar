@@ -21,7 +21,6 @@ const composeQuery = (key, value) => {
     username
     email
     password
-
     metadata{
       createdAt
       emailVerification
@@ -53,9 +52,14 @@ const composeQuery = (key, value) => {
 const response = data => {
   const user = data.users[0];
   if (user) {
-    if (!user.metadata.emailVerification) delete user.metadata.emailVerification;
-    if (!user.metadata.newPassword) delete user.metadata.newPassword;
-    if (!user.metadata.passwordConfirmation) delete user.metadata.passwordConfirmation;
+    // Если email уже подтвержден - удаляем строку из экземпляра пользователя
+    if (user.metadata.emailVerification === null) {
+      delete user.metadata.emailVerification;
+    } else {
+      // Если не подтвержден - заменяем сам код подтверждения на значение true
+      user.metadata.emailVerification = true;
+    }
+
     if (!user.party) delete user.party;
   }
   return user;

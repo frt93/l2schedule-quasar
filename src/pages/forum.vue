@@ -1,5 +1,8 @@
 <template>
-  <div>forum</div>
+  <div>
+    forum
+    {{ $store.state.lang.lang.loginHint }}
+  </div>
 </template>
 
 <script>

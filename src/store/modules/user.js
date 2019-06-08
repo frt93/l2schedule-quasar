@@ -1,16 +1,13 @@
 export default {
   namespaced: true,
   state: {
-    user: null,
+    instance: null,
+    lang: 'ru',
   },
 
   mutations: {
     setUser(state, user) {
-      state.user = user;
-    },
-
-    resetUser(state) {
-      state.user = null;
+      state.instance = user;
     },
   },
 
@@ -18,7 +15,7 @@ export default {
 
   getters: {
     getUser(state) {
-      return state.user;
+      return state.instance;
     },
   },
 };

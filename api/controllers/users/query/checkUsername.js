@@ -21,7 +21,7 @@ const query = username => {
  */
 const response = data => {
   const users = data.users;
-  return users.length ? users[0].username : '';
+  return users.length ? users[0].username : null;
 };
 
 module.exports = { query, response };

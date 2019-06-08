@@ -11,8 +11,9 @@ router.post('/create', users.create);
 router.post('/signin', users.signin);
 
 router.post('/repair', users.repair);
-router.post('/confirm-repair', users.repairConfirm);
+router.post('/confirm-repair', users.confirmRepair);
+router.post('/repair/change-password', users.changePassword);
 
-router.post('/change/password', users.changePassword);
+router.post('/settings/account', users.accountSettings);
 
 module.exports = router;

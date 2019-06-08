@@ -2,10 +2,10 @@ import { debounce } from 'quasar';
 export default {
   data() {
     return {
-      login: 'frt', // Только для компонента авторизации
+      login: '', // Только для компонента авторизации
       username: '',
       email: '',
-      password: '123456789',
+      password: '',
       hidePwd: true,
 
       usernameError: false,
@@ -29,10 +29,9 @@ export default {
      * Валидируем никнейм пользователя
      *
      * @param {String} username   Указанный пользователем никнейм
-     * @param {String} page       Параметр, определяющий источник вызова метода (компонент). По умолчанию предполагается, что метод вызван на странице регистрации.
-     *                            Со страниц логина и восстановления доступа вызывается со значениями 'signin' и 'repair' соответственно
+     * @param {Boolean} check     Параметр, определяющий стоит ли проверять существование пользователя с указанным username перед отправкой формы
      */
-    validateUsername: debounce(function(username, page = 'signup') {
+    validateUsername: debounce(function(username, check = true) {
       this.usernameError = false;
       this.usernameErrorMessage = '';
 
@@ -44,10 +43,10 @@ export default {
           charsToRemove = '',
           chars;
 
-        // Выражение ищет пробелы в начале и конце никнейма. Пробелы между буквами в никнейме разрешены
-        const spaces = /^\s|\s$/g.test(username);
+        // Выражение ищет пробелы в никнейме
+        const spaces = /\s/g.test(username);
         if (spaces) {
-          message += 'Пробелы в начале и конце никнейма запрещены\n';
+          message += 'Пробелы в никнейме запрещены\n';
         }
 
         // Запрещенные символы
@@ -72,7 +71,7 @@ export default {
           this.usernameError = true;
           this.usernameErrorMessage = message;
         } else {
-          if (page === 'signup') this.checkUsername(username, page);
+          if (check) this.checkUsername(username);
         }
       }
 
@@ -83,10 +82,9 @@ export default {
      * Валидируем email адрес пользователя. В email адресе запрещены только пробелы
      *
      * @param {String} email    Указанный пользователем email
-     * @param {String} page     Параметр, определяющий источник вызова метода (компонент). По умолчанию предполагается, что метод вызван на странице регистрации.
-     *                          Со страниц логина и восстановления доступа вызывается со значениями 'signin' и 'repair' соответственно
+     * @param {Boolean} check   Параметр, определяющий стоит ли проверять существование пользователя с указанным email адресом перед отправкой формы
      */
-    validateEmail: debounce(function(email, page = 'signup') {
+    validateEmail: debounce(function(email, check = true) {
       this.emailError = false;
       this.emailErrorMessage = '';
 
@@ -109,7 +107,7 @@ export default {
           this.emailError = true;
           this.emailErrorMessage = message;
         } else {
-          if (page !== 'signin') this.checkEmail(email, page);
+          if (check) this.checkEmail(email);
         }
       }
 
@@ -137,26 +135,6 @@ export default {
     },
 
     /**
-     * Валидируем ключ подтверждения для восстановления пользователю доступа к аккаунту
-     *
-     * @param {String} key        Указанный пользователем никнейм
-     */
-    validateRepairKey: debounce(function(key) {
-      this.repairKeyError = false;
-      this.repairKeyErrorMessage = '';
-
-      const pattern = /[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}/gi.test(key);
-
-      if (!pattern) {
-        this.repairKeyError = true;
-        this.repairKeyErrorMessage = 'Неверный ключ подтверждения';
-      }
-
-      this.loading.repair = false;
-      return;
-    }, 1500),
-
-    /**
      * Если нет ошибок и поля с никнеймом или почтовым адресом не в процессе валидации - форма заполнила корректно
      */
     validateForm() {
@@ -173,44 +151,22 @@ export default {
      * Проверяем свободен ли указанный при регистрации пользователем никнейм
      *
      * @param {String} username   Указанный никнейм
-     * @param {String} page       Страница, вызвавшая метод
      */
-    checkUsername(username, page) {
-      this.$axios
-        .post('/users/check/username', { username })
-        .then(res => {
-          if (res.data) {
-            this.usernameError = true;
-            this.usernameErrorMessage = `Никнейм ${res.data} уже используется другим пользователем`;
-          }
-          return;
-        })
-        .catch(e => {
-          throw e;
-        });
+    checkUsername(username) {
+      this.$axios.post('/users/check/username', { username }).catch(e => {
+        this.handleErrors(e);
+      });
     },
 
     /**
      * Проверяем свободен ли указанный при регистрации пользователем email адрес
      *
      * @param {String} email    Указанный адрес электронной почты
-     * @param {String} page     Страница, вызвавшая метод
      */
-    checkEmail(email, page) {
-      this.$axios
-        .post('/users/check/email', { email })
-        .then(res => {
-          if (res.data && page === 'signup') {
-            this.emailError = true;
-            this.emailErrorMessage = `Адрес ${res.data} уже используется другим пользователем`;
-          } else if (!res.data && page === 'repair') {
-            this.emailError = true;
-            this.emailErrorMessage = `Пользователь с данным адресом не найден`;
-          }
-        })
-        .catch(e => {
-          throw e;
-        });
+    checkEmail(email) {
+      this.$axios.post('/users/check/email', { email }).catch(e => {
+        this.handleErrors(e);
+      });
     },
 
     /**
@@ -219,36 +175,22 @@ export default {
      * @param {Object} e        Экземпляр ошибки
      */
     handleErrors(e) {
-      // Описанные на стороне сервера ошибки
+      /**
+       * Описанные на стороне сервера кастомные ошибки.
+       * У них задано свойство type, совпадающее с наименованием свойств data, отвечающих за выброс ошибок.
+       * Свойство msgType совпадает с наименованием свойст data, хранящих в себе текст ошибок
+       */
+
       if (e.response) {
-        if (e.response.data.username) {
-          this.usernameError = true;
-          this.usernameErrorMessage = e.response.data.usernameErrorMessage;
-        }
-        if (e.response.data.email) {
-          this.emailError = true;
-          this.emailErrorMessage = e.response.data.emailErrorMessage;
-        }
-        if (e.response.data.password) {
-          this.passwordError = true;
-          this.passwordErrorMessage = e.response.data.passwordErrorMessage;
-        }
-        if (e.response.data.name === 'Invalid repair key') {
-          this.repairKeyError = true;
-          this.repairKeyErrorMessage = e.response.data.message;
+        const err = e.response.data;
+        const status = e.response.status;
+        if (err.type === 'usernameError' || 'emailError' || 'passwordError' || 'repairKeyError') {
+          this[err.type] = true;
+          this[err.msgType] = err.message;
         }
 
-        if (e.response.data.name === 'Repair key not found') {
-          this.repairKeyError = true;
-          this.repairKeyErrorMessage = e.response.data.message;
-        }
-
-        if (e.response.data.name === 'Database connection failed') {
-          this.errorNotify(e.response.data.message);
-        }
-
-        if (e.response.data.name === 'Operation failed') {
-          this.errorNotify(e.response.data.message);
+        if (status >= 500) {
+          this.errorNotify(err.message);
         }
       }
 
@@ -270,6 +212,20 @@ export default {
         color: 'negative',
         position: 'bottom',
         icon: 'fas fa-exclamation',
+        message,
+      });
+    },
+
+    /**
+     * Вызов оповещения об успешном завершении операции
+     *
+     * @param {String} message   Текст оповещения
+     */
+    successNotify(message) {
+      this.$q.notify({
+        color: 'green-6',
+        position: 'bottom-right',
+        icon: 'far fa-smile-wink',
         message,
       });
     },

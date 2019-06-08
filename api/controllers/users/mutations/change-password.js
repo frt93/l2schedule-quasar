@@ -2,22 +2,23 @@
  * Компонуем запрос для изменения пароля пользователя
  *
  * @param {String} email       Email адрес пользователя, который меняет себе пароль
+ * @param {String} key         Ключ подтверждения
  * @param {String } password   Новый пароль
  */
-const composeMutation = (email, password) => {
+const composeMutation = (email, key, password) => {
   return `mutation change_password {
+    update_users(where: {email: {_like: "${email}"}, metadata: {repairKey: {_eq: "${key}"}}}, _set: {password: "${password}"}) {
+      returning {
+        email
+      }
+    }
     update_user_metadata(where: {user: {email: {_ilike: "${email}"}}}, _set: {repairKey: null}) {
       returning {
         repairKey
       }
     }
-
-    update_users(where: {email: {_like: "${email}"}}, _set: {password: "${password}"}) {
-      returning {
-        email
-      }
-    }
-  }`;
+  }
+  `;
 };
 
 /**

@@ -25,9 +25,8 @@ export default {
         this.emailError = false;
         this.emailErrorMessage = this.email = "";
         return !this.repairKey.length ||
-          !this.repairKey.length === 36 ||
-          this.repairKeyError ||
-          this.loading.repair
+          this.repairKey.length !== 36 ||
+          this.repairKeyError
           ? false
           : true;
       }
@@ -59,7 +58,7 @@ export default {
       this.$axios
         .post("/users/repair", { email: this.email })
         .then(res => {
-          if (res.data === "success") {
+          if (res.data === true) {
             this.step = 2;
           }
         })
@@ -83,9 +82,10 @@ export default {
 
     lastStep() {
       this.$axios
-        .post("/users/change/password", {
+        .post("/users/repair/change-password", {
           email: this.email,
-          password: this.password
+          password: this.password,
+          key: this.repairKey
         })
         .then(res => {
           this.$router.push({ name: "signin" });
@@ -130,7 +130,7 @@ export default {
                 input: value => {
                   this.email = value;
                   this.loading.email = true;
-                  this.validateEmail(value, "repair");
+                  this.validateEmail(value, false);
                 }
               }
             },
@@ -184,14 +184,13 @@ export default {
                 placeholder: "Например, 133caea8-c3ad-490c-b70f-8eb0f4c29639",
                 value: this.repairKey,
                 error: this.repairKeyError,
-                errorMessage: this.repairKeyErrorMessage,
-                loading: this.loading.repair
+                errorMessage: this.repairKeyErrorMessage
               },
               on: {
                 input: value => {
                   this.repairKey = value;
-                  this.loading.repair = true;
-                  this.validateRepairKey(value);
+                  this.repairKeyError = false;
+                  this.repairKeyErrorMessage = "";
                 }
               }
             },

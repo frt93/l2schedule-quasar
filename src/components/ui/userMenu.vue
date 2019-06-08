@@ -25,7 +25,7 @@ export default {
         }
       },
       [
-        h("q-list", { attrs: { style: "min-width:100px" } }, [
+        h("q-list", { attrs: { style: "min-width:150px" } }, [
           h("q-item", { props: { clickable: true } }, [
             h("q-item-section", this.user.username)
           ]),

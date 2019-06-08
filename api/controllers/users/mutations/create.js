@@ -6,6 +6,7 @@ const mutation = `mutation create_user ($users: [users_insert_input!]!) {
       password
       metadata {
         emailVerification
+        createdAt
       }
     }
   }

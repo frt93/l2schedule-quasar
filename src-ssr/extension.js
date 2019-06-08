@@ -10,7 +10,8 @@
  * Note: Changes to this file (but not any file it imports!) are picked up by the
  * development server, but such updates are costly since the dev-server needs a reboot.
  */
-
+const createLocaleMiddleware = require('express-locale');
+var requestLanguage = require('express-request-language');
 module.exports.extendApp = function({ app }) {
   /*
      Extend the parts of the express app that you
@@ -18,4 +19,16 @@ module.exports.extendApp = function({ app }) {
 
      Example: app.use(), app.get() etc
   */
+  app.use(
+    createLocaleMiddleware({
+      priority: ['accept-language', 'default'],
+      default: 'en_US',
+    })
+  );
+
+  app.use(
+    requestLanguage({
+      languages: ['en-US', 'zh-CN'],
+    })
+  );
 };

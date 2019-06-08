@@ -65,173 +65,167 @@ export default {
         this.emailError = false;
         this.emailErrorMessage = "";
         this.loading.username = true;
-        this.validateUsername(newValue, "sigin");
+        this.validateUsername(newValue, false);
       } else {
         this.usernameError = false;
         this.usernameErrorMessage = "";
         this.loading.email = true;
-        this.validateEmail(newValue, "signin");
+        this.validateEmail(newValue, false);
       }
     }
   },
 
   render(h) {
     return h(
-      "div",
+      "q-form",
       {
-        class: "q-pa-md"
+        class: "q-gutter-md",
+        attrs: {
+          autocomplete: false
+        },
+        on: {
+          submit: () => {
+            this.submit();
+          }
+        }
       },
       [
-        h(
-          "q-form",
-          {
-            class: "q-gutter-md",
-            attrs: {
-              autocomplete: false
-            },
-            on: {
-              submit: () => {
-                this.submit();
-              }
-            }
-          },
-          [
-            this.loginKey === "username"
-              ? h(
-                  "q-input",
-                  {
-                    attrs: {
-                      key: "username",
-                      autofocus: true,
-                      autocomplete: false,
-                      value: this.login,
-                      label: "Логин",
-                      hint: "Ваш никнейм или email адрес",
-                      error: this.usernameError,
-                      errorMessage: this.usernameErrorMessage,
-                      loading: this.loading.username
-                    },
-                    on: {
-                      input: value => {
-                        this.login = value;
-                      }
-                    }
-                  },
-                  [
-                    h("q-spinner-puff", {
-                      attrs: {
-                        color: this.usernameError ? "negative" : "primary"
-                      },
-                      slot: "loading"
-                    }),
-                    h("q-icon", {
-                      attrs: {
-                        name: "fas fa-user-alt"
-                      },
-                      slot: "prepend"
-                    })
-                  ]
-                )
-              : h(
-                  "q-input",
-                  {
-                    attrs: {
-                      key: "email",
-                      autocomplete: false,
-                      value: this.login,
-                      label: "Логин",
-                      hint: "Ваш никнейм или email адрес",
-                      error: this.emailError,
-                      errorMessage: this.emailErrorMessage,
-                      loading: this.loading.email
-                    },
-                    on: {
-                      input: value => {
-                        this.login = value;
-                      }
-                    }
-                  },
-                  [
-                    h("q-spinner-puff", {
-                      attrs: {
-                        color: this.emailError ? "negative" : "primary"
-                      },
-                      slot: "loading"
-                    }),
-                    h("q-icon", {
-                      attrs: {
-                        name: "fas fa-envelope"
-                      },
-                      slot: "prepend"
-                    })
-                  ]
-                ),
-            h(
+        this.loginKey === "username"
+          ? h(
               "q-input",
               {
                 attrs: {
+                  key: "username",
+                  autofocus: true,
                   autocomplete: false,
-                  maxlength: "30",
-                  type: this.hidePwd ? "password" : "text",
-                  value: this.password,
-                  label: "Пароль",
-                  error: this.passwordError,
-                  errorMessage: this.passwordErrorMessage
+                  value: this.login,
+                  label: "Логин",
+                  hint: "Ваш никнейм или email адрес",
+                  error: this.usernameError,
+                  errorMessage: this.usernameErrorMessage,
+                  loading: this.loading.username
                 },
                 on: {
                   input: value => {
-                    this.password = value;
-                    this.validatePassword(value);
+                    this.login = value;
                   }
                 }
               },
               [
-                h("q-icon", {
-                  class: "cursor-pointer q-ml-sm",
-                  slot: "append",
+                h("q-spinner-puff", {
                   attrs: {
-                    name: this.hidePwd ? "fas fa-eye" : "fas fa-eye-slash"
+                    color: this.usernameError ? "negative" : "primary"
                   },
-                  on: {
-                    click: () => {
-                      this.hidePwd = !this.hidePwd;
-                    }
-                  }
+                  slot: "loading"
                 }),
                 h("q-icon", {
                   attrs: {
-                    name:
-                      this.password.length < 7 || this.passwordError
-                        ? "fas fa-unlock"
-                        : "fas fa-lock"
+                    name: "fas fa-user-alt"
+                  },
+                  slot: "prepend"
+                })
+              ]
+            )
+          : h(
+              "q-input",
+              {
+                attrs: {
+                  key: "email",
+                  autocomplete: false,
+                  value: this.login,
+                  label: "Логин",
+                  hint: "Ваш никнейм или email адрес",
+                  error: this.emailError,
+                  errorMessage: this.emailErrorMessage,
+                  loading: this.loading.email
+                },
+                on: {
+                  input: value => {
+                    this.login = value;
+                  }
+                }
+              },
+              [
+                h("q-spinner-puff", {
+                  attrs: {
+                    color: this.emailError ? "negative" : "primary"
+                  },
+                  slot: "loading"
+                }),
+                h("q-icon", {
+                  attrs: {
+                    name: "fas fa-envelope"
                   },
                   slot: "prepend"
                 })
               ]
             ),
-            h("q-btn", {
-              class: "float-right q-my-xl",
-              attrs: {
-                label: "Войти",
-                type: "submit",
-                color: this.canSubmit ? "green-6" : "red-6",
-                disabled: !this.canSubmit
+        h(
+          "q-input",
+          {
+            attrs: {
+              autocomplete: false,
+              maxlength: "30",
+              type: this.hidePwd ? "password" : "text",
+              value: this.password,
+              label: "Пароль",
+              error: this.passwordError,
+              errorMessage: this.passwordErrorMessage
+            },
+            on: {
+              input: value => {
+                this.password = value;
+                this.validatePassword(value);
               }
-            }),
-            h("q-btn", {
-              class: "float-left q-mt-xl",
+            }
+          },
+          [
+            h("q-icon", {
+              class: "cursor-pointer q-ml-sm",
+              slot: "append",
               attrs: {
-                label: "Забыли пароль?",
-                color: "yellow-7"
+                name: this.hidePwd ? "fas fa-eye" : "fas fa-eye-slash"
               },
               on: {
                 click: () => {
-                  this.$router.push({ name: "repair" });
+                  this.hidePwd = !this.hidePwd;
                 }
               }
+            }),
+            h("q-icon", {
+              attrs: {
+                name:
+                  this.password.length < 7 || this.passwordError
+                    ? "fas fa-unlock"
+                    : "fas fa-lock"
+              },
+              slot: "prepend"
             })
           ]
-        )
+        ),
+        h("div", { staticClass: "q-my-md" }, [
+          h("q-btn", {
+            class: "float-right",
+            attrs: {
+              label: "Войти",
+              type: "submit",
+              color: this.canSubmit ? "green-6" : "red-6",
+              disabled: !this.canSubmit
+            }
+          }),
+          h("q-btn", {
+            class: "float-left",
+            attrs: {
+              label: "Забыли пароль?",
+              color: "yellow-7"
+            },
+            on: {
+              click: () => {
+                this.$router.push({ name: "repair" });
+              }
+            }
+          })
+        ])
       ]
     );
   }

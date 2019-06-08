@@ -51,19 +51,24 @@ const routes = [
   },
   {
     path: '/settings',
-    component: () => import('layouts/mainLayout.vue'),
+    component: () => import('layouts/settingsLayout.vue'),
     children: [
       {
         path: '',
+        redirect: { name: 'settings/account' },
         name: 'settings',
-        component: () => import('pages/settings/index.vue'),
-        meta: { middleware: [user] },
       },
       {
-        path: 'email',
-        name: 'settings/email',
-        component: () => import('pages/settings/email.vue'),
-        meta: { middleware: [user] },
+        path: 'account',
+        name: 'settings/account',
+        component: () => import('pages/settings/account.vue'),
+        meta: { middleware: [autologin, user] },
+      },
+      {
+        path: 'password',
+        name: 'settings/password',
+        component: () => import('pages/settings/password.vue'),
+        meta: { middleware: [autologin, user] },
       },
     ],
   },

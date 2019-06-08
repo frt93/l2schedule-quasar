@@ -26,7 +26,7 @@ const composeMutation = (email, key) => {
 const composeResponse = data => {
   const returning = data.update_user_metadata.returning[0];
   if (returning) {
-    return 'success';
+    return true;
   } else {
     return null;
   }

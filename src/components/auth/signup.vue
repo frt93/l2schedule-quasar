@@ -53,154 +53,145 @@ export default {
 
   render(h) {
     return h(
-      "div",
+      "q-form",
       {
-        class: "q-pa-md"
+        class: "q-gutter-md",
+        attrs: {
+          autocomplete: false
+        },
+        on: {
+          submit: () => {
+            this.submit();
+          }
+        }
       },
       [
         h(
-          "q-form",
+          "q-input",
           {
-            class: "q-gutter-md",
             attrs: {
-              autocomplete: false
+              autofocus: true,
+              autocomplete: false,
+              maxlength: "16",
+              value: this.username,
+              label: "Никнейм",
+              hint: "Максимум 16 символов",
+              counter: true,
+              error: this.usernameError,
+              errorMessage: this.usernameErrorMessage,
+              loading: this.loading.username
             },
             on: {
-              submit: () => {
-                this.submit();
+              input: value => {
+                this.username = value;
+                this.loading.username = true;
+                this.validateUsername(value);
               }
             }
           },
           [
-            h(
-              "q-input",
-              {
-                attrs: {
-                  autofocus: true,
-                  autocomplete: false,
-                  maxlength: "16",
-                  value: this.username,
-                  label: "Никнейм",
-                  hint: "Максимум 16 символов",
-                  counter: true,
-                  error: this.usernameError,
-                  errorMessage: this.usernameErrorMessage,
-                  loading: this.loading.username
-                },
-                on: {
-                  input: value => {
-                    this.username = value;
-                    this.loading.username = true;
-                    this.validateUsername(value);
-                  }
-                }
+            h("q-spinner-puff", {
+              props: {
+                color: this.usernameError ? "negative" : "primary"
               },
-              [
-                h("q-spinner-puff", {
-                  props: {
-                    color: this.usernameError ? "negative" : "primary"
-                  },
-                  slot: "loading"
-                }),
-                h("q-icon", {
-                  attrs: {
-                    name: "fas fa-user-alt"
-                  },
-                  slot: "prepend"
-                })
-              ]
-            ),
-            h(
-              "q-input",
-              {
-                attrs: {
-                  autocomplete: false,
-                  type: "email",
-                  value: this.email,
-                  label: "Email",
-                  hint: "На указанный адрес придет письмо для подтверждения",
-                  error: this.emailError,
-                  errorMessage: this.emailErrorMessage,
-                  loading: this.loading.email
-                },
-                on: {
-                  input: value => {
-                    this.email = value;
-                    this.loading.email = true;
-                    this.validateEmail(value);
-                  }
-                }
-              },
-              [
-                h("q-spinner-puff", {
-                  attrs: {
-                    color: this.emailError ? "negative" : "primary"
-                  },
-                  slot: "loading"
-                }),
-                h("q-icon", {
-                  attrs: {
-                    name: "fas fa-envelope"
-                  },
-                  slot: "prepend"
-                })
-              ]
-            ),
-            h(
-              "q-input",
-              {
-                attrs: {
-                  autocomplete: false,
-                  maxlength: "30",
-                  type: this.hidePwd ? "password" : "text",
-                  value: this.password,
-                  label: "Пароль",
-                  hint: "От 7 до 30 символов",
-                  counter: true,
-                  error: this.passwordError,
-                  errorMessage: this.passwordErrorMessage
-                },
-                on: {
-                  input: value => {
-                    this.password = value;
-                    this.validatePassword(value);
-                  }
-                }
-              },
-              [
-                h("q-icon", {
-                  staticClass: "cursor-pointer q-ml-sm",
-                  slot: "append",
-                  attrs: {
-                    name: this.hidePwd ? "fas fa-eye" : "fas fa-eye-slash"
-                  },
-                  on: {
-                    click: () => {
-                      this.hidePwd = !this.hidePwd;
-                    }
-                  }
-                }),
-                h("q-icon", {
-                  attrs: {
-                    name:
-                      this.password.length < 7 ? "fas fa-unlock" : "fas fa-lock"
-                  },
-                  slot: "prepend"
-                })
-              ]
-            ),
-            h("q-btn", {
-              class: "float-right q-my-xl",
+              slot: "loading"
+            }),
+            h("q-icon", {
               attrs: {
-                label: "Зарегистрироваться",
-                type: "submit",
-                color: this.canSubmit ? "green-6" : "red-6",
-                disabled: !this.canSubmit
+                name: "fas fa-user-alt"
               },
-              props: {}
+              slot: "prepend"
             })
           ]
-        )
+        ),
+        h(
+          "q-input",
+          {
+            attrs: {
+              autocomplete: false,
+              type: "email",
+              value: this.email,
+              label: "Email",
+              hint: "На указанный адрес придет письмо для подтверждения",
+              error: this.emailError,
+              errorMessage: this.emailErrorMessage,
+              loading: this.loading.email
+            },
+            on: {
+              input: value => {
+                this.email = value;
+                this.loading.email = true;
+                this.validateEmail(value);
+              }
+            }
+          },
+          [
+            h("q-spinner-puff", {
+              attrs: {
+                color: this.emailError ? "negative" : "primary"
+              },
+              slot: "loading"
+            }),
+            h("q-icon", {
+              attrs: {
+                name: "fas fa-envelope"
+              },
+              slot: "prepend"
+            })
+          ]
+        ),
+        h(
+          "q-input",
+          {
+            attrs: {
+              autocomplete: false,
+              maxlength: "30",
+              type: this.hidePwd ? "password" : "text",
+              value: this.password,
+              label: "Пароль",
+              hint: "От 7 до 30 символов",
+              counter: true,
+              error: this.passwordError,
+              errorMessage: this.passwordErrorMessage
+            },
+            on: {
+              input: value => {
+                this.password = value;
+                this.validatePassword(value);
+              }
+            }
+          },
+          [
+            h("q-icon", {
+              staticClass: "cursor-pointer q-ml-sm",
+              slot: "append",
+              attrs: {
+                name: this.hidePwd ? "fas fa-eye" : "fas fa-eye-slash"
+              },
+              on: {
+                click: () => {
+                  this.hidePwd = !this.hidePwd;
+                }
+              }
+            }),
+            h("q-icon", {
+              attrs: {
+                name: this.password.length < 7 ? "fas fa-unlock" : "fas fa-lock"
+              },
+              slot: "prepend"
+            })
+          ]
+        ),
+        h("q-btn", {
+          class: "float-right q-my-xl",
+          attrs: {
+            label: "Зарегистрироваться",
+            type: "submit",
+            color: this.canSubmit ? "green-6" : "red-6",
+            disabled: !this.canSubmit
+          },
+          props: {}
+        })
       ]
     );
   }

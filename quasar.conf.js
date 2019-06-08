@@ -1,12 +1,13 @@
 // Configuration for your app
 const path = require('path');
+const fs = require('fs');
 
 module.exports = function(ctx) {
   return {
     preFetch: true,
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
-    boot: ['axios'],
+    boot: ['axios', 'i18n'],
 
     css: ['app.styl'],
 
@@ -26,28 +27,30 @@ module.exports = function(ctx) {
         'QHeader',
         'QPageContainer',
         'QPage',
+        'QRouteTab',
+        'QTabs',
+        'QTab',
+        'QMenu',
         'QToolbar',
         'QBtn',
         'QIcon',
         'QCard',
         'QCardSection',
-        'QMenu',
-        'QTabs',
-        'QRouteTab',
-        'QTab',
         'QSpace',
         'QList',
         'QItem',
         'QItemSection',
         'QItemLabel',
-        'QInput',
         'QForm',
-        'QSpinnerPuff',
+        'QInput',
+        'QSelect',
         'QAvatar',
         'QSeparator',
         'QStepper',
         'QStep',
         'QStepperNavigation',
+        'QSpinnerPuff',
+        'QSpinnerDots',
       ],
 
       directives: ['Ripple'],
@@ -56,7 +59,7 @@ module.exports = function(ctx) {
       plugins: ['Notify', 'Cookies', 'Meta'],
 
       iconSet: 'fontawesome-v5',
-      lang: 'ru', // Quasar language
+      lang: 'en-us', // Quasar language
     },
 
     supportIE: false,
@@ -82,7 +85,10 @@ module.exports = function(ctx) {
     },
 
     devServer: {
-      https: true,
+      https: {
+        key: fs.readFileSync('./ssl/example.com+5-key.pem'),
+        cert: fs.readFileSync('./ssl/example.com+5.pem'),
+      },
       port: 8000,
       open: false, // opens browser window automatically
     },

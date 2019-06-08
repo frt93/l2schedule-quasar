@@ -6,8 +6,14 @@ import { axiosInstance } from 'boot/axios';
  */
 export const autologin = async ({ store, ssrContext, next }) => {
   if (process.env.SERVER) {
+    console.log(ssrContext.req.language);
     const cookies = Cookies.parseSSR(ssrContext);
     const token = cookies.get('auth');
+    const lang = cookies.get('lang');
+
+    if (!lang) {
+      await setLang(cookies, ssrContext);
+    }
 
     if (token) {
       await axiosInstance
@@ -78,7 +84,7 @@ export const admin = ({ next, to, from, Router, store, ssrContext }) => {
  * @param store
  */
 const getUser = store => {
-  return store.state.user.user;
+  return store.state.user.instance;
 };
 
 /**
@@ -93,4 +99,10 @@ const authToken = ssrContext => {
   };
 
   return cookies().has('auth');
+};
+
+const setLang = (cookies, ssrContext) => {
+  const lang = ssrContext.req.locale;
+  console.log(lang);
+  cookies.set('lang', lang);
 };
