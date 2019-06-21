@@ -1,5 +1,6 @@
 <script>
 import auth from "mixin/auth";
+import api from "handlers/user/api";
 export default {
   name: "registrationComponent",
   mixins: [auth],
@@ -8,7 +9,7 @@ export default {
     /**
      * Компонуем экземпляр данных авторизации пользователя для отправки на сервер
      */
-    user() {
+    credentials() {
       return {
         username: this.username,
         email: this.email,
@@ -35,19 +36,20 @@ export default {
   },
 
   methods: {
-    submit() {
-      this.$axios
-        .post("/users/create", this.user)
-        .then(res => {
-          this.$store.dispatch("auth/signUp", {
-            user: res.data.user,
-            token: res.data.token,
-            router: this.$router
-          });
-        })
-        .catch(e => {
-          this.handleErrors(e);
-        });
+    async submit() {
+      this.loading.submit = true;
+      const { user, error } = await api.signup(this.credentials);
+      this.loading.submit = false;
+      if (error) {
+        return this.handleErrors(error);
+      }
+      this.$store.commit("user/setUser", user);
+
+      // Проверяем наличие параметра переадресации в текущем роуте.
+      // Если он есть - перенаправляем пользователя на указанный маршрут. В противном случае отправляем на главную страницу
+      const redirectTo = this.$route.params.redirect;
+      const to = redirectTo ? redirectTo : "home";
+      this.$router.replace({ name: to });
     }
   },
 
@@ -74,8 +76,8 @@ export default {
               autocomplete: false,
               maxlength: "16",
               value: this.username,
-              label: "Никнейм",
-              hint: "Максимум 16 символов",
+              label: this.$t("labels.username"),
+              hint: this.$t("hints.auth.username"),
               counter: true,
               error: this.usernameError,
               errorMessage: this.usernameErrorMessage,
@@ -111,8 +113,8 @@ export default {
               autocomplete: false,
               type: "email",
               value: this.email,
-              label: "Email",
-              hint: "На указанный адрес придет письмо для подтверждения",
+              label: this.$t("labels.email"),
+              hint: this.$t("hints.auth.email"),
               error: this.emailError,
               errorMessage: this.emailErrorMessage,
               loading: this.loading.email
@@ -148,8 +150,8 @@ export default {
               maxlength: "30",
               type: this.hidePwd ? "password" : "text",
               value: this.password,
-              label: "Пароль",
-              hint: "От 7 до 30 символов",
+              label: this.$t("labels.password"),
+              hint: this.$t("hints.auth.password"),
               counter: true,
               error: this.passwordError,
               errorMessage: this.passwordErrorMessage
@@ -182,16 +184,31 @@ export default {
             })
           ]
         ),
-        h("q-btn", {
-          class: "float-right q-my-xl",
-          attrs: {
-            label: "Зарегистрироваться",
-            type: "submit",
-            color: this.canSubmit ? "green-6" : "red-6",
-            disabled: !this.canSubmit
+        h(
+          "q-btn",
+          {
+            staticClass: "float-right q-my-xl",
+            class: {
+              loading: this.loading.submit
+            },
+            attrs: {
+              type: "submit",
+              label: this.$t("labels.signup"),
+              color: this.canSubmit ? "green-6" : "red-6",
+              loading: this.loading.submit,
+              disable: !this.canSubmit
+            }
           },
-          props: {}
-        })
+          [
+            h(
+              "div",
+              {
+                slot: "loading"
+              },
+              [this._v(this.$t("labels.sending")), h("q-spinner-dots")]
+            )
+          ]
+        )
       ]
     );
   }

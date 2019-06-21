@@ -32,7 +32,7 @@ module.exports = {
           type: 'run_sql',
           args: {
             sql:
-              'CREATE TABLE "public"."user_metadata"("user_id" serial NOT NULL, "emailVerification" uuid, "repairKey" uuid, "newPassword" text , "passwordConfirmation" text , "createdAt" timestamp with time zone NOT NULL DEFAULT now(), PRIMARY KEY ("user_id") , UNIQUE ("user_id"), UNIQUE("repairKey"));',
+              'CREATE TABLE "public"."user_metadata"("user_id" serial NOT NULL, "emailVerification" uuid, "repairKey" uuid, "language" text NOT NULL DEFAULT "ru", "timezone" text, "createdAt" timestamp with time zone NOT NULL DEFAULT now(), PRIMARY KEY ("user_id") , UNIQUE ("user_id"), UNIQUE("repairKey"));',
           },
         },
         { type: 'add_existing_table_or_view', args: { name: 'user_metadata', schema: 'public' } },

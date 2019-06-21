@@ -10,6 +10,15 @@ app.disable('x-powered-by');
 app.use(bodyParser.json());
 app.use(cors());
 
+router.use((req, res, next) => {
+  // Добавляем языковое свойство в экземпляр ответа сервера. Значение получаем из заголовка запроса, который устанавливается на клиенте
+  res.lang = req.headers['lang'];
+  if (!req.headers['lang']) {
+    res.lang = 'en-us';
+  }
+  next();
+});
+
 // Require API routes
 // const raidbosses = require('./routes/rb');
 // const items = require('./routes/items');

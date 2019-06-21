@@ -6,15 +6,9 @@ export default {
     signup
   },
 
-  data() {
-    return {
-      previous: ""
-    };
-  },
-
   meta() {
     return {
-      title: "Регистрация",
+      title: this.$t("titles.authSignup"),
       titleTemplate: title => `${title} - L2Schedule`
     };
   },

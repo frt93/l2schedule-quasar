@@ -1,5 +1,6 @@
 <script>
 import auth from "mixin/auth";
+import api from "handlers/user/api";
 export default {
   name: "repairPasswordComponent",
   mixins: [auth],
@@ -8,25 +9,34 @@ export default {
       step: 1,
       repairKey: "",
       repairKeyError: false,
-      repairKeyErrorMessage: ""
+      repairKeyErrorMessage: "",
+      user: this.$store.state.user.instance
     };
   },
 
   computed: {
     canNext() {
+      let can;
       if (this.step === 1) {
         this.repairKeyError = false;
         this.repairKeyErrorMessage = this.repairKey = "";
-        return !this.email.length || this.emailError || this.loading.email
-          ? false
-          : true;
+        if (this.user !== null) {
+          /**
+           * Если пользователь авторизован (и скорее всего переадресован со страницы смены пароля в настройках)
+           * значит письмо должно быть отправлено на его почтовый адрес, который автоматически подставится в инпут. Следовательно кнопка должна быть разблокирована для отправки письма
+           */
+
+          return true;
+        } else {
+          return !this.email.length || this.emailError || this.loading.email
+            ? false
+            : true;
+        }
       }
       if (this.step === 2) {
         this.emailError = false;
         this.emailErrorMessage = this.email = "";
-        return !this.repairKey.length ||
-          this.repairKey.length !== 36 ||
-          this.repairKeyError
+        return this.repairKey.length !== 36 || this.repairKeyError
           ? false
           : true;
       }
@@ -54,49 +64,55 @@ export default {
       }
     },
 
-    firstStep() {
-      this.$axios
-        .post("/users/repair", { email: this.email })
-        .then(res => {
-          if (res.data === true) {
-            this.step = 2;
-          }
-        })
-        .catch(e => {
-          this.handleErrors(e);
-        });
+    async firstStep() {
+      const email = this.user !== null ? this.user.email : this.email;
+      this.loading.submit = true;
+      const { response, error } = await api.repairFirstStep(email);
+      this.loading.submit = false;
+
+      if (error) {
+        return this.handleErrors(error);
+      }
+      this.step = 2;
     },
 
-    secondStep() {
-      this.$axios
-        .post("/users/confirm-repair", { key: this.repairKey })
-        .then(res => {
-          this.email = res.data;
-          this.step = 3; // Принудительно инкрементируем шаг, чтобы разблокировать третий этап
-          this.$refs.stepper.next();
-        })
-        .catch(e => {
-          this.handleErrors(e);
-        });
+    async secondStep() {
+      this.loading.submit = true;
+      const { email, error } = await api.repairSecondStep(this.repairKey);
+      this.loading.submit = false;
+
+      if (error) {
+        return this.handleErrors(error);
+      }
+      this.email = email;
+      this.step = 3;
+      this.$refs.stepper.next();
     },
 
-    lastStep() {
-      this.$axios
-        .post("/users/repair/change-password", {
-          email: this.email,
-          password: this.password,
-          key: this.repairKey
-        })
-        .then(res => {
-          this.$router.push({ name: "signin" });
-        })
-        .catch(e => {
-          this.handleErrors(e);
-        });
+    async lastStep() {
+      this.loading.submit = true;
+
+      const credentials = {
+        email: this.email,
+        password: this.password,
+        key: this.repairKey
+      };
+      const { response, success, error } = await api.repairThirdStep(
+        credentials
+      );
+      this.loading.submit = false;
+
+      if (error) {
+        return this.handleErrors(error);
+      }
+
+      const redirectTo = this.user !== null ? "home" : "signin";
+      this.$router.push({ name: redirectTo });
+      this.successNotify(success);
     },
 
     /**
-     * Отрисовка первого шага
+     * Рендер первого шага
      */
     __QStep1(h) {
       return h(
@@ -112,7 +128,7 @@ export default {
         },
         [
           this._v(
-            "Для запуска процесса восстановления доступа к своему аккаунту введите email адрес, который вы указывали при регистрации. На него будет отправлено письмо с ключом подтверждения операции"
+            this.$t(this.user ? "labels.repair.user1" : "labels.repair.guest1")
           ),
           h(
             "q-input",
@@ -120,8 +136,9 @@ export default {
               attrs: {
                 autofocus: true,
                 autocomplete: false,
+                readonly: this.user !== null ? true : false,
                 placeholder: "youremail@adress.com",
-                value: this.email,
+                value: this.user !== null ? this.user.email : this.email,
                 error: this.emailError,
                 errorMessage: this.emailErrorMessage,
                 loading: this.loading.email
@@ -154,7 +171,7 @@ export default {
     },
 
     /**
-     * Отрисовка второго шага
+     * Рендер второго шага
      */
     __QStep2(h) {
       return h(
@@ -171,9 +188,8 @@ export default {
           }
         },
         [
-          this._v(
-            "Введите ключ подтверждения из письма, которое пришло на ваш электронный адрес"
-          ),
+          this._v(this.$t("labels.repair.2")),
+          ,
           h(
             "q-input",
             {
@@ -181,7 +197,10 @@ export default {
                 autofocus: true,
                 autocomplete: false,
                 maxlength: 36,
-                placeholder: "Например, 133caea8-c3ad-490c-b70f-8eb0f4c29639",
+                counter: true,
+                placeholder: `${this.$t(
+                  "phrases.eg"
+                )}, 133caea8-c3ad-490c-b70f-8eb0f4c29639`,
                 value: this.repairKey,
                 error: this.repairKeyError,
                 errorMessage: this.repairKeyErrorMessage
@@ -196,12 +215,6 @@ export default {
             },
             [
               [
-                h("q-spinner-puff", {
-                  attrs: {
-                    color: this.repairKeyError ? "negative" : "primary"
-                  },
-                  slot: "loading"
-                }),
                 h("q-icon", {
                   attrs: {
                     name: "fas fa-key"
@@ -216,7 +229,7 @@ export default {
     },
 
     /**
-     * Отрисовка третьего и последнего шага
+     * Рендер третьего и последнего шага
      */
     __QStep3(h) {
       return h(
@@ -231,9 +244,7 @@ export default {
           }
         },
         [
-          this._v(
-            "Теперь можете указать ваш новый пароль. После подтверждения вы будете перенаправлены на страницу авторизации"
-          ),
+          this._v(this.$t("labels.repair.3")),
           h(
             "q-input",
             {
@@ -243,7 +254,7 @@ export default {
                 type: this.hidePwd ? "password" : "text",
                 maxlength: 30,
                 counter: true,
-                hint: "От 7 до 30 символов",
+                hint: this.$t("hints.auth.password"),
                 value: this.password,
                 error: this.passwordError,
                 errorMessage: this.passwordErrorMessage
@@ -257,12 +268,6 @@ export default {
             },
             [
               [
-                h("q-spinner-puff", {
-                  attrs: {
-                    color: this.passwordError ? "negative" : "primary"
-                  },
-                  slot: "loading"
-                }),
                 h("q-icon", {
                   staticClass: "cursor-pointer q-ml-sm",
                   attrs: {
@@ -290,23 +295,42 @@ export default {
     },
 
     /**
-     * Отрисовка слота навигации
+     * Рендер слота навигации
      */
     __navigationSlot(h) {
       let buttons = [
-        h("q-btn", {
-          staticClass: "float-right",
-          attrs: {
-            color: this.canNext ? "green-6" : "red-6",
-            label: this.step === 3 ? "Подтвердить" : "Далее",
-            disabled: !this.canNext
-          },
-          on: {
-            click: () => {
-              this.nextStep();
+        h(
+          "q-btn",
+          {
+            staticClass: "float-right",
+            class: {
+              loading: this.loading.submit
+            },
+            attrs: {
+              color: this.canNext ? "green-6" : "red-6",
+              label:
+                this.step === 3
+                  ? this.$t("labels.save")
+                  : this.$t("labels.next"),
+              loading: this.loading.submit,
+              disable: !this.canNext
+            },
+            on: {
+              click: () => {
+                this.nextStep();
+              }
             }
-          }
-        })
+          },
+          [
+            h(
+              "div",
+              {
+                slot: "loading"
+              },
+              [this._v(this.$t("labels.sending")), h("q-spinner-dots")]
+            )
+          ]
+        )
       ];
 
       if (this.step > 1) {
@@ -316,7 +340,7 @@ export default {
             attrs: {
               flat: true,
               color: "red-6",
-              label: "Назад"
+              label: this.$t("labels.back")
             },
             on: {
               click: () => {
@@ -333,7 +357,7 @@ export default {
             staticClass: "float-left",
             attrs: {
               color: "green-6",
-              label: "Уже есть ключ?"
+              label: this.$t("labels.haveKey")
             },
             on: {
               click: () => {
@@ -353,6 +377,7 @@ export default {
       "q-stepper",
       {
         staticClass: "q-pb-xl",
+        ref: "stepper",
         attrs: {
           flat: true,
           contracted: true,

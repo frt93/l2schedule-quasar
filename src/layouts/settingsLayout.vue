@@ -1,67 +1,120 @@
-<template>
-  <q-layout view="lHh lpR fFf">
-    <mainheader></mainheader>
-    <q-page-container>
-      <q-page>
-        <div class="float-left q-mr-xl" style="min-width: 250px; height: 100vh">
-          <q-list bordered separator>
-            <q-item :to="{name:'settings/account'}" replace v-ripple>
-              <q-item-section>Учетная запись</q-item-section>
-            </q-item>
-
-            <q-item :to="{name:'settings/password'}" replace v-ripple>
-              <q-item-section>
-                <q-item-label>Пароль</q-item-label>
-              </q-item-section>
-            </q-item>
-
-            <q-item clickable v-ripple>
-              <q-item-section>
-                <q-item-label overline>OVERLINE</q-item-label>
-                <q-item-label>Item with caption</q-item-label>
-              </q-item-section>
-            </q-item>
-          </q-list>
-        </div>
-
-        <router-view :userInstance="user"></router-view>
-      </q-page>
-    </q-page-container>
-  </q-layout>
-</template>
 
 
 <script>
 import mainheader from "component/ui/header/main";
-import { mapState } from "vuex";
+import { mapState, mapGetters } from "vuex";
 export default {
   name: "settingsLayout",
   components: { mainheader },
+
   data() {
     return {};
   },
 
   computed: {
     ...mapState({
-      user: state => state.user.instance
+      user: state => state.user.instance,
+      lang: state => state.user.language
+    }),
+
+    ...mapGetters({
+      timezone: "user/timezone",
+      timezoneList: "user/timezoneList"
     })
   },
 
   render(h) {
     return h("q-layout", { props: { view: "lHh lpR fFf" } }, [
       h(mainheader),
-      h("q-page-container", [h("router-view")])
+      h("q-page-container", [
+        h("q-page", [
+          h(
+            "div",
+            {
+              staticClass: "float-left window-height q-mr-xl",
+              style: {
+                "min-width": "250px"
+              }
+            },
+            [
+              h(
+                "q-list",
+                {
+                  props: {
+                    bordered: true,
+                    separator: true
+                  }
+                },
+                [
+                  h(
+                    "q-item",
+                    {
+                      props: {
+                        to: { name: "settings/account" },
+                        replace: true,
+                        "v-ripple": true
+                      }
+                    },
+                    [
+                      h("q-item-section", [
+                        h("q-item-label"),
+                        this.$t("tabs.settings.account")
+                      ])
+                    ]
+                  ),
+                  h(
+                    "q-item",
+                    {
+                      props: {
+                        to: { name: "settings/password" },
+                        replace: true,
+                        "v-ripple": true
+                      }
+                    },
+                    [
+                      h("q-item-section", [
+                        h("q-item-label"),
+                        this.$t("tabs.settings.password")
+                      ])
+                    ]
+                  ),
+                  h(
+                    "q-item",
+                    {
+                      props: {
+                        to: { name: "settings/safety" },
+                        replace: true,
+                        "v-ripple": true
+                      }
+                    },
+                    [
+                      h("q-item-section", [
+                        h("q-item-label"),
+                        this.$t("tabs.settings.safety")
+                      ])
+                    ]
+                  )
+                ]
+              )
+            ]
+          ),
+          h("router-view", {
+            attrs: {
+              userInstance: this.user,
+              lang: this.lang,
+              timezoneList: this.timezoneList,
+              timezone: this.timezone
+            }
+          })
+        ])
+      ])
     ]);
   }
 };
 </script>
 
 <style lang="stylus">
-.inputs .q-field {
+.form .q-field {
   margin-bottom: $spaces.md.y;
-}
-
-.q-btn.submit .q-spinner {
-  margin-left: $spaces.sm.x;
 }
 </style>

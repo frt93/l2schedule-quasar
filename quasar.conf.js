@@ -23,6 +23,7 @@ module.exports = function(ctx) {
       // all: true, // --- includes everything; for dev only!
 
       components: [
+        'QNoSsr',
         'QLayout',
         'QHeader',
         'QPageContainer',
@@ -36,6 +37,7 @@ module.exports = function(ctx) {
         'QIcon',
         'QCard',
         'QCardSection',
+        'QCardActions',
         'QSpace',
         'QList',
         'QItem',
@@ -44,22 +46,24 @@ module.exports = function(ctx) {
         'QForm',
         'QInput',
         'QSelect',
+        'QChip',
         'QAvatar',
         'QSeparator',
         'QStepper',
         'QStep',
         'QStepperNavigation',
+        'QDialog',
         'QSpinnerPuff',
         'QSpinnerDots',
       ],
 
-      directives: ['Ripple'],
+      directives: ['Ripple', 'ClosePopup'],
 
       // Quasar plugins
-      plugins: ['Notify', 'Cookies', 'Meta'],
+      plugins: ['Notify', 'Cookies', 'Dialog', 'Meta'],
 
       iconSet: 'fontawesome-v5',
-      lang: 'en-us', // Quasar language
+      lang: 'ru', // Quasar language
     },
 
     supportIE: false,
@@ -80,6 +84,8 @@ module.exports = function(ctx) {
           store: path.resolve(__dirname, './src/store'),
           boot: path.resolve(__dirname, './src/boot'),
           mixin: path.resolve(__dirname, './src/mixins'),
+          lang: path.resolve(__dirname, './src/lang'),
+          handlers: path.resolve(__dirname, './src/handlers'),
         };
       },
     },

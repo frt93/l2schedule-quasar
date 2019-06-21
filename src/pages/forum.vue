@@ -1,17 +1,12 @@
 <template>
-  <div>
-    forum
-    {{ $store.state.lang.lang.loginHint }}
-  </div>
+  <div>forum</div>
 </template>
 
 <script>
 export default {
   meta() {
     return {
-      // this accesses the "title" property in your Vue "data";
-      // whenever "title" prop changes, your meta will automatically update
-      title: "Форум",
+      title: this.$t("titles.forum"),
       titleTemplate: title => `${title} - L2Schedule`
     };
   }

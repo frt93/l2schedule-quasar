@@ -1,16 +1,16 @@
 <script>
 export default {
   name: "userDropdownMenu",
-  props: {
-    user: {
-      type: Object,
-      required: true
-    }
+  props: ["user"],
+  data() {
+    return {
+      uu: null
+    };
   },
 
   methods: {
     logout() {
-      this.$store.dispatch("auth/logout", this.$router);
+      this.$store.dispatch("user/logout", this.$router);
     }
   },
 
@@ -32,14 +32,16 @@ export default {
           h(
             "q-item",
             {
-              class: this.user.metadata.emailVerification
-                ? "bg-red-6 menu-link"
-                : null,
+              class:
+                typeof this.user === "object" &&
+                this.user.metadata.emailVerification
+                  ? "bg-red-6 menu-link"
+                  : null,
               attrs: {
                 to: { name: "settings" }
               }
             },
-            [h("q-item-section", "Настройки")]
+            [h("q-item-section", this.$t("labels.settings"))]
           ),
           h("q-separator"),
           h("q-item", { props: { clickable: true } }, [
@@ -52,7 +54,7 @@ export default {
                   }
                 }
               },
-              "Log Out"
+              this.$t("labels.logout")
             )
           ])
         ])

@@ -1,4 +1,5 @@
 import { debounce } from 'quasar';
+import api from 'handlers/user/api';
 export default {
   data() {
     return {
@@ -11,15 +12,18 @@ export default {
       usernameError: false,
       emailError: false,
       passwordError: false,
+      newPasswordError: false,
 
       usernameErrorMessage: '',
       emailErrorMessage: '',
       passwordErrorMessage: '',
+      newPasswordErrorMessage: '',
 
       loading: {
         username: false,
         email: false,
         repair: false,
+        submit: false,
       },
     };
   },
@@ -46,7 +50,7 @@ export default {
         // Выражение ищет пробелы в никнейме
         const spaces = /\s/g.test(username);
         if (spaces) {
-          message += 'Пробелы в никнейме запрещены\n';
+          message += `${this.$t('errors.spaces')}\n`;
         }
 
         // Запрещенные символы
@@ -62,9 +66,9 @@ export default {
 
         // Меньше трех (т.е. 2 символа) так как в строку символ добавляется с пробелом
         if (charsToRemove.length && charsToRemove.length < 3)
-          message += `Символ ${charsToRemove}запрещен`;
+          message += `${this.$t('errors.char')} ${charsToRemove}`;
         else if (charsToRemove.length >= 3) {
-          message += `Символы ${charsToRemove}запрещены`;
+          message += `${this.$t('errors.chars')} ${charsToRemove}`;
         }
 
         if (spaces || charsToRemove.length) {
@@ -95,12 +99,12 @@ export default {
         let message = '';
         const spaces = /\s/g.test(email);
         if (spaces) {
-          message += 'Пробелы запрещены\n';
+          message += `${this.$t('errors.spaces')}\n`;
         }
 
         const pattern = /@+\w{1,}\.\w{2,}/g.test(email);
         if (!pattern) {
-          message += 'Неверный формат email адреса';
+          message += this.$t('errors.wrongEmail');
         }
 
         if (spaces || !pattern) {
@@ -117,17 +121,28 @@ export default {
     /**
      * Валидируем пароль пользователя. Запрещены только пробелы
      *
-     * @param {String} password   Указанный пользователем пароль
+     * @param {String} password      Указанный пользователем пароль
+     * @param {String} newPassword   Новый пароль пароль пользователя (передается в компоненте смены пароля)
      */
-    validatePassword(password) {
+    validatePassword(password, newPassword) {
       this.passwordError = false;
       this.passwordErrorMessage = '';
+
+      if (newPassword) {
+        this.newPasswordError = false;
+        this.newPasswordErrorMessage = '';
+      }
 
       let message = '';
       const spaces = /\s/g.test(password);
 
       if (spaces) {
-        message += 'Пробелы запрещены';
+        message += `${this.$t('errors.spaces')}\n`;
+        if (newPassword) {
+          this.newPasswordError = true;
+          this.newPasswordErrorMessage = message;
+          return;
+        }
         this.passwordError = true;
         this.passwordErrorMessage = message;
       }
@@ -152,10 +167,9 @@ export default {
      *
      * @param {String} username   Указанный никнейм
      */
-    checkUsername(username) {
-      this.$axios.post('/users/check/username', { username }).catch(e => {
-        this.handleErrors(e);
-      });
+    async checkUsername(username) {
+      const { error } = await api.checkUsername(username);
+      if (error) this.handleErrors(error);
     },
 
     /**
@@ -163,10 +177,9 @@ export default {
      *
      * @param {String} email    Указанный адрес электронной почты
      */
-    checkEmail(email) {
-      this.$axios.post('/users/check/email', { email }).catch(e => {
-        this.handleErrors(e);
-      });
+    async checkEmail(email) {
+      const { error } = await api.checkEmail(email);
+      if (error) this.handleErrors(error);
     },
 
     /**
@@ -196,9 +209,7 @@ export default {
 
       // Сгенерированные сервером/браузером ошибки
       if (e.message === 'Network Error') {
-        this.errorNotify(
-          'Не удалось связаться с сервером. Проверьте свое соединение с интернетом и попробуйте снова'
-        );
+        this.errorNotify(this.$t('errors.network'));
       }
     },
 

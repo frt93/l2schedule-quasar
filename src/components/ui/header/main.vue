@@ -1,5 +1,5 @@
 <script>
-import { mapState, mapGetters } from "vuex";
+import { mapState } from "vuex";
 import userMenu from "component/ui/userMenu";
 export default {
   name: "headerComponent",
@@ -13,41 +13,42 @@ export default {
 
     __routeTabs() {
       const tabs = [
-        { to: "/", label: "Главная" },
-        { to: "/rb", label: "Рейдовые боссы" },
-        { to: "/forum", label: "Форум" }
+        { to: "/", label: this.$t("tabs.routes.homepage") },
+        { to: "/rb", label: this.$t("tabs.routes.rb") },
+        { to: "/forum", label: this.$t("tabs.routes.forum") }
       ];
 
       if (!this.user)
         tabs.push(
-          { to: "/auth/signup", label: "Регистрация" },
-          { to: "/auth/signin", label: "Логин" }
+          { to: "/auth/signup", label: this.$t("tabs.routes.signup") },
+          { to: "/auth/signin", label: this.$t("tabs.routes.signin") }
         );
 
       return tabs;
     }
   },
-
   methods: {
     __getRouteTabs(h) {
-      return h(
-        "q-tabs",
-        { props: { align: "left" } },
+      return h("div", [
+        h(
+          "q-tabs",
+          { props: { align: "left" } },
 
-        this.__routeTabs.map(function(tab) {
-          return h(
-            "q-route-tab",
-            {
-              attrs: {
-                to: tab.to,
-                exact: true,
-                ripple: true
-              }
-            },
-            tab.label
-          );
-        })
-      );
+          this.__routeTabs.map(function(tab) {
+            return h(
+              "q-route-tab",
+              {
+                attrs: {
+                  to: tab.to,
+                  exact: true,
+                  ripple: true
+                }
+              },
+              tab.label
+            );
+          })
+        )
+      ]);
     },
 
     __getRightTabs(h) {

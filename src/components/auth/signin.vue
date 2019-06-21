@@ -1,5 +1,6 @@
 <script>
 import auth from "mixin/auth";
+import api from "handlers/user/api";
 export default {
   name: "loginComponent",
   mixins: [auth],
@@ -40,19 +41,20 @@ export default {
     }
   },
   methods: {
-    submit() {
-      this.$axios
-        .post("/users/signin", this.credentials)
-        .then(res => {
-          this.$store.dispatch("auth/signIn", {
-            user: res.data.user,
-            token: res.data.token,
-            router: this.$router
-          });
-        })
-        .catch(e => {
-          this.handleErrors(e);
-        });
+    async submit() {
+      this.loading.submit = true;
+      const { user, error } = await api.signin(this.credentials);
+      this.loading.submit = false;
+      if (error) {
+        return this.handleErrors(error);
+      }
+      this.$store.dispatch("user/signin", user);
+
+      // Проверяем наличие параметра переадресации в текущем роуте.
+      // Если он есть - перенаправляем пользователя на указанный маршрут. В противном случае отправляем на главную страницу
+      const redirectTo = this.$route.params.redirect;
+      const to = redirectTo ? redirectTo : "home";
+      this.$router.replace({ name: to });
     }
   },
 
@@ -99,8 +101,7 @@ export default {
                   autofocus: true,
                   autocomplete: false,
                   value: this.login,
-                  label: "Логин",
-                  hint: "Ваш никнейм или email адрес",
+                  label: this.$t("labels.login"),
                   error: this.usernameError,
                   errorMessage: this.usernameErrorMessage,
                   loading: this.loading.username
@@ -133,8 +134,7 @@ export default {
                   key: "email",
                   autocomplete: false,
                   value: this.login,
-                  label: "Логин",
-                  hint: "Ваш никнейм или email адрес",
+                  label: this.$t("labels.login"),
                   error: this.emailError,
                   errorMessage: this.emailErrorMessage,
                   loading: this.loading.email
@@ -168,7 +168,7 @@ export default {
               maxlength: "30",
               type: this.hidePwd ? "password" : "text",
               value: this.password,
-              label: "Пароль",
+              label: this.$t("labels.password"),
               error: this.passwordError,
               errorMessage: this.passwordErrorMessage
             },
@@ -204,19 +204,35 @@ export default {
           ]
         ),
         h("div", { staticClass: "q-my-md" }, [
+          h(
+            "q-btn",
+            {
+              staticClass: "float-right",
+              class: {
+                loading: this.loading.submit
+              },
+              attrs: {
+                type: "submit",
+                label: this.$t("labels.signin"),
+                color: this.canSubmit ? "green-6" : "red-6",
+                loading: this.loading.submit,
+                disable: !this.canSubmit
+              }
+            },
+            [
+              h(
+                "div",
+                {
+                  slot: "loading"
+                },
+                [this._v(this.$t("labels.sending")), h("q-spinner-dots")]
+              )
+            ]
+          ),
           h("q-btn", {
-            class: "float-right",
+            staticClass: "float-left",
             attrs: {
-              label: "Войти",
-              type: "submit",
-              color: this.canSubmit ? "green-6" : "red-6",
-              disabled: !this.canSubmit
-            }
-          }),
-          h("q-btn", {
-            class: "float-left",
-            attrs: {
-              label: "Забыли пароль?",
+              label: this.$t("labels.forgot"),
               color: "yellow-7"
             },
             on: {

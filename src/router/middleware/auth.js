@@ -1,36 +1,4 @@
 import { Cookies } from 'quasar';
-import { axiosInstance } from 'boot/axios';
-
-/**
- * Пробуем авторизовать пользователя при запуске приложения
- */
-export const autologin = async ({ store, ssrContext, next }) => {
-  if (process.env.SERVER) {
-    console.log(ssrContext.req.language);
-    const cookies = Cookies.parseSSR(ssrContext);
-    const token = cookies.get('auth');
-    const lang = cookies.get('lang');
-
-    if (!lang) {
-      await setLang(cookies, ssrContext);
-    }
-
-    if (token) {
-      await axiosInstance
-        .post('/users/authorize', { token })
-        .then(res => {
-          store.dispatch('auth/authorize', { user: res.data, token });
-        })
-        .catch(e => {
-          store.commit('user/setUser', null, { root: true });
-        });
-    } else {
-      store.commit('user/setUser', null, { root: true });
-    }
-  }
-
-  return next();
-};
 
 /**
  * Пропускаем только гостей
@@ -38,9 +6,22 @@ export const autologin = async ({ store, ssrContext, next }) => {
 export const guest = ({ next, to, from, Router, store, ssrContext }) => {
   const token = authToken(ssrContext);
   const user = getUser(store);
-
-  if (user !== null || token) {
-    Router.replace({ name: 'home' });
+  if (from.params.redirect) {
+    /**
+     * Если пользователь попал на роут "для гостей" со страницы, требующей авторизации - передаем параметр редиректа,
+     * который он получил во время редиректа на страницу авторизации (в middleware user, описанном ниже), при переходе между другими "гостевыми роутами".
+     * Например: пользователь пытается перейти на страницу, требующую авторизацию и переадресован на страницу логина. Но у него нет аккаунта и он переходит на страницу регистрации.
+     * Вот тут мы и передаем параметр редиректа на потребовавшую авторизацию страницу далее. И в итоге после успешной регистрации он будет переадресован туда, куда пытался попасть в guest моде
+     */
+    to.params.redirect = from.params.redirect;
+  }
+  if (token) {
+    return next({
+      name: from.name || 'home',
+      params: {
+        redirect: to.name,
+      },
+    });
   }
 
   return next();
@@ -53,8 +34,8 @@ export const user = ({ next, to, from, Router, store, ssrContext }) => {
   const token = authToken(ssrContext);
   const user = getUser(store);
 
-  if (user === null || !token) {
-    next({
+  if (!token) {
+    return next({
       name: 'signin',
       params: {
         redirect: to.name,
@@ -99,10 +80,4 @@ const authToken = ssrContext => {
   };
 
   return cookies().has('auth');
-};
-
-const setLang = (cookies, ssrContext) => {
-  const lang = ssrContext.req.locale;
-  console.log(lang);
-  cookies.set('lang', lang);
 };

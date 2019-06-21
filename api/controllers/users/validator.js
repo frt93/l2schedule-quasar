@@ -1,3 +1,5 @@
+const messages = require('./lang');
+
 /**
  * Генерируем ошибки
  *
@@ -9,41 +11,38 @@ module.exports.throwErrors = (name, res, params) => {
   if (name === 'Empty credentials') {
     return res.status(400).send({
       type: 'Empty credentials',
-      message: 'Вы неполностью заполнили форму',
+      message: messages(res.lang).errors[name],
     });
   }
   if (name === 'Username not found') {
-    return {
+    return res.status(404).send({
       type: 'usernameError',
       msgType: 'usernameErrorMessage',
-      message: `Пользователь с никнеймом ${params} не найден в базе данных`,
-    };
+      message: messages(res.lang).errors[name](params), // Тут возвращается функция
+    });
   }
 
   if (name === 'Username already exists') {
     return res.status(403).send({
       type: 'usernameError',
       msgType: 'usernameErrorMessage',
-      message: `Никнейм ${params} уже используется другим пользователем`,
+      message: messages(res.lang).errors[name](params), // Тут возвращается функция
     });
   }
 
   if (name === 'Email not found') {
-    const error = {
+    return res.status(404).send({
       type: 'emailError',
       msgType: 'emailErrorMessage',
-      message: `Пользователь с email-адресом ${params} не найден в базе данных`,
-    };
-    if (res) return res.status(404).send(error);
-
-    return error;
+      message: messages(res.lang).errors[name](params),
+    });
   }
 
   if (name === 'Email already exists') {
     return res.status(403).send({
       type: 'emailError',
       msgType: 'emailErrorMessage',
-      message: `Email ${params} уже используется другим пользователем`,
+      message: messages(res.lang).errors[name](params),
     });
   }
 
@@ -51,7 +50,7 @@ module.exports.throwErrors = (name, res, params) => {
     return res.status(404).send({
       type: 'repairKeyError',
       msgType: 'repairKeyErrorMessage',
-      message: 'Указанный ключ не найден в базе данных',
+      message: messages(res.lang).errors[name],
     });
   }
 
@@ -59,7 +58,23 @@ module.exports.throwErrors = (name, res, params) => {
     return res.status(400).send({
       type: 'repairKeyError',
       msgType: 'repairKeyErrorMessage',
-      message: 'Неверный формат ключа подтверждения',
+      message: messages(res.lang).errors[name],
+    });
+  }
+
+  if (name === 'Wrong email confirm key') {
+    return res.status(400).send({
+      type: 'confirmKeyError',
+      msgType: 'confirmKeyErrorMessage',
+      message: messages(res.lang).errors[name],
+    });
+  }
+
+  if (name === 'Email confirm key not found') {
+    return res.status(404).send({
+      type: 'confirmKeyError',
+      msgType: 'confirmKeyErrorMessage',
+      message: messages(res.lang).errors[name],
     });
   }
 
@@ -67,13 +82,19 @@ module.exports.throwErrors = (name, res, params) => {
     return res.status(401).send({
       type: 'passwordError',
       msgType: 'passwordErrorMessage',
-      message: 'Неверный пароль',
+      message: messages(res.lang).errors[name],
     });
   }
 
   if (name === 'Password change failed') {
     return res.status(500).send({
-      message: 'Cмена пароля не удалась. Попробуйте снова',
+      message: messages(res.lang).errors[name],
+    });
+  }
+
+  if (name === 'Constraint violation') {
+    return res.status(500).send({
+      message: messages(res.lang).errors[name],
     });
   }
 };
@@ -82,16 +103,15 @@ module.exports.throwErrors = (name, res, params) => {
  * Обрабатываем ошибки, возникшие в результате запросов к GraphQL движку
  *
  * @param {Error} e           Экземпляр ошибки
+ * @param req                 Объект запроса сервера
  * @param res                 Объект ответа сервера
  */
 module.exports.handleErrors = (e, res) => {
-  let error = {};
-
   // Ошибка подключения к hasura
   if (e.name === 'FetchError') {
     return res.status(503).send({
       type: 'Connection Error',
-      message: 'Не удалось связаться с базой данных. Попробуйте снова',
+      message: messages(res.lang).errors[name],
     });
   }
 
@@ -101,6 +121,8 @@ module.exports.handleErrors = (e, res) => {
     e.message.indexOf('repairKey:') !== -1
   ) {
     return this.throwErrors('Wrong repair key', res);
+  } else if (e.message.indexOf('duplicate key value violates unique constraint') !== 1) {
+    return this.throwErrors('Constraint violation', res);
   } else {
     res.status(500).send(e);
   }
@@ -117,14 +139,10 @@ module.exports.validateUsername = (username, res) => {
     charsToRemove = '',
     chars;
 
-  if (!username) {
-    message = 'Укажите никнейм';
-  }
-
   // Выражение ищет пробелы в никнейме
   const spaces = /\s/g.test(username);
   if (spaces) {
-    message += 'Пробелы в никнейме запрещены\n';
+    message += messages(res.lang).errors['Username spaces'];
   }
 
   // Запрещенные символы
@@ -140,9 +158,9 @@ module.exports.validateUsername = (username, res) => {
 
   // Меньше трех (т.е. 2 символа) так как в строку символ добавляется с пробелом
   if (charsToRemove.length && charsToRemove.length < 3)
-    message += `Символ ${charsToRemove}запрещен`;
+    message += messages(res.lang).errors['Prohibited char'](charsToRemove);
   else if (charsToRemove.length >= 3) {
-    message += `Символы ${charsToRemove}запрещены`;
+    message += messages(res.lang).errors['Prohibited chars'](charsToRemove);
   }
 
   if (message.length) {
@@ -166,18 +184,14 @@ module.exports.validateUsername = (username, res) => {
 module.exports.validateEmail = (email, res) => {
   let message = '';
 
-  if (!email) {
-    message = 'Укажите email адрес';
-  }
-
   const spaces = /\s/g.test(email);
   if (spaces) {
-    message += 'Пробелы запрещены\n';
+    message += messages(res.lang).errors['Email spaces'];
   }
 
   const pattern = /@+\w{1,}\.\w{2,}/g.test(email);
   if (!pattern) {
-    message += 'Неверный формат email адреса';
+    message += messages(res.lang).errors['Wrong email pattern'];
   }
 
   if (message.length) {
@@ -201,20 +215,16 @@ module.exports.validateEmail = (email, res) => {
 module.exports.validatePassword = (password, res) => {
   let message = '';
 
-  if (!password) {
-    message = 'Укажите пароль';
-  }
-
   const spaces = /\s/g.test(password);
 
   if (password.length < 7) {
-    message += 'Пароль должен состоять минимум из 7 символов\n';
+    message += messages(res.lang).errors['Password min length'];
   }
   if (password.length > 30) {
-    message += 'Пароль должен состоять максимум из 30 символов\n';
+    message += messages(res.lang).errors['Password max length'];
   }
   if (spaces) {
-    message += 'Пробелы запрещены';
+    message += messages(res.lang).errors['Password spaces'];
   }
   if (message.length) {
     res.status(400).send({
@@ -232,7 +242,7 @@ module.exports.validatePassword = (password, res) => {
  * Валидируем ключ подтверждения для восстановления пользователю доступа к аккаунту.
  * Эта проверка проводится на случай, если по каким-то причинам аналогичная валидация на клиенте не сработала или ее удалось обойти
  *
- * @param {String} key        Указанный пользователем никнейм
+ * @param {String} key        Указанный пользователем ключ
  * @param res                 Объект ответа сервера
  */
 module.exports.validateRepairKey = (key, res) => {
@@ -246,55 +256,15 @@ module.exports.validateRepairKey = (key, res) => {
 };
 
 /**
- * Проверяем переданный объект пользователя (email, username, password или все вместе) на наличие нарушений правил валидации.
- * Эта проверка проводится на случай, если по каким-то причинам аналогичная валидация на клиенте не сработала или ее удалось обойти
+ * Валидируем ключ подтверждения email адреса пользователя.
  *
- *  @param {String} user              Экземпляр пользователя
- *  @param {String|Object} required   Поля, которые должны быть заполнены
- *  @param res                        Объект ответа сервера
+ * @param {String} key        Указанный пользователем никнейм
+ * @param res                 Объект ответа сервера
  */
-module.exports.validateUser = (user, required, res) => {
-  let error = {},
-    usernameError,
-    emailError,
-    passwordError;
-
-  // Следующие конструкции if проверяют какие данные переданы для валидации, т.к. наборы эти данных при передачи с разных роутов отличаются
-  if (required === 'all' || required.username) {
-    usernameError = this.validateUsername(user.username);
-  }
-  if (required === 'all' || required.email) {
-    emailError = this.validateEmail(user.email);
-  }
-
-  if (required === 'all' || required.password) {
-    passwordError = this.validatePassword(user.password);
-  }
-
-  if (usernameError) {
-    error = {
-      type: 'usernameError',
-      msgType: 'usernameErrorMessage',
-      message: usernameError,
-    };
-  }
-  if (emailError) {
-    error = {
-      type: 'emailError',
-      msgType: 'emailErrorMessage',
-      message: emailError,
-    };
-  }
-  if (passwordError) {
-    error = {
-      type: 'passwordError',
-      msgType: 'passwordErrorMessage',
-      message: passwordError,
-    };
-  }
-
-  if (usernameError || emailError || passwordError) {
-    res.status(400).send(error);
+module.exports.validateEmailConfirmationKey = (key, res) => {
+  const pattern = /[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}/gi.test(key);
+  if (!pattern) {
+    this.throwErrors('Wrong email confirm key', res);
     return false;
   }
 

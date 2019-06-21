@@ -1,4 +1,4 @@
-import { guest, user, autologin, admin } from './middleware/auth';
+import { guest, user, admin } from './middleware/auth';
 
 const routes = [
   {
@@ -9,19 +9,17 @@ const routes = [
         path: '',
         name: 'home',
         component: () => import('pages/Index.vue'),
-        meta: { middleware: [autologin] },
       },
       {
         path: 'rb',
         name: 'rb',
         component: () => import('pages/rb.vue'),
-        meta: { middleware: [autologin, user] },
+        meta: { middleware: [user] },
       },
       {
         path: 'forum',
         name: 'forum',
         component: () => import('pages/forum.vue'),
-        meta: { middleware: [autologin] },
       },
     ],
   },
@@ -45,7 +43,11 @@ const routes = [
         path: 'repair',
         name: 'repair',
         component: () => import('pages/auth/repair.vue'),
-        meta: { middleware: [guest] },
+      },
+      {
+        path: 'confirm',
+        name: 'auth/confirm',
+        component: () => import('pages/auth/confirm.vue'),
       },
     ],
   },
@@ -62,13 +64,19 @@ const routes = [
         path: 'account',
         name: 'settings/account',
         component: () => import('pages/settings/account.vue'),
-        meta: { middleware: [autologin, user] },
+        meta: { middleware: [user], needAuth: true },
       },
       {
         path: 'password',
         name: 'settings/password',
         component: () => import('pages/settings/password.vue'),
-        meta: { middleware: [autologin, user] },
+        meta: { middleware: [user], needAuth: true },
+      },
+      {
+        path: 'safety',
+        name: 'settings/safety',
+        component: () => import('pages/settings/safety.vue'),
+        meta: { middleware: [user], needAuth: true },
       },
     ],
   },

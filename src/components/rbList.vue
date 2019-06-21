@@ -54,7 +54,7 @@ export default {
   },
   computed: {
     rb() {
-      return this.$store.state.rb.allRaidBosses;
+      return [];
     }
   },
   methods: {

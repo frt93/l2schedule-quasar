@@ -4,7 +4,8 @@ const { GraphQLClient } = require('api/config/graphql'),
   { jwtKey } = require('api/config/auth'),
   { replaceSpaces } = require('api/utils/filters'),
   validator = require('./validator'),
-  helpers = require('./helpers');
+  helpers = require('./helpers'),
+  messages = require('./lang');
 
 /**
  * Создаем нового пользователя.
@@ -72,20 +73,19 @@ module.exports.signin = async (req, res) => {
   if (credentials.username) {
     // Если пользователь авторизуется с помощью никнейма
     query = { key: 'username', value: credentials.username };
-    error = validator.throwErrors('Username not found', null, credentials.username);
+    error = { name: 'Username not found', params: credentials.username };
   } else if (credentials.email) {
     // Если пользователь авторизуется с помощью email-адреса
     query = { key: 'email', value: credentials.email };
-    error = validator.throwErrors('Email not found', null, credentials.email);
+    error = { name: 'Email not found', params: credentials.email };
   }
 
   // Пытаемся получить экземпляр пользователя из базы данных
-  user = await helpers.findUser(query.key, query.value);
+  user = await helpers.findUser(query.key, query.value, res);
 
   if (!user) {
-    // Пользователь не найден - выбрасываем ошибку (тело ошибки в переменной error)
-    res.status(404).send(error);
-    return;
+    // Пользователь не найден - выбрасываем ошибку (параметры ошибки в переменной error)
+    return validator.throwErrors(error.name, res, error.params);
   } else {
     // Пользователь найден. Сверяем введенный и хранящийся в БД пароли
     const comparePasswords = await helpers.comparePasswords(credentials.password, user.password);
@@ -112,7 +112,6 @@ module.exports.signin = async (req, res) => {
  * @return {Object}              Экземпляр пользователя
  */
 module.exports.authorize = (req, res) => {
-  let query, user;
   const token = req.body.token;
   if (!token)
     return res.status(401).send({ type: 'error', message: 'Authorization header not found.' });
@@ -124,7 +123,7 @@ module.exports.authorize = (req, res) => {
         .send({ type: 'error', message: 'Provided authorization token is invalid.', error });
 
     // Пытаемся получить экземпляр пользователя из базы данных
-    user = await helpers.findUser('id', result.id);
+    let user = await helpers.findUser('id', result.id, res);
 
     if (!user) {
       res.status(404).send('User not found.');
@@ -160,7 +159,7 @@ module.exports.checkUsername = async (req, res) => {
       if (username !== null) {
         return validator.throwErrors('Username already exists', res, username);
       }
-      return;
+      res.send(username);
     })
     .catch(e => {
       return validator.handleErrors(e, res);
@@ -191,10 +190,58 @@ module.exports.checkEmail = async (req, res) => {
       if (email !== null) {
         return validator.throwErrors('Email already exists', res, email);
       }
-      return;
+      res.send(email);
     })
     .catch(e => {
-      console.log(e);
+      return validator.handleErrors(e, res);
+    });
+};
+
+/**
+ * Подтверждаем электронный адрес пользователя
+ *
+ * @param req               Объект запроса сервера
+ * @param res               Объект ответа сервера
+ */
+module.exports.confirmEmail = async (req, res) => {
+  const key = req.body.key,
+    id = req.body.id; // id пользователя, который осуществляет операцию подтверждения.
+
+  const valid = await validator.validateEmailConfirmationKey(key, res);
+  //Если валидация провалилась - прекращаем выполнение
+  if (!valid) return;
+
+  const {
+    composeMutation,
+    composeResponse,
+  } = require('api/controllers/users/mutations/confirm-email');
+  const mutation = composeMutation(key);
+
+  GraphQLClient.request(mutation)
+    .then(async data => {
+      const email = composeResponse(data);
+
+      if (!email) {
+        return validator.throwErrors('Email confirm key not found', res);
+      }
+
+      // Мы подтвердили электронный адрес пользователя. Теперь необходимо обновить его экземпляр в Redis.
+      // Если паредадть в метод findUser в качестве ключа-значения id, то он просто вернет уже существующий экземпляр из кэша.
+      // Поэтому передадим email, чтобы обновленные данные сначала взялись из базы данных, а затем переписались в кэше
+      user = await helpers.findUser('email', email, res);
+      if (user) {
+        delete user.password; // Удаляем пароль из отсылаемого экземпляра
+      }
+      const message = messages(res.lang).success.emailConfirmed;
+
+      /**
+       * Если пользователь авторизован во время операции подтверждения email и его id === id пользователя, email которого в ходе операции был подтвержден -
+       * возвращаем в ответе экземпляр пользователя с подтвержденной почтой. Если это условие не соблюдено - отправим только сообщение об успешной операции
+       */
+      const response = id === user.id ? { message, user } : { message };
+      res.send(response);
+    })
+    .catch(e => {
       return validator.handleErrors(e, res);
     });
 };
@@ -208,7 +255,6 @@ module.exports.checkEmail = async (req, res) => {
  * @todo Организовать отправку письма пользователю с ключом подтверждения
  */
 module.exports.repair = async (req, res) => {
-  let mutation;
   const email = req.body.email;
 
   const valid = await validator.validateEmail(email, res);
@@ -218,7 +264,7 @@ module.exports.repair = async (req, res) => {
   const { key } = await helpers.generateToken();
 
   const { composeMutation, composeResponse } = require('api/controllers/users/mutations/repair');
-  mutation = composeMutation(email, key);
+  const mutation = composeMutation(email, key);
 
   GraphQLClient.request(mutation)
     .then(async data => {
@@ -232,7 +278,6 @@ module.exports.repair = async (req, res) => {
       // Тут отправляем письмо
     })
     .catch(e => {
-      console.log(e);
       return validator.handleErrors(e, res);
     });
 };
@@ -245,14 +290,13 @@ module.exports.repair = async (req, res) => {
  * @param res               Объект ответа сервера
  */
 module.exports.confirmRepair = async (req, res) => {
-  let query;
   const key = req.body.key;
   const valid = await validator.validateRepairKey(key, res);
   //Если валидация провалилась - прекращаем выполнение
   if (!valid) return;
 
   const { composeQuery, composeResponse } = require('api/controllers/users/query/confirm-repair');
-  query = composeQuery(key);
+  const query = composeQuery(key);
 
   GraphQLClient.request(query)
     .then(data => {
@@ -265,7 +309,7 @@ module.exports.confirmRepair = async (req, res) => {
       res.send(user);
     })
     .catch(e => {
-      validator.handleErrors(e, res);
+      return validator.handleErrors(e, res);
     });
 };
 
@@ -275,7 +319,7 @@ module.exports.confirmRepair = async (req, res) => {
  * @param req               Объект запроса сервера
  * @param res               Объект ответа сервера
  */
-module.exports.changePassword = async (req, res) => {
+module.exports.repairChangePassword = async (req, res) => {
   const credentials = req.body;
 
   const valid = await validator.repairPasswordValidation(req.body, res);
@@ -297,11 +341,11 @@ module.exports.changePassword = async (req, res) => {
       if (!response) {
         return validator.throwErrors('Password change failed', res);
       }
-
-      res.send(response);
+      const message = messages(res.lang).success.passwordChanged;
+      res.send({ response, message });
     })
     .catch(e => {
-      validator.handleErrors(e, res);
+      return validator.handleErrors(e, res);
     });
 };
 
@@ -315,32 +359,102 @@ module.exports.changePassword = async (req, res) => {
  * @todo Организовать отправку письма на случай, если были изменены никнейм или email
  */
 module.exports.accountSettings = async (req, res) => {
-  const payload = req.body.payload;
+  const payload = {
+    user: req.body.user,
+    metadata: req.body.metadata,
+  };
+
   const id = req.body.id;
   const password = req.body.password;
 
-  const user = await helpers.findUser('id', id);
-  const comparePasswords = await helpers.comparePasswords(password, user.password);
-  // @todo В дальнейшем можно будет изменять не только никнейм и мыло. Надо будет проверять, изменились ли они и только в этом случае проверять пароль.
-  // Остальные данные можно будет менять без подтверждения паролем
-  if (comparePasswords) {
-    // Пароль верен. Отправляем запрос на изменение данных
-    const { mutation, variables, response } = require('./mutations/settings/account');
-    const data = variables(id, payload);
+  const user = await helpers.findUser('id', id, res);
 
-    GraphQLClient.request(mutation, data)
-      .then(async updated => {
-        const updatedUser = response(updated);
+  if (!(user.username === payload.user.username && user.email === payload.user.email)) {
+    const comparePasswords = await helpers.comparePasswords(password, user.password);
 
-        helpers.saveUserInRedis(updatedUser); // Сохраняем пользователя в Redis
-        delete updatedUser.password; // Убираем из возвращаемого экземпляра пароль
-        res.send(updatedUser);
-      })
-      .catch(e => {
-        validator.handleErrors(e, res);
-      });
-  } else {
+    if (!comparePasswords)
+      // Пароль неверен.Выбрасываем ошибку
+      return validator.throwErrors('Wrong password', res);
+  }
+
+  if (user.email !== payload.user.email) {
+    //Пользователь сменил email адрес. Сгенерируем ключ подтверждения
+    const { key } = await helpers.generateToken();
+    payload.metadata = {
+      emailVerification: key,
+    };
+  }
+
+  // Пароль верен. Отправляем запрос на изменение данных
+  const { mutation, variables, response } = require('./mutations/settings/account');
+  const data = variables(id, payload);
+
+  GraphQLClient.request(mutation, data)
+    .then(updated => {
+      const updatedUser = response(updated);
+
+      helpers.saveUserInRedis(updatedUser); // Сохраняем пользователя в Redis
+      delete updatedUser.password; // Убираем из возвращаемого экземпляра пароль
+      const message = messages(res.lang).success.accountSettings;
+      res.send({ user: updatedUser, message });
+    })
+    .catch(e => {
+      return validator.handleErrors(e, res);
+    });
+};
+
+/**
+ * Изменяем пароль от аккаунта пользователя
+ *
+ * @param req               Объект запроса сервера
+ * @param res               Объект ответа сервера
+ *
+ * @todo Организовать отправку письма после удачной смены пароля
+ */
+module.exports.passwordSettings = async (req, res) => {
+  const payload = req.body;
+  const user = await helpers.findUser('id', payload.id, res);
+
+  const comparePasswords = await helpers.comparePasswords(payload.current, user.password);
+  if (!comparePasswords) {
     // Пароль неверен.Выбрасываем ошибку
     return validator.throwErrors('Wrong password', res);
   }
+
+  // Текущий пароль верен. Отправляем запрос на его изменение
+  const { mutation, variables, response } = require('./mutations/settings/password');
+  const hashPassword = await helpers.hashPassword(payload.new); // Хэшируем новый пароль
+  const data = variables(payload.id, { password: hashPassword });
+
+  GraphQLClient.request(mutation, data)
+    .then(updated => {
+      const updatedUser = response(updated);
+      helpers.saveUserInRedis(updatedUser); // Сохраняем пользователя в Redis
+
+      const message = messages(res.lang).success.passwordChanged;
+      res.send({ message });
+    })
+    .catch(e => {
+      return validator.handleErrors(e, res);
+    });
+};
+
+/**
+ * Заново высылаем пользователю письмо в ключом подтверждения email адреса
+ *
+ * @param req               Объект запроса сервера
+ * @param res               Объект ответа сервера
+ *
+ * @todo Организовать отправку письма после удачной смены пароля
+ */
+module.exports.resendEmailConfirmationKey = async (req, res) => {
+  const id = req.body.id;
+  const user = await helpers.findUser('id', id, res);
+  const key = user.metadata.emailVerification;
+
+  if (key) {
+    console.log(key);
+    // @todo Отсылаем письмо
+  }
+  res.send({ message: 'okey' });
 };

@@ -1,3 +1,4 @@
+const userInstancePattern = require('./userInstancePattern');
 /**
  * Компонуем запрос данных искомого пользователя
  *
@@ -17,25 +18,7 @@ const composeQuery = (key, value) => {
 
   return `query findUser{
   ${queryHeader} {
-    id
-    username
-    email
-    password
-    metadata{
-      createdAt
-      emailVerification
-    }
-
-    party {
-      name
-      leader {
-        username
-      }
-      createdAt
-      members {
-        username
-      }
-    }
+    ${userInstancePattern}
   }
 }`;
 };
@@ -51,6 +34,7 @@ const composeQuery = (key, value) => {
  */
 const response = data => {
   const user = data.users[0];
+
   if (user) {
     // Если email уже подтвержден - удаляем строку из экземпляра пользователя
     if (user.metadata.emailVerification === null) {

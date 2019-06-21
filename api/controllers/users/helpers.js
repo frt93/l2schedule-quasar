@@ -69,9 +69,10 @@ module.exports.comparePasswords = async (unhashed, hashed) => {
  * Ищем пользователя в Redis кэше или в базе данных
  * @param {String} key        Ключ (поле) по которому осуществляется поиск (id/username/email, etc)
  * @param {String} value      Значение ключа поиска
+ * @param res                 Экземпляр ответа сервера
  *
  */
-module.exports.findUser = async (key, value) => {
+module.exports.findUser = async (key, value, res) => {
   let user;
   if (key === 'id') {
     user = await this.getUserFromRedis(value);
@@ -88,7 +89,7 @@ module.exports.findUser = async (key, value) => {
   await GraphQLClient.request(query)
     .then(async data => {
       user = await response(data);
-      this.saveUserInRedis(user);
+      if (user) this.saveUserInRedis(user);
     })
     .catch(e => {
       validator.handleErrors(e, res);
