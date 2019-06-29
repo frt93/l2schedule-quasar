@@ -2,12 +2,14 @@ import VueI18n from 'vue-i18n';
 import { Cookies } from 'quasar';
 import messages from '../lang';
 
-export default ({ app, Vue, store, ssrContext }) => {
+let i18n;
+
+export default async ({ app, Vue, store, ssrContext }) => {
   Vue.use(VueI18n);
   let lang;
   // Определяем/устанавливаем язык пользователя
   if (process.env.SERVER) {
-    lang = getLang(ssrContext, app); // Вызываем на стороне сервера
+    lang = getLang(ssrContext, store); // Вызываем на стороне сервера
   }
 
   app.i18n = new VueI18n({
@@ -15,14 +17,18 @@ export default ({ app, Vue, store, ssrContext }) => {
     fallbackLocale: lang,
     messages,
   });
+
+  i18n = app.i18n;
 };
 
-const getLang = (ssrContext, app) => {
+export { i18n };
+
+const getLang = (ssrContext, store) => {
   const cookies = Cookies.parseSSR(ssrContext);
   let lang;
 
   if (!cookies.has('lang')) {
-    // Если нет куков с языком - установим их
+    // Если нет куков с языком - определим язык при помощи языковых заголовков в теле запроса
     const userLanguages = ssrContext.req.acceptsLanguages();
     // Функция проверяет наличие в списке языков браузера клиента наличие языка переданного в качестве аргумента.
     const entry = lang => {
@@ -36,14 +42,11 @@ const getLang = (ssrContext, app) => {
     } else {
       lang = 'en-us'; // Если не найдены первые два - устанавливаем английский
     }
-
-    // Записываем выбранное значение в куки
-    // cookies.set('lang', lang, { expires: 3650, path: '' });
   } else {
     // Куки есть. Берем из них значение, передаем в стор и возвращаем
     lang = cookies.get('lang');
   }
 
-  app.store.commit('user/setLanguage', lang);
+  store.commit('user/setLanguage', lang);
   return lang;
 };

@@ -27,10 +27,10 @@ module.exports = {
     'Password change failed': 'Cмена пароля не удалась. Попробуйте снова',
     FetchError: 'Не удалось связаться с базой данных. Попробуйте снова',
     'Username spaces': 'Пробелы в никнейме запрещены\n',
-    'Disallowed char': char => {
+    'Prohibited char': char => {
       return `Символ ${char}запрещен`;
     },
-    'Disallowed chars': chars => {
+    'Prohibited chars': chars => {
       return `Символы ${chars}запрещены`;
     },
     'Email spaces': 'Пробелы в email адресе запрещены\n',

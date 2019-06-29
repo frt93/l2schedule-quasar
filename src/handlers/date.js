@@ -1,4 +1,3 @@
-import { Cookies } from 'quasar';
 import jsCookie from 'js-cookie';
 import { DateTime, Settings } from 'luxon';
 
@@ -25,6 +24,26 @@ export default {
   },
 
   /**
+   * На странице настроек данных аккаунта пользователь может выбрать подходящий для него часовой пояс из предложенного списка.
+   * Постараемся в процессе регистрации проверить вхождения определенного пакетом luxon часового пояса пользователя в данный список.
+   * Если вхождение есть - вернем значение. В противном случае вернем null и время для пользователя будет отображаться на основании
+   * системных данных его ПО без привязки к выбранному часовому поясу
+   *
+   * @param {Array} list        Массив с перечнем часовых поясов, предлагаемый для выбора пользователю в настройках
+   */
+  isTimezoneInList(list) {
+    const userTimezone = this.getCurrentTimezone();
+
+    const tz = list.filter(zone => {
+      return zone.value === userTimezone;
+    });
+    if (tz.length) {
+      return tz[0].value;
+    }
+    return null;
+  },
+
+  /**
    * Получаем сокращенно наименование текущего часового пояса пользователя, который установлен на его устройстве
    */
   getCurrentTimezoneShortname() {
@@ -32,16 +51,25 @@ export default {
     return timezone;
   },
 
-  now() {
-    var now = DateTime.local().toFormat('dd.LL.yyyy HH.mm');
-    return now;
-  },
-
-  isInDST(timezone) {
+  /**
+   * Текущее время пользователя в установленном им часовом поясе
+   *
+   * @param {String} timezone   Установленный часовой пояс пользователя
+   */
+  now(timezone) {
     if (!timezone || timezone === 'local') {
       timezone = this.getCurrentTimezone();
     }
-    console.log(timezone);
+    let now = DateTime.local().setZone(timezone);
+
+    return now.toFormat('dd.LL.yyyy HH.mm.ss');
+  },
+
+  isTimezoneInDST(timezone) {
+    if (!timezone || timezone === 'local') {
+      timezone = this.getCurrentTimezone();
+    }
+
     return DateTime.local().setZone(timezone).isInDST;
   },
 

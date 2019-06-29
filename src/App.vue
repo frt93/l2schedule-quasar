@@ -8,6 +8,7 @@
 import { Cookies } from "quasar";
 import cookies from "js-cookie";
 import date from "handlers/date";
+import userAPI from "handlers/user/api";
 export default {
   name: "App",
   async preFetch({ store, ssrContext }) {
@@ -26,6 +27,7 @@ export default {
       let lang = this.$store.state.user.language;
       this.$i18n.locale = lang;
       date.setDefaultLocale(lang);
+      userAPI.setLanguageHeader(lang);
       await import(`quasar/lang/${lang}`).then(lang => {
         this.$q.lang.set(lang.default);
       });

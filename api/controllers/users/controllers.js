@@ -6,7 +6,6 @@ const { GraphQLClient } = require('api/config/graphql'),
   validator = require('./validator'),
   helpers = require('./helpers'),
   messages = require('./lang');
-
 /**
  * Создаем нового пользователя.
  * Предварительно валидируем полученные данные.
@@ -31,15 +30,10 @@ module.exports.create = async (req, res) => {
   credentials.password = hashedPassword;
 
   const { key } = await helpers.generateToken();
-  const metadata = {
-    data: {
-      emailVerification: key,
-    },
-  };
-  user = { ...credentials, metadata };
+  credentials.metadata.data.emailVerification = key;
 
   const { mutation, variable, response } = require('api/controllers/users/mutations/create');
-  user = variable(user);
+  user = variable(credentials);
 
   GraphQLClient.request(mutation, user)
     .then(async data => {
@@ -50,7 +44,7 @@ module.exports.create = async (req, res) => {
       helpers.saveUserInRedis(createdUser); // Сохраняем пользователя в Redis
     })
     .catch(e => {
-      validator.handleErrors(e, res);
+      validator.handleErrors(e, res, credentials);
     });
 };
 
@@ -370,6 +364,10 @@ module.exports.accountSettings = async (req, res) => {
   const user = await helpers.findUser('id', id, res);
 
   if (!(user.username === payload.user.username && user.email === payload.user.email)) {
+    const valid = await validator.accountSettingsValidation(payload.user, password, res);
+    //Если валидация провалилась - прекращаем выполнение
+    if (!valid) return;
+
     const comparePasswords = await helpers.comparePasswords(password, user.password);
 
     if (!comparePasswords)
@@ -399,7 +397,7 @@ module.exports.accountSettings = async (req, res) => {
       res.send({ user: updatedUser, message });
     })
     .catch(e => {
-      return validator.handleErrors(e, res);
+      return validator.handleErrors(e, res, payload.user);
     });
 };
 

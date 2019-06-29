@@ -27,6 +27,9 @@ export default {
     back: 'Back',
     language: 'Language',
     timezone: 'Timezone',
+    noTimezone: 'The specified time zone not found',
+    country: 'Country',
+    noCountry: 'The specified country not found',
     sending: 'Sending',
     settings: 'Settings',
     confirmKey: 'Confirmation key',
@@ -58,9 +61,12 @@ export default {
   hints: {
     settings: {
       username: 'Name under which other users are see you. Can be used for authorization',
-      email: 'Your email adress',
+      email: 'Email will not be publicly displayed',
       password:
         'If you change your nickname or email address, you must enter your current account password to confirm the operation',
+      now: 'Current time',
+      DST: 'Auto transition to daylight/standard time',
+      country: 'Select the country you live in',
       safety: {
         email1:
           "Was sent to the email address you specified during registration. If you can't find the letter - we can ",

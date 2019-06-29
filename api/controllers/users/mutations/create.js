@@ -1,4 +1,4 @@
-const userInstancePattern = require('../../query/userInstancePattern');
+const userInstancePattern = require('../query/userInstancePattern');
 const mutation = `mutation create_user ($users: [users_insert_input!]!) {
   insert_users(objects: $users) {
     returning {

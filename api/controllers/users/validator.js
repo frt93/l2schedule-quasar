@@ -5,7 +5,7 @@ const messages = require('./lang');
  *
  * @param {String} name       Имя ошибки
  * @param res                 Объект ответа сервера
- * @param params              Переменная (или несколько переменных) для формирования сообщения ошибки
+ * @param params              Переменная (или объект с несколькими переменными) для детализации сообщения ошибки
  */
 module.exports.throwErrors = (name, res, params) => {
   if (name === 'Empty credentials') {
@@ -103,10 +103,10 @@ module.exports.throwErrors = (name, res, params) => {
  * Обрабатываем ошибки, возникшие в результате запросов к GraphQL движку
  *
  * @param {Error} e           Экземпляр ошибки
- * @param req                 Объект запроса сервера
  * @param res                 Объект ответа сервера
+ * @param params              Переменная (или объект с несколькими переменными) для детализации сообщения ошибки
  */
-module.exports.handleErrors = (e, res) => {
+module.exports.handleErrors = (e, res, params) => {
   // Ошибка подключения к hasura
   if (e.name === 'FetchError') {
     return res.status(503).send({
@@ -117,12 +117,20 @@ module.exports.handleErrors = (e, res) => {
 
   // Неправильный формат uuid идентификатора в запросе в методе confirmRepair
   else if (
-    e.message.indexOf('invalid input syntax for type uuid') !== -1 &&
-    e.message.indexOf('repairKey:') !== -1
+    e.message.indexOf('invalid input syntax for type uuid') != -1 &&
+    e.message.indexOf('repairKey:') != -1
   ) {
     return this.throwErrors('Wrong repair key', res);
-  } else if (e.message.indexOf('duplicate key value violates unique constraint') !== 1) {
-    return this.throwErrors('Constraint violation', res);
+  } else if (
+    e.message.indexOf('Uniqueness violation') != -1 &&
+    e.message.indexOf('users_username_key') != -1
+  ) {
+    return this.throwErrors('Username already exists', res, params.username);
+  } else if (
+    e.message.indexOf('Uniqueness violation') != -1 &&
+    e.message.indexOf('users_email_key') != -1
+  ) {
+    return this.throwErrors('Email already exists', res, params.email);
   } else {
     res.status(500).send(e);
   }
@@ -360,6 +368,27 @@ module.exports.repairPasswordValidation = async (credentials, res) => {
   if (!valid) return false;
 
   valid = await this.validateRepairKey(key, res);
+  if (!valid) return false;
+
+  return true;
+};
+
+module.exports.accountSettingsValidation = async (credentials, password, res) => {
+  if (!credentials.username || !credentials.email || !password) {
+    // Форма заполнена неполностью - выбрасываем ошибку
+    this.throwErrors('Empty credentials', res);
+    return false;
+  }
+
+  let valid;
+
+  valid = await this.validateUsername(credentials.username, res);
+  if (!valid) return false;
+
+  valid = await this.validateEmail(credentials.email, res);
+  if (!valid) return false;
+
+  valid = await this.validatePassword(password, res);
   if (!valid) return false;
 
   return true;

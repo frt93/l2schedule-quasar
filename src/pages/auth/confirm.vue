@@ -1,9 +1,20 @@
 <script>
-import auth from "mixin/auth";
-import api from "handlers/user/api";
+import userAPI from "handlers/user/api";
+import controllers from "handlers/user/controllers";
 export default {
   name: "confirmPage",
-  mixins: [auth],
+  meta() {
+    return {
+      title: this.$t("titles.confirmPage"),
+      titleTemplate: title => `${title} - L2Schedule`
+    };
+  },
+  beforeMount() {
+    const query = this.$route.query;
+    if (query.email) {
+      this.confirmEmail(query.email);
+    }
+  },
 
   methods: {
     async confirmEmail(key) {
@@ -14,28 +25,16 @@ export default {
       // Запускаем переадресацию
       this.$router.replace({ name: "home" });
 
-      const { user, success, error } = await api.confirmEmail(key, id);
+      const { user, success, error } = await userAPI.confirmEmail(key, id);
 
       if (error) {
-        return this.errorNotify(error);
+        return controllers.errorNotify(error);
       }
       if (user) {
         this.$store.commit("user/setUser", user);
       }
-      this.successNotify(success);
+      controllers.successNotify(success);
     }
-  },
-  beforeMount() {
-    const query = this.$route.query;
-    if (query.email) {
-      this.confirmEmail(query.email);
-    }
-  },
-  meta() {
-    return {
-      title: this.$t("titles.confirmPage"),
-      titleTemplate: title => `${title} - L2Schedule`
-    };
   },
 
   render(h) {

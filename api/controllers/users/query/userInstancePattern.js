@@ -9,6 +9,7 @@ metadata {
   emailVerification
   language
   timezone
+  country
   createdAt
 }
 party {

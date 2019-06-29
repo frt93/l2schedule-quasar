@@ -1,6 +1,5 @@
 import cookies from 'js-cookie';
 
-import { axiosInstance } from 'boot/axios';
 import api from 'handlers/user/api';
 import date from 'handlers/date';
 
@@ -10,6 +9,7 @@ export default {
     instance: null,
     language: null,
     timezoneList: null,
+    countriesList: null,
   },
 
   mutations: {
@@ -32,8 +32,10 @@ export default {
      *
      * @param {Array} zones     Массив с временными зонами
      */
-    setTimezonesList(state, zones) {
-      state.timezoneList = zones;
+    setTimezonesAndCountriesLists(state, payload) {
+      const userTimezone = this.getters['user/timezone'];
+      state.timezoneList = payload.getTimezonesList(userTimezone);
+      state.countriesList = payload.countries;
     },
 
     /**
@@ -62,7 +64,6 @@ export default {
     defineLanguage(state) {
       const lang = cookies.get('lang');
       state.language = lang;
-      axiosInstance.defaults.headers.common['lang'] = lang;
     },
   },
 
@@ -153,7 +154,6 @@ export default {
   getters: {
     timezone(state) {
       let timezone;
-
       if (state.instance !== null) {
         timezone = state.instance.metadata.timezone;
       } else if (state.instance == null) {
@@ -168,10 +168,6 @@ export default {
       }
 
       return timezone;
-    },
-
-    timezoneList(state) {
-      return state.timezoneList;
     },
   },
 };

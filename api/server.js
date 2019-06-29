@@ -3,8 +3,7 @@ const express = require('express'),
   port = process.env.PORT || 5000,
   router = express.Router(),
   cors = require('cors'),
-  app = express(),
-  { GraphQLClient } = require('api/config/graphql');
+  app = express();
 
 app.disable('x-powered-by');
 app.use(bodyParser.json());

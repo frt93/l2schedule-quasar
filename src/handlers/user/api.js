@@ -86,6 +86,18 @@ export default {
   },
 
   /**
+   * Получаем ISO код страны регистрирующегося пользователя с помощью стороннего сервиса
+   */
+  async getCountry() {
+    let country = null;
+    await axiosInstance.get('https://ipapi.co/json/').then(res => {
+      country = res.data.country.toLowerCase();
+    });
+
+    return country;
+  },
+
+  /**
    * Первый шаг операции восстановления доступа к аккаунта.
    * Поиск пользователя по email адресу
    *
@@ -153,6 +165,7 @@ export default {
    */
   async confirmEmail(key, id) {
     let user, success, error;
+
     await axiosInstance
       .post('/users/confirm/email', { key, id })
       .then(res => {
@@ -168,6 +181,10 @@ export default {
     return { user, success, error };
   },
 
+  setLanguageHeader(lang) {
+    axiosInstance.defaults.headers.common['lang'] = lang;
+  },
+
   /**
    * Отправляем запрос на изменение данных аккаунта пользователя
    *
@@ -177,7 +194,7 @@ export default {
   async submitAccountSettings(payload, lang) {
     let user, success, error;
     // Установим языковой заголовок перед запросом, чтобы пользователь получил оповещение об успешной операции или возникшей в ее ходе ошибке на выбранном языке
-    axiosInstance.defaults.headers.common['lang'] = lang;
+    this.setLanguageHeader(lang);
 
     await axiosInstance
       .post('/users/settings/account', payload)

@@ -1,45 +1,90 @@
 <script>
-import auth from "mixin/auth";
-import api from "handlers/user/api";
+import { debounce } from "quasar";
+
+import userAPI from "handlers/user/api";
+import controllers from "handlers/user/controllers";
 import date from "handlers/date";
+import { setInterval } from "timers";
 
 export default {
   name: "accountSettingsPage",
-  mixins: [auth],
-  props: ["userInstance", "lang", "timezoneList", "timezone"],
+  meta() {
+    return {
+      title: this.$t("titles.settings.account"),
+      titleTemplate: title =>
+        `${title} - ${this.$t("titles.settings.main")} - L2Schedule`
+    };
+  },
+
+  props: ["userInstance", "lang", "timezoneList", "timezone", "countriesList"],
   async preFetch({ store }) {
     /**
      * Загружаем список временных зон
      */
-    await import(`lang/timezones`).then(data => {
-      store.commit("user/setTimezonesList", data.default.timezones);
+    const lang = store.state.user.language;
+    await import(`lang/${lang}/timezones-countries`).then(data => {
+      store.commit("user/setTimezonesAndCountriesLists", data.default);
     });
-  },
-
-  mounted() {
-    console.log(date.isInDST(this.metadata.timezone));
   },
 
   data() {
     return {
-      user: {
-        username: this.userInstance.username,
-        email: this.userInstance.email
-      },
+      username: this.userInstance.username,
+      email: this.userInstance.email,
+      password: "",
+
       metadata: {
         language: this.lang,
-        timezone: this.timezone
+        timezone: this.timezone,
+        country: this.userInstance.metadata.country
       },
+
+      usernameError: false,
+      emailError: false,
+      passwordError: false,
+
+      usernameErrorMessage: "",
+      emailErrorMessage: "",
+      passwordErrorMessage: "",
+
+      loading: {
+        username: false,
+        email: false,
+        submit: false
+      },
+
+      timezoneOptions: this.timezoneList,
       languageOptions: [
         { label: "Русский", value: "ru" },
         { label: "Українська", value: "uk" },
         { label: "English", value: "en-us" }
       ],
-      timezoneOptions: []
+      countriesOptions: this.countriesList,
+
+      time: date.now(this.timezone),
+      clockID: null // Сюда записывается идентификатор setInterval-функции в методе clock()
     };
   },
 
+  async beforeMount() {
+    if (process.env.CLIENT) {
+      // Запускаем таймер для отображения часов в реальном времени под селектом с часовыми поясами
+      this.clock();
+    }
+  },
+
+  destroyed() {
+    // Удаляем таймер
+    clearInterval(this.clockID._id);
+  },
+
   computed: {
+    user() {
+      return {
+        username: this.username,
+        email: this.email
+      };
+    },
     /**
      * Проверяем отсутствие ошибок и разблокируем кнопку отправки
      */
@@ -56,9 +101,17 @@ export default {
         anyChanges = true;
       }
 
-      if (this.metadata.timezone !== this.timezone) {
+      if (this.metadata.timezone && this.metadata.timezone !== this.timezone) {
         anyChanges = true;
       }
+
+      if (
+        this.metadata.country &&
+        this.metadata.country !== this.userInstance.metadata.country
+      ) {
+        anyChanges = true;
+      }
+
       return !anyChanges ||
         this.usernameError ||
         this.emailError ||
@@ -75,8 +128,8 @@ export default {
      */
     needPasswordConfirm() {
       if (
-        this.user.username !== this.userInstance.username ||
-        this.user.email !== this.userInstance.email
+        this.username !== this.userInstance.username ||
+        this.email !== this.userInstance.email
       ) {
         return true;
       } else {
@@ -101,15 +154,20 @@ export default {
           payload = { ...payload, password: this.password };
         }
 
-        const { user, success, error } = await api.submitAccountSettings(
+        const { user, success, error } = await userAPI.submitAccountSettings(
           payload,
           lang
         );
         this.loading.submit = false;
 
         if (error) {
-          return this.handleErrors(error);
+          const { errorType, message } = controllers.handleErrors(error);
+          this[errorType] = true;
+          this[`${errorType}Message`] = message;
+
+          return;
         }
+
         // Устанавливаем новый инстанс пользователя
         this.$store.commit("user/setUser", user);
         //Меняем локализацию luxon
@@ -117,24 +175,44 @@ export default {
         date.setDefaultZone(this.metadata.timezone); //@todo только если изменилось
         date.setTimezoneCookie(this.metadata.timezone); //@todo только если изменилось
 
-        //Меняем локализацию i18n
+        //Меняем локализацию
         this.$store.commit("user/changeLanguage", lang);
         this.$i18n.locale = lang;
         await import(`quasar/lang/${lang}`).then(lang => {
           this.$q.lang.set(lang.default);
         });
+        await import(`lang/${lang}/timezones-countries`).then(data => {
+          this.$store.commit(
+            "user/setTimezonesAndCountriesLists",
+            data.default
+          );
+        });
+        this.timezoneOptions = this.timezoneList; // Обновляем список часовых поясов, который используется селектом, для перевода текущего выбранного пояса
+        this.countriesOptions = this.countriesList; // Обновляем список стран, который используется селектом, для перевода текущей выбранной страны
 
-        this.successNotify(success);
+        controllers.successNotify(success);
       }
     },
 
     /**
-     * Фильтруем опции выпадающего списка с временными зонами
+     * Фильтруем опции выпадающего списка с перечнем временных зон
      */
-    filterFn(val, update, abort) {
+    timezonesFilterFn(val, update, abort) {
       update(() => {
         const needle = val.toLowerCase();
         this.timezoneOptions = this.timezoneList.filter(v => {
+          if (v.label.toLowerCase().indexOf(needle) > -1) return v;
+        });
+      });
+    },
+
+    /**
+     * Фильтруем опции выпадающего списка с перечнем стран
+     */
+    countriesFilterFn(val, update, abort) {
+      update(() => {
+        const needle = val.toLowerCase();
+        this.countriesOptions = this.countriesList.filter(v => {
           if (v.label.toLowerCase().indexOf(needle) > -1) return v;
         });
       });
@@ -165,8 +243,15 @@ export default {
             },
             on: {
               input: value => {
+                this.passwordError = false;
+                this.passwordErrorMessage = "";
+
                 this.password = value;
-                this.validatePassword(value);
+                this.passwordErrorMessage = controllers.validatePassword(value);
+
+                if (this.passwordErrorMessage) {
+                  this.passwordError = true;
+                }
               }
             }
           },
@@ -187,8 +272,28 @@ export default {
         );
     },
 
+    /**
+     * Хинт для блока выбора часового пояса. В нем указывается текущее время в выбранном часовом поясе и наличие перехода на зимнее/летнее время
+     */
     __timezoneHint(h) {
-      return [h("div", `Текущее время - ${date.now()}`)];
+      const timezone = this.metadata.timezone;
+
+      let message = `${this.$t("hints.settings.now")} - ${this.time}`;
+      if (date.isTimezoneInDST(timezone)) {
+        message += `. ${this.$t("hints.settings.DST")}`;
+      }
+
+      if (timezone == null) {
+        message = "";
+      }
+
+      return [h("span", message)];
+    },
+
+    clock() {
+      this.clockID = setInterval(() => {
+        this.time = date.now(this.metadata.timezone);
+      }, 1000);
     },
 
     /**
@@ -227,23 +332,58 @@ export default {
     }
   },
 
-  meta() {
-    return {
-      title: this.$t("titles.settings.account"),
-      titleTemplate: title =>
-        `${title} - ${this.$t("titles.settings.main")} - L2Schedule`
-    };
+  watch: {
+    username: debounce(async function(username) {
+      this.usernameError = false;
+      this.usernameErrorMessage = "";
+
+      if (username !== this.userInstance.username) {
+        this.usernameErrorMessage = controllers.validateUsername(username);
+
+        if (this.usernameErrorMessage) {
+          this.usernameError = true;
+        } else {
+          const { message } = await controllers.checkUsername(username);
+          if (message) {
+            this.usernameError = true;
+            this.usernameErrorMessage = message;
+          }
+        }
+      }
+
+      this.loading.username = false;
+    }, 1500),
+
+    email: debounce(async function(email) {
+      this.emailError = false;
+      this.emailErrorMessage = "";
+
+      if (email !== this.userInstance.email) {
+        this.emailErrorMessage = controllers.validateEmail(email);
+
+        if (this.emailErrorMessage) {
+          this.emailError = true;
+        } else {
+          const { message } = await controllers.checkEmail(email);
+          if (message) {
+            this.emailError = true;
+            this.emailErrorMessage = message;
+          }
+        }
+      }
+
+      this.loading.email = false;
+    }, 1500)
   },
 
   render(h) {
     return h("div", { staticClass: "form" }, [
-      this._v(date.now()),
       h(
         "q-input",
         {
           attrs: {
             autocomplete: false,
-            value: this.user.username,
+            value: this.username,
             label: this.$t("labels.username"),
             hint: this.$t("hints.settings.username"),
             error: this.usernameError,
@@ -252,13 +392,8 @@ export default {
           },
           on: {
             input: value => {
-              this.user.username = value;
+              this.username = value;
               this.loading.username = true;
-              if (value !== this.userInstance.username) {
-                this.validateUsername(value);
-              } else {
-                this.validateUsername(value, false); // Никнейм в первоначальном виде. Запрос на проверку уникальности не нужен
-              }
             }
           }
         },
@@ -277,7 +412,7 @@ export default {
         {
           attrs: {
             autocomplete: false,
-            value: this.user.email,
+            value: this.email,
             label: this.$t("labels.email"),
             hint: this.$t("hints.settings.email"),
             error: this.emailError,
@@ -286,13 +421,8 @@ export default {
           },
           on: {
             input: value => {
-              this.user.email = value;
+              this.email = value;
               this.loading.email = true;
-              if (value !== this.userInstance.email) {
-                this.validateEmail(value);
-              } else {
-                this.validateEmail(value, false); // Email в первоначальном виде. Запрос на проверку уникальности не нужен
-              }
             }
           }
         },
@@ -307,6 +437,126 @@ export default {
       ),
 
       this.__passwordInput(h),
+
+      h(
+        "q-select",
+        {
+          style: {
+            "max-width": "500px"
+          },
+          props: {
+            value: this.metadata.timezone,
+            label: this.$t("labels.timezone"),
+            bottomSlots: true,
+            useInput: true,
+            hideSelected: true,
+            fillInput: true,
+            options: this.timezoneOptions,
+            optionsDense: true,
+            optionsSelectedClass: "selected",
+            emitValue: true,
+            mapOptions: true
+          },
+          on: {
+            input: value => {
+              this.metadata.timezone = value;
+            },
+            filter: (value, update, abort) => {
+              this.timezonesFilterFn(value, update, abort);
+            },
+            blur: () => {
+              this.timezoneOptions = this.timezoneList; // При потери фокуса на селекте записываем в свойство с опциями стандартный список
+            }
+          },
+          scopedSlots: {
+            option: scope =>
+              h("q-item", { props: scope.itemProps, on: scope.itemEvents }, [
+                h("q-item-section", `(${scope.opt.utc}) ${scope.opt.label}`)
+              ]),
+            "no-option": () =>
+              h("q-item", { slot: "no-option" }, [
+                h("q-item-section", { staticClass: "text-grey" }, [
+                  this._v(`${this.$t("labels.noTimezone")}`)
+                ])
+              ])
+          }
+        },
+        [
+          h(
+            "div",
+            { staticClass: "multiline-hint", slot: "hint" },
+            this.__timezoneHint(h)
+          ),
+          h("q-icon", {
+            staticClass: "cursor-pointer q-ml-sm",
+            slot: "append",
+            attrs: {
+              name: "fas fa-times"
+            },
+            on: {
+              click: () => {
+                this.metadata.timezone = null;
+              }
+            }
+          })
+        ]
+      ),
+
+      h(
+        "q-select",
+        {
+          style: {
+            "max-width": "500px"
+          },
+          props: {
+            value: this.metadata.country,
+            label: this.$t("labels.country"),
+            hint: this.$t("hints.settings.country"),
+            bottomSlots: true,
+            useInput: true,
+            hideSelected: true,
+            fillInput: true,
+            options: this.countriesOptions,
+            optionsDense: true,
+            optionsSelectedClass: "selected",
+            emitValue: true,
+            mapOptions: true
+          },
+          on: {
+            input: value => {
+              this.metadata.country = value;
+            },
+            filter: (value, update, abort) => {
+              this.countriesFilterFn(value, update, abort);
+            },
+            blur: () => {
+              this.countriesOptions = this.countriesList; // При потери фокуса на селекте записываем в свойство с опциями стандартный список
+            }
+          },
+          scopedSlots: {
+            "no-option": () =>
+              h("q-item", { slot: "no-option" }, [
+                h("q-item-section", { staticClass: "text-grey" }, [
+                  this._v(`${this.$t("labels.noCountry")}`)
+                ])
+              ])
+          }
+        },
+        [
+          h("q-icon", {
+            staticClass: "cursor-pointer q-ml-sm",
+            slot: "append",
+            attrs: {
+              name: "fas fa-times"
+            },
+            on: {
+              click: () => {
+                this.metadata.country = null;
+              }
+            }
+          })
+        ]
+      ),
 
       h("q-select", {
         style: {
@@ -349,50 +599,11 @@ export default {
         }
       }),
 
-      h(
-        "q-select",
-        {
-          style: {
-            "max-width": "300px"
-          },
-          props: {
-            value: this.metadata.timezone,
-            label: this.$t("labels.timezone"),
-            bottomSlots: true,
-            useInput: true,
-            options: this.timezoneOptions.length
-              ? this.timezoneOptions
-              : this.timezoneList,
-            optionsDense: true,
-            optionsSelectedClass: "selected",
-            emitValue: true,
-            mapOptions: true
-          },
-          on: {
-            input: value => {
-              this.metadata.timezone = value;
-            },
-            filter: (value, update, abort) => {
-              this.filterFn(value, update, abort);
-            }
-          }
-        },
-        [h("div", { slot: "hint" }, this.__timezoneHint(h))]
-      ),
-
       this.__submitButton(h)
     ]);
   }
 };
 </script>
-
-<style>
-/* .flags {
-  width: 32px;
-  height: 32px;
-  float: left;
-} */
-</style>
 
 
 
