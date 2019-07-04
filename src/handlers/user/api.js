@@ -175,12 +175,17 @@ export default {
         success = res.data.message;
       })
       .catch(e => {
-        error = e.response.data.message;
+        error = e;
       });
 
     return { user, success, error };
   },
 
+  /**
+   * Устанавливаем языковой заголовок http-клиенту для получения ответов с сервера на том же языке, на котором отображается приложение
+   *
+   * @param {String} lang        Текущий язык пользователя
+   */
   setLanguageHeader(lang) {
     axiosInstance.defaults.headers.common['lang'] = lang;
   },

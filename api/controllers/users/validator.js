@@ -111,7 +111,7 @@ module.exports.handleErrors = (e, res, params) => {
   if (e.name === 'FetchError') {
     return res.status(503).send({
       type: 'Connection Error',
-      message: messages(res.lang).errors[name],
+      message: messages(res.lang).errors[e.name],
     });
   }
 
@@ -121,6 +121,11 @@ module.exports.handleErrors = (e, res, params) => {
     e.message.indexOf('repairKey:') != -1
   ) {
     return this.throwErrors('Wrong repair key', res);
+  } else if (
+    e.message.indexOf('invalid input syntax for type uuid') != -1 &&
+    e.message.indexOf('emailVerification') != -1
+  ) {
+    return this.throwErrors('Wrong email confirm key', res);
   } else if (
     e.message.indexOf('Uniqueness violation') != -1 &&
     e.message.indexOf('users_username_key') != -1
@@ -215,12 +220,12 @@ module.exports.validateEmail = (email, res) => {
 };
 
 /**
- * Валидируем пароль пользователя. Запрещены только пробелы. Длина от 7 до 30 символов
+ * Перечень правил для валидации пароля. Запрещены только пробелы. Длина от 7 до 30 символов
  *
  * @param {String} password   Указанный пользователем пароль
  * @param res                 Экземпляр ответа сервера
  */
-module.exports.validatePassword = (password, res) => {
+module.exports.passwordPattern = (password, res) => {
   let message = '';
 
   const spaces = /\s/g.test(password);
@@ -234,6 +239,19 @@ module.exports.validatePassword = (password, res) => {
   if (spaces) {
     message += messages(res.lang).errors['Password spaces'];
   }
+
+  return message;
+};
+
+/**
+ * Валидируем пароль пользователя.
+ *
+ * @param {String} password   Указанный пользователем пароль
+ * @param res                 Экземпляр ответа сервера
+ */
+module.exports.validatePassword = (password, res) => {
+  const message = this.passwordPattern(password, res);
+
   if (message.length) {
     res.status(400).send({
       type: 'passwordError',
@@ -390,6 +408,34 @@ module.exports.accountSettingsValidation = async (credentials, password, res) =>
 
   valid = await this.validatePassword(password, res);
   if (!valid) return false;
+
+  return true;
+};
+
+module.exports.accountPasswordValidation = async (passwords, res) => {
+  if (!passwords.current || !passwords.new) {
+    // Форма заполнена неполностью - выбрасываем ошибку
+    this.throwErrors('Empty credentials', res);
+    return false;
+  }
+
+  let valid, message;
+
+  // Проверим текущий пароль при помощи готового метода валидации
+  valid = await this.validatePassword(passwords.current, res);
+  if (!valid) return false;
+
+  // Проверим новый пароль с помощью функции-проверки паттерна пароля и перепишем тип возможной ошибки
+  message = this.passwordPattern(passwords.new, res);
+
+  if (message.length) {
+    res.status(400).send({
+      type: 'newPasswordError',
+      msgType: 'newPasswordErrorMessage',
+      message,
+    });
+    return false;
+  }
 
   return true;
 };

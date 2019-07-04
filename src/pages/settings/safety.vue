@@ -1,14 +1,23 @@
 <script>
-import auth from "mixin/auth";
-import api from "handlers/user/api";
+import userAPI from "handlers/user/api";
+import controllers from "handlers/user/controllers";
 export default {
   name: "accountSettingsPage",
-  mixins: [auth],
-  props: ["userInstance"],
+  meta() {
+    return {
+      title: this.$t("titles.settings.safety"),
+      titleTemplate: title =>
+        `${title} - ${this.$t("titles.settings.main")} - L2Schedule`
+    };
+  },
 
+  props: ["userInstance"],
   data() {
     return {
-      emailConfirmKey: ""
+      confirmKey: "",
+      confirmKeyError: false,
+      confirmKeyErrorMessage: "",
+      sending: false
     };
   },
 
@@ -17,30 +26,37 @@ export default {
      * Проверяем отсутствие ошибок и разблокируем кнопку отправки
      */
     canSubmit() {
-      return this.emailConfirmKey.length == 36 ? true : false;
+      return this.confirmKey.length == 36 && !this.confirmKeyError
+        ? true
+        : false;
     }
   },
 
   methods: {
     async submit() {
       if (this.canSubmit) {
-        this.loading.submit = true;
+        this.sending = true;
 
-        const { user, success, error } = await api.confirmEmail(
-          this.emailConfirmKey,
+        const { user, success, error } = await userAPI.confirmEmail(
+          this.confirmKey,
           this.userInstance.id
         );
-        this.loading.submit = false;
+        this.sending = false;
 
         if (error) {
-          return this.handleErrors(error);
+          const { message } = controllers.handleErrors(error);
+          this.confirmKeyError = true;
+          this.confirmKeyErrorMessage = message;
+
+          return;
         }
 
         if (user) {
           this.$store.commit("user/setUser", user);
         }
-        this.emailConfirmKey = "";
-        this.successNotify(success);
+
+        this.confirmKey = "";
+        controllers.successNotify(success);
       }
     },
 
@@ -58,13 +74,15 @@ export default {
           persistent: true
         })
         .onOk(async () => {
-          const { success, error } = await api.resendEmailConfirmationKey(
+          const { success, error } = await userAPI.resendEmailConfirmationKey(
             this.userInstance.id
           );
+
           if (error) {
-            return this.handleErrors(error);
+            return controllers.handleErrors(error);
           }
-          this.successNotify(success);
+
+          controllers.successNotify(success);
         });
     },
 
@@ -81,28 +99,24 @@ export default {
               autocomplete: false,
               maxlength: 36,
               counter: true,
-              value: this.emailConfirmKey,
+              value: this.confirmKey,
               label: this.$t("labels.confirmKey"),
-              error: this.usernameError,
-              errorMessage: this.usernameErrorMessage,
-              loading: this.loading.username
+              error: this.confirmKeyError,
+              errorMessage: this.confirmKeyErrorMessage
             },
             on: {
               input: value => {
-                this.emailConfirmKey = value;
+                this.confirmKeyError = false;
+                this.confirmKeyErrorMessage = "";
+
+                this.confirmKey = value;
               }
             }
           },
           [
             h("div", { staticClass: "multiline-hint", slot: "hint" }, [
               this.__emailConfirmHint(h)
-            ]),
-            h("q-spinner-puff", {
-              attrs: {
-                color: this.usernameError ? "negative" : "primary"
-              },
-              slot: "loading"
-            })
+            ])
           ]
         );
       }
@@ -152,11 +166,11 @@ export default {
         {
           staticClass: "float-right q-my-lg",
           class: {
-            loading: this.loading.submit
+            loading: this.sending
           },
           attrs: {
             label: this.$t("labels.save"),
-            loading: this.loading.submit,
+            loading: this.sending,
             color: this.canSubmit ? "green-6" : "red-6",
             disable: !this.canSubmit
           },
@@ -177,14 +191,6 @@ export default {
         ]
       );
     }
-  },
-
-  meta() {
-    return {
-      title: this.$t("titles.settings.safety"),
-      titleTemplate: title =>
-        `${title} - ${this.$t("titles.settings.main")} - L2Schedule`
-    };
   },
 
   render(h) {

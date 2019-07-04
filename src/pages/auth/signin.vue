@@ -3,6 +3,8 @@ import { debounce } from "quasar";
 
 import userAPI from "handlers/user/api";
 import controllers from "handlers/user/controllers";
+import oauth from "boot/oAuth";
+import { axiosInstance } from "boot/axios";
 
 export default {
   name: "loginPage",
@@ -67,6 +69,30 @@ export default {
     }
   },
   methods: {
+    google() {
+      let user;
+      oauth.google
+        .signIn()
+        .then(GoogleUser => {
+          const profile = GoogleUser.getBasicProfile();
+          user = {
+            id: profile.getId(),
+            email: profile.getEmail(),
+            avatar: profile.getImageUrl(),
+            name: profile.getName()
+          };
+          console.log(user);
+        })
+        .catch(error => {
+          //on fail do something
+        });
+    },
+    fb() {
+      let user;
+      oauth.facebook.login().then(res => {
+        console.log(res);
+      });
+    },
     async submit() {
       this.sending = true;
       const { user, error } = await userAPI.signin(this.credentials);
@@ -258,6 +284,30 @@ export default {
               on: {
                 click: () => {
                   this.$router.push({ name: "repair" });
+                }
+              }
+            }),
+            h("q-btn", {
+              staticClass: "float-left",
+              attrs: {
+                label: "google",
+                color: "yellow-4"
+              },
+              on: {
+                click: () => {
+                  this.google();
+                }
+              }
+            }),
+            h("q-btn", {
+              staticClass: "float-left",
+              attrs: {
+                label: "fb",
+                color: "yellow-4"
+              },
+              on: {
+                click: () => {
+                  this.fb();
                 }
               }
             })

@@ -34,23 +34,4 @@ router.use('/service', service);
 
 app.use('/api', router);
 
-// app.get('/articles', (req, res) => {
-//   const query = `{
-//     articles {
-//       id
-//       title
-//     }
-//   }`;
-
-//   GraphQLClient.request(query)
-//     .then(data => {
-//       res.send(data);
-//     })
-//     .catch(function(err) {
-//       res.status(500).json({
-//         error: 'Something failed!',
-//       });
-//     });
-// });
-
 app.listen(port);

@@ -185,6 +185,21 @@ module.exports = {
           },
         },
 
+        // Связываем приглашение в группу с самим экземпляром этой группы из таблицы groups
+        {
+          type: 'create_object_relationship',
+          args: {
+            name: 'group',
+            table: { name: 'group_invitations', schema: 'public' },
+            using: {
+              manual_configuration: {
+                remote_table: { name: 'groups', schema: 'public' },
+                column_mapping: { group_id: 'id' },
+              },
+            },
+          },
+        },
+
         /**
          * Создаем таблицу кланов.
          * Затем связаваем таблицы кланов и групп
@@ -305,4 +320,9 @@ module.exports = {
 
     return GraphQLApi(query);
   },
+};
+
+yy = {
+  type: 'bulk',
+  args: [],
 };

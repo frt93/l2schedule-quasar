@@ -28,7 +28,11 @@ export default {
       const { user, success, error } = await userAPI.confirmEmail(key, id);
 
       if (error) {
-        return controllers.errorNotify(error);
+        const { message } = controllers.handleErrors(error);
+        if (message) {
+          controllers.errorNotify(message);
+        }
+        return;
       }
       if (user) {
         this.$store.commit("user/setUser", user);

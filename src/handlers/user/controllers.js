@@ -135,6 +135,7 @@ export default {
 
       if (status >= 500) {
         this.errorNotify(err.message);
+        return false;
       } else {
         if (
           from &&
@@ -151,7 +152,7 @@ export default {
     // Сгенерированные сервером/браузером ошибки
     if (e.message === 'Network Error') {
       this.errorNotify(i18n.t('errors.network'));
-      return;
+      return false;
     }
   },
 

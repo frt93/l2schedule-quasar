@@ -127,7 +127,7 @@ export default {
      * Если пользователь внес изменения в email адрес или никнейм - запрашиваем у него пароль для подтверждения
      */
     needPasswordConfirm() {
-      if (
+      if (typeof this.userInstance === "object" &&
         this.username !== this.userInstance.username ||
         this.email !== this.userInstance.email
       ) {
@@ -170,25 +170,20 @@ export default {
 
         // Устанавливаем новый инстанс пользователя
         this.$store.commit("user/setUser", user);
-        //Меняем локализацию luxon
-        date.setDefaultLocale(lang);
-        date.setDefaultZone(this.metadata.timezone); //@todo только если изменилось
-        date.setTimezoneCookie(this.metadata.timezone); //@todo только если изменилось
 
-        //Меняем локализацию
-        this.$store.commit("user/changeLanguage", lang);
-        this.$i18n.locale = lang;
-        await import(`quasar/lang/${lang}`).then(lang => {
-          this.$q.lang.set(lang.default);
-        });
-        await import(`lang/${lang}/timezones-countries`).then(data => {
-          this.$store.commit(
-            "user/setTimezonesAndCountriesLists",
-            data.default
-          );
-        });
-        this.timezoneOptions = this.timezoneList; // Обновляем список часовых поясов, который используется селектом, для перевода текущего выбранного пояса
-        this.countriesOptions = this.countriesList; // Обновляем список стран, который используется селектом, для перевода текущей выбранной страны
+        if (this.metadata.timezone !== this.timezone) {
+          //Меняем локализацию luxon только если пользователь сменил часовой пояс
+          date.setDefaultZone(this.metadata.timezone);
+          date.setTimezoneCookie(this.metadata.timezone);
+        }
+
+        if (this.metadata.language !== this.lang) {
+          //Меняем локализацию только если пользователь сменил язык
+          this.$store.dispatch("user/changeLanguage", lang).then(() => {
+            this.timezoneOptions = this.timezoneList; // Обновляем список часовых поясов, который используется селектом, для перевода текущего выбранного пояса
+            this.countriesOptions = this.countriesList; // Обновляем список стран, который используется селектом, для перевода текущей выбранной страны
+          });
+        }
 
         controllers.successNotify(success);
       }
@@ -604,6 +599,3 @@ export default {
   }
 };
 </script>
-
-
-

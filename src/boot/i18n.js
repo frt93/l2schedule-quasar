@@ -14,7 +14,7 @@ export default async ({ app, Vue, store, ssrContext }) => {
 
   app.i18n = new VueI18n({
     locale: lang,
-    fallbackLocale: lang,
+    fallbackLocale: 'en-us',
     messages,
   });
 

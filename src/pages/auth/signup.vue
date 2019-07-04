@@ -15,7 +15,7 @@ export default {
   },
 
   beforeMount() {
-    const lang = this.$store.state.user.language;
+    const lang = this.lang;
     import(`lang/${lang}/timezones-countries`).then(data => {
       this.tz = dateAPI.isTimezoneInList(data.default.getTimezonesList());
     });
@@ -25,6 +25,7 @@ export default {
     return {
       tz: null,
       countryISO: null,
+      lang: this.$store.state.user.language,
 
       username: "",
       email: "",
@@ -60,7 +61,8 @@ export default {
         metadata: {
           data: {
             country: this.countryISO,
-            timezone: this.tz
+            timezone: this.tz,
+            language: this.lang
           }
         }
       };

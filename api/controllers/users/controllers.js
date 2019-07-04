@@ -411,6 +411,11 @@ module.exports.accountSettings = async (req, res) => {
  */
 module.exports.passwordSettings = async (req, res) => {
   const payload = req.body;
+
+  const valid = await validator.accountPasswordValidation(payload, res);
+  //Если валидация провалилась - прекращаем выполнение
+  if (!valid) return;
+
   const user = await helpers.findUser('id', payload.id, res);
 
   const comparePasswords = await helpers.comparePasswords(payload.current, user.password);

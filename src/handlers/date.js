@@ -2,6 +2,11 @@ import jsCookie from 'js-cookie';
 import { DateTime, Settings } from 'luxon';
 
 export default {
+  /**
+   * Устанавливаем язык пакета по умолчанию
+   *
+   * @param {String} lang       Язык пользователя
+   */
   setDefaultLocale(lang) {
     Settings.defaultLocale = lang;
   },
@@ -20,6 +25,14 @@ export default {
    */
   getCurrentTimezone() {
     const timezone = DateTime.local().zoneName;
+    return timezone;
+  },
+
+  /**
+   * Получаем сокращенно наименование текущего часового пояса пользователя, который установлен на его устройстве
+   */
+  getCurrentTimezoneShortname() {
+    const timezone = DateTime.local().offsetNameShort;
     return timezone;
   },
 
@@ -44,14 +57,6 @@ export default {
   },
 
   /**
-   * Получаем сокращенно наименование текущего часового пояса пользователя, который установлен на его устройстве
-   */
-  getCurrentTimezoneShortname() {
-    const timezone = DateTime.local().offsetNameShort;
-    return timezone;
-  },
-
-  /**
    * Текущее время пользователя в установленном им часовом поясе
    *
    * @param {String} timezone   Установленный часовой пояс пользователя
@@ -65,12 +70,59 @@ export default {
     return now.toFormat('dd.LL.yyyy HH.mm.ss');
   },
 
+  /**
+   * Проверяем наличие в указанном часовом поясе перехода на зимнее/летнее время
+   *
+   * @param {String} timezone   Установленный часовой пояс пользователя
+   */
   isTimezoneInDST(timezone) {
     if (!timezone || timezone === 'local') {
       timezone = this.getCurrentTimezone();
     }
 
     return DateTime.local().setZone(timezone).isInDST;
+  },
+
+  /**
+   * Проверяем куки с названием часового пояса пользователя. Если пользователь авторизован - сверяем с названием час. пояса, сохраненным в базе данных.
+   * В итоге устанавливаем полученный часовой пояс как значение по умолчанию для экземпляра luxon
+   *
+   * @param {Object | null} user   Инстанс данных пользователя
+   */
+  setTimezone(user) {
+    const timezoneCookie = jsCookie.get('timezone');
+    let timezone;
+
+    if (user !== null) {
+      const userTimezone = user.metadata.timezone;
+      /**
+       * Пользователь авторизован. Возьмем значение часового пояса из его инстанса
+       */
+      timezone = userTimezone;
+
+      if (timezoneCookie !== userTimezone) {
+        /**
+         * В инстансе пользователя указан кастомный часовой пояс и значение куков не равно значению инстанса - перезаписываем куки
+         */
+        this.setTimezoneCookie(userTimezone);
+      }
+    }
+
+    if (user === null) {
+      /**
+       * Пользователь гость. Возьмем значение из куков. В случае их отсутствия в переменную запишется null
+       */
+      timezone = timezoneCookie;
+    }
+
+    if (timezone == null || timezone === 'null') {
+      /**
+       * Если у пользователя в инстансе не указан кастомный часовой пояс(и, соответственно, значение 'null' записано в куки)/отсутствуют куки - опеределим локальный часовой пояс
+       */
+      timezone = this.getCurrentTimezone();
+    }
+
+    this.setDefaultZone(timezone);
   },
 
   /**

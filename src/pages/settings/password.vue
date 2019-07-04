@@ -1,26 +1,41 @@
 
 
 <script>
-import auth from "mixin/auth";
-import api from "handlers/user/api";
+import userAPI from "handlers/user/api";
+import controllers from "handlers/user/controllers";
 export default {
   name: "passwordSettingsPage",
-  mixins: [auth],
-  props: ["userInstance"],
+  meta() {
+    return {
+      title: this.$t("titles.settings.password"),
+      titleTemplate: title =>
+        `${title} - ${this.$t("titles.settings.main")} - L2Schedule`
+    };
+  },
 
+  props: ["userInstance"],
   data() {
     return {
-      currentPassword: "",
+      password: "",
       newPassword: "",
-      hidePwd2: true
+
+      passwordError: false,
+      newPasswordError: false,
+
+      passwordErrorMessage: "",
+      newPasswordErrorMessage: "",
+
+      hidePwd: true,
+      hidePwd2: true,
+      sending: false
     };
   },
 
   computed: {
     canSubmit() {
-      return this.currentPassword.length >= 7 &&
+      return this.password.length >= 7 &&
         this.newPassword.length >= 7 &&
-        (this.currentPassword.length <= 30 && this.newPassword.length <= 30) &&
+        (this.password.length <= 30 && this.newPassword.length <= 30) &&
         !this.passwordError &&
         !this.newPasswordError
         ? true
@@ -32,17 +47,24 @@ export default {
     async submit() {
       if (this.canSubmit) {
         const payload = {
-          current: this.currentPassword,
+          current: this.password,
           new: this.newPassword,
           id: this.userInstance.id
         };
-        const { success, error } = await api.submitPasswordSettings(payload);
+        const { success, error } = await userAPI.submitPasswordSettings(
+          payload
+        );
+
         if (error) {
-          return this.handleErrors(error);
+          const { errorType, message } = controllers.handleErrors(error);
+          this[errorType] = true;
+          this[`${errorType}Message`] = message;
+
+          return;
         }
 
-        this.successNotify(success);
-        this.currentPassword = this.newPassword = "";
+        controllers.successNotify(success);
+        this.password = this.newPassword = "";
       }
     },
     /**
@@ -54,11 +76,11 @@ export default {
         {
           staticClass: "float-right q-my-lg",
           class: {
-            loading: this.loading.submit
+            loading: this.sending
           },
           attrs: {
             label: this.$t("labels.save"),
-            loading: this.loading.submit,
+            loading: this.sending,
             color: this.canSubmit ? "green-6" : "red-6",
             disable: !this.canSubmit
           },
@@ -81,14 +103,6 @@ export default {
     }
   },
 
-  meta() {
-    return {
-      title: this.$t("titles.settings.password"),
-      titleTemplate: title =>
-        `${title} - ${this.$t("titles.settings.main")} - L2Schedule`
-    };
-  },
-
   render(h) {
     return h("div", { staticClass: "form" }, [
       h(
@@ -100,15 +114,22 @@ export default {
             type: this.hidePwd ? "password" : "text",
             maxlength: 30,
             counter: true,
-            value: this.currentPassword,
+            value: this.password,
             label: this.$t("labels.currentPassword"),
             error: this.passwordError,
             errorMessage: this.passwordErrorMessage
           },
           on: {
             input: value => {
-              this.currentPassword = value;
-              this.validatePassword(value);
+              this.passwordError = false;
+              this.passwordErrorMessage = "";
+
+              this.password = value;
+              this.passwordErrorMessage = controllers.validatePassword(value);
+
+              if (this.passwordErrorMessage) {
+                this.passwordError = true;
+              }
             }
           }
         },
@@ -159,8 +180,17 @@ export default {
           },
           on: {
             input: value => {
+              this.newPasswordError = false;
+              this.newPasswordErrorMessage = "";
+
               this.newPassword = value;
-              this.validatePassword(value, true);
+              this.newPasswordErrorMessage = controllers.validatePassword(
+                value
+              );
+
+              if (this.newPasswordErrorMessage) {
+                this.newPasswordError = true;
+              }
             }
           }
         },
