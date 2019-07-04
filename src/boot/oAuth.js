@@ -142,9 +142,23 @@ const facebook = (() => {
   return new Auth();
 })();
 
+const telegram = () => {
+  const script = document.createElement('script');
+  script.async = true;
+  script.src = 'https://telegram.org/js/telegram-widget.js?3';
+  script.setAttribute('data-size', 'large');
+  script.setAttribute('data-userpic', false);
+  script.setAttribute('data-radius', 3);
+  script.setAttribute('data-telegram-login', 'l2funBot');
+  script.setAttribute('data-request-access', 'write');
+  script.setAttribute('data-onauth', 'window.onTelegramAuth(user)');
+
+  return { script };
+};
+
 if (process.env.CLIENT) {
   google.load();
   facebook.load();
 }
 
-export default { google, facebook };
+export default { google, facebook, telegram };

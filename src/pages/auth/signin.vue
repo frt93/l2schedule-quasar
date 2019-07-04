@@ -3,7 +3,7 @@ import { debounce } from "quasar";
 
 import userAPI from "handlers/user/api";
 import controllers from "handlers/user/controllers";
-import oauth from "boot/oAuth";
+// import oauth from "boot/oAuth";
 import { axiosInstance } from "boot/axios";
 
 export default {
@@ -13,6 +13,16 @@ export default {
       title: this.$t("titles.authSignin"),
       titleTemplate: title => `${title} - L2Schedule`
     };
+  },
+
+  beforeMount() {
+    if (process.env.CLIENT) {
+      import("boot/oAuth").then(data => {
+        this.oauth = data.default;
+        const { script } = this.oauth.telegram();
+        this.$refs.providers.appendChild(script);
+      });
+    }
   },
 
   data() {
@@ -25,7 +35,8 @@ export default {
       passwordErrorMessage: "",
       hidePwd: true,
       loading: false,
-      sending: false
+      sending: false,
+      oauth: null
     };
   },
 
@@ -71,7 +82,7 @@ export default {
   methods: {
     google() {
       let user;
-      oauth.google
+      this.oauth.google
         .signIn()
         .then(GoogleUser => {
           const profile = GoogleUser.getBasicProfile();
@@ -89,9 +100,12 @@ export default {
     },
     fb() {
       let user;
-      oauth.facebook.login().then(res => {
+      this.oauth.facebook.login().then(res => {
         console.log(res);
       });
+    },
+    telegram() {
+      return TWidgetLogin.auth();
     },
     async submit() {
       this.sending = true;
@@ -287,30 +301,32 @@ export default {
                 }
               }
             }),
-            h("q-btn", {
-              staticClass: "float-left",
-              attrs: {
-                label: "google",
-                color: "yellow-4"
-              },
-              on: {
-                click: () => {
-                  this.google();
+            h("div", { ref: "providers" }, [
+              h("q-btn", {
+                staticClass: "float-left",
+                attrs: {
+                  label: "google",
+                  color: "yellow-4"
+                },
+                on: {
+                  click: () => {
+                    this.google();
+                  }
                 }
-              }
-            }),
-            h("q-btn", {
-              staticClass: "float-left",
-              attrs: {
-                label: "fb",
-                color: "yellow-4"
-              },
-              on: {
-                click: () => {
-                  this.fb();
+              }),
+              h("q-btn", {
+                staticClass: "float-left",
+                attrs: {
+                  label: "fb",
+                  color: "yellow-4"
+                },
+                on: {
+                  click: () => {
+                    this.fb();
+                  }
                 }
-              }
-            })
+              })
+            ])
           ])
         ]
       )
