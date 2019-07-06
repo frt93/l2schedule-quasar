@@ -12,6 +12,7 @@ export default {
     login: 'Ваш никнейм или email адрес',
     signin: 'Войти',
     forgot: 'Забыли пароль?',
+    restoreAccess: 'Восстановить доступ',
     logout: 'Выйти',
     haveKey: 'Уже есть ключ?',
     repair: {
@@ -38,11 +39,9 @@ export default {
   },
   errors: {
     spaces: 'Пробелы запрещены',
-    char: 'Уберите символ',
-    chars: 'Уберите символы',
-    wrongEmail: 'Неверный формат email адреса',
     network:
       'Не удалось связаться с сервером. Проверьте свое соединение с интернетом и попробуйте снова',
+    authError: 'Ошибка авторизации',
   },
   titles: {
     mainPage: 'Главная',

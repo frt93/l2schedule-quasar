@@ -2,25 +2,15 @@ const userInstancePattern = require('./userInstancePattern');
 /**
  * Компонуем запрос данных искомого пользователя
  *
- * @param {String} key             Ключ (столбец в базе данных) по которому осуществляется поиск
- * @param {String | Int} value     Значение ключа
- * @todo Дополнить
+ * @param {String} provider   Название oAuth провайдера, с помощью которого авторизуется пользователь
+ * @param {Integer} id        ID его аккаунта в приложении-провайдере
  */
-const composeQuery = (key, value) => {
-  let queryHeader;
-  // Компонуем шапку запроса в зависимости от поля, по которому ищем пользователя. Поле id требует точного сравнения (_eq) и значения типа int.
-  // В остальных случаях значения строкового типа с поиском методом _ilike(точное совпадение строки без учета регистра)
-  if (key === 'id') {
-    queryHeader = `users(where: {${key}: {_eq: ${value}}})`;
-  } else {
-    queryHeader = `users(where: {${key}: {_ilike: "${value}"}})`;
-  }
-
-  return `query findUser{
-  ${queryHeader} {
-    ${userInstancePattern}
-  }
-}`;
+const composeQuery = (provider, id) => {
+  return `query find_user{
+    users(where: {metadata: {${provider}ID: {_ilike: "${id}"}}}) {
+      ${userInstancePattern}
+    }
+  }`;
 };
 
 /**

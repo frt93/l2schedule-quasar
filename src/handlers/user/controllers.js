@@ -5,53 +5,7 @@ import api from './api';
 
 export default {
   /**
-   * Валидируем никнейм пользователя
-   *
-   * @param {String} username   Указанный пользователем никнейм
-   */
-  validateUsername(username) {
-    // Начинаем валидацию только:
-    // 1. Если передано какое-то значение, а не пустая строка
-    // 2. Если на момент начала срабатывания метода в компоненте авторизации в качестве ключа авторизации используется никнейм
-    if (username.length) {
-      let message = '',
-        charsToRemove = '',
-        chars;
-
-      // Выражение ищет пробелы в никнейме
-      const spaces = /\s/g.test(username);
-      if (spaces) {
-        message += `${i18n.t('errors.spaces')} \n`;
-      }
-
-      // Запрещенные символы
-      const forbiddenChars = /@|~|`|'|"|\/|\\|\|/g;
-
-      // Проверяем строку на наличие запрещенных символов. Проверка длится до конца строки
-      while ((chars = forbiddenChars.exec(username))) {
-        // Найденный символ дописываем в переменную charsToRemove только в том случае, если конкретно его там еще нет.
-        if (charsToRemove.indexOf(chars[0]) === -1) {
-          charsToRemove += `${chars[0]} `;
-        }
-      }
-
-      // Меньше трех (т.е. 2 символа) так как в строку символ добавляется с пробелом
-      if (charsToRemove.length && charsToRemove.length < 3)
-        message += `${i18n.t('errors.char')} ${charsToRemove}`;
-      else if (charsToRemove.length >= 3) {
-        message += `${i18n.t('errors.chars')} ${charsToRemove}`;
-      }
-
-      if (spaces || charsToRemove.length) {
-        return message;
-      }
-
-      return '';
-    }
-  },
-
-  /**
-   * Проверяем свободен ли указанный при регистрации пользователем никнейм
+   * Делаем запрос для валидации никнейма
    *
    * @param {String} username   Указанный никнейм
    */
@@ -63,36 +17,7 @@ export default {
   },
 
   /**
-   * Валидируем email адрес пользователя. В email адресе запрещены только пробелы
-   *
-   * @param {String} email    Указанный пользователем email
-   */
-  validateEmail(email) {
-    // Начинаем валидацию только:
-    // 1. Если передано какое-то значение, а не пустая строка
-    // 2. Если на момент начала срабатывания метода в компоненте авторизации в качестве ключа авторизации используется email адрес
-    if (email.length) {
-      let message = '';
-      const spaces = /\s/g.test(email);
-      if (spaces) {
-        message += `${i18n.t('errors.spaces')}\n`;
-      }
-
-      const pattern = /@+\w{1,}\.\w{2,}/g.test(email);
-      if (!pattern) {
-        message += i18n.t('errors.wrongEmail');
-      }
-
-      if (spaces || !pattern) {
-        return message;
-      }
-
-      return '';
-    }
-  },
-
-  /**
-   * Проверяем свободен ли указанный при регистрации пользователем email адрес
+   * Делаем запрос для валидации email адреса
    *
    * @param {String} email    Указанный адрес электронной почты
    */
@@ -114,6 +39,98 @@ export default {
     if (spaces) {
       return `${i18n.t('errors.spaces')}\n`;
     }
+  },
+
+  /**
+   * Получаем интанс гугл аккаунта пользователя и отбираем необходимые данные
+   *
+   * @param {String} data          Инстанс данных гугл аккаунта пользователя
+   */
+  googleInstance(data) {
+    let user = {
+      provider: 'google',
+      id: data.getId(),
+      email: data.getEmail(),
+    };
+
+    if (data.getImageUrl()) {
+      user.avatar = data.getImageUrl();
+    }
+    if (data.getName()) {
+      user.name = data.getName();
+    }
+
+    return user;
+  },
+
+  /**
+   * Получаем интанс facebook аккаунта пользователя и отбираем необходимые данные
+   *
+   * @param {String} data          Инстанс данных фейсбук аккаунта пользователя
+   */
+  facebookInstance(data) {
+    let user = {
+      provider: 'facebook',
+      id: data.id,
+      name: `${data.first_name} ${data.last_name}`,
+    };
+
+    if (data.email) {
+      user.email = data.email;
+    }
+
+    return user;
+  },
+
+  /**
+   * Получаем интанс аккаунта vk.com пользователя и отбираем необходимые данные
+   *
+   * @param {String} data          Инстанс данных vk аккаунта пользователя
+   */
+  vkInstance(data) {
+    let profile = data.session.user;
+
+    let user = {
+      provider: 'vk',
+      id: profile.id,
+      name: `${profile.first_name} ${profile.last_name}`,
+    };
+
+    if (profile.domain) {
+      user.username = profile.domain;
+    }
+
+    return user;
+  },
+
+  /**
+   * Получаем интанс телеграм аккаунта пользователя и отбираем необходимые данные
+   *
+   * @param {String} data          Инстанс данных telegram аккаунта пользователя
+   */
+  telegramInstance(data) {
+    let user = {
+      provider: 'telegram',
+      id: data.id,
+    };
+
+    if (data.username) {
+      user.username = data.username;
+    }
+
+    if (data.photo_url) {
+      user.avatar = data.photo_url;
+    }
+
+    if (data.first_name) {
+      user.name = data.first_name;
+    }
+
+    if (data.last_name) {
+      user.name = `${data.first_name} ${data.last_name}`;
+    }
+
+    return user;
   },
 
   /**

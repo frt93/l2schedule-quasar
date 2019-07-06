@@ -53,7 +53,6 @@ module.exports.create = async (req, res) => {
  *
  * @param req                    Объект запроса сервера
  * @param res                    Объект ответа сервера
- * @param {Object} credentials   Данные, с помощью которых пользователь пытается авторизовать. Это никнейм/email и пароль
  *
  * @return {Object}              Экземпляр пользователя
  */
@@ -95,6 +94,68 @@ module.exports.signin = async (req, res) => {
       return validator.throwErrors('Wrong password', res);
     }
   }
+};
+
+/**
+ * Авторизуем пользователя с помощью данных аккаунта одной из доступных социальных сетей
+ *
+ * @param req                    Объект запроса сервера
+ * @param res                    Объект ответа сервера
+ *
+ * @return {Object}              Экземпляр пользователя
+ */
+module.exports.oauthLogin = (req, res) => {
+  const credentials = req.body,
+    provider = credentials.provider,
+    id = credentials.id;
+
+  let user;
+
+  const { composeQuery, response } = require('api/controllers/users/query/oauth');
+  const query = composeQuery(provider, id);
+
+  GraphQLClient.request(query)
+    .then(async data => {
+      user = response(data);
+      if (user) {
+        helpers.saveUserInRedis(user);
+        // Пароль правльный. Генерируем токен авторизации и отправляем данные пользователю
+        const { token } = await helpers.generateToken(user.id);
+        delete user.password; // Удаляем из передаваемого экземпляра пароль
+        res.send({ token, user });
+      } else {
+        // Пользователь не найден. Попытаемся зарегистрировать его
+        return validator.throwErrors('oauth: no user', res);
+      }
+    })
+    .catch(e => {
+      console.log(e);
+      return validator.handleErrors(e, res);
+    });
+};
+
+module.exports.oauthCreate = async (req, res) => {
+  const credentials = req.body;
+  if (credentials.email) {
+    const { isExist, error } = await helpers.findEmail(credentials.email, res);
+
+    if (error) {
+      return validator.handleErrors(error, res);
+    }
+
+    if (isExist !== null) {
+      return validator.throwErrors('oauth: email already used', res, isExist);
+    }
+  }
+
+  const { username } = await helpers.oauthChooseUsername(credentials, res);
+  if (!username) {
+    return validator.throwErrors('oauth: username is not chosen', res);
+  } else {
+    console.log(username);
+  }
+
+  return;
 };
 
 /**
@@ -142,22 +203,17 @@ module.exports.checkUsername = async (req, res) => {
   const valid = await validator.validateUsername(username, res);
   //Если валидация провалилась - прекращаем выполнение
   if (!valid) return;
+  const { isExist, error } = await helpers.findUsername(username, res);
 
-  const { query, response } = require('api/controllers/users/query/checkUsername');
-  username = replaceSpaces(username);
-  username = query(username);
+  if (error) {
+    return validator.handleErrors(error, res);
+  }
 
-  GraphQLClient.request(username)
-    .then(data => {
-      username = response(data);
-      if (username !== null) {
-        return validator.throwErrors('Username already exists', res, username);
-      }
-      res.send(username);
-    })
-    .catch(e => {
-      return validator.handleErrors(e, res);
-    });
+  if (isExist !== null) {
+    return validator.throwErrors('Username already exists', res, isExist);
+  }
+
+  res.send(isExist);
 };
 
 /**
@@ -174,21 +230,17 @@ module.exports.checkEmail = async (req, res) => {
   const valid = await validator.validateEmail(email, res);
   //Если валидация провалилась - прекращаем выполнение
   if (!valid) return;
+  const { isExist, error } = await helpers.findEmail(email, res);
 
-  const { query, response } = require('api/controllers/users/query/checkemail');
-  email = query(email);
+  if (error) {
+    return validator.handleErrors(error, res);
+  }
 
-  GraphQLClient.request(email)
-    .then(data => {
-      email = response(data);
-      if (email !== null) {
-        return validator.throwErrors('Email already exists', res, email);
-      }
-      res.send(email);
-    })
-    .catch(e => {
-      return validator.handleErrors(e, res);
-    });
+  if (isExist !== null) {
+    return validator.throwErrors('Email already exists', res, isExist);
+  }
+
+  res.send(isExist);
 };
 
 /**

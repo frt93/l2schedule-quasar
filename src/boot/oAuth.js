@@ -1,9 +1,9 @@
 const google = (() => {
   const install = () => {
-    const apiUrl = 'https://apis.google.com/js/api.js';
     return new Promise(resolve => {
       const script = document.createElement('script');
-      script.src = apiUrl;
+      script.src = 'https://apis.google.com/js/api.js';
+      script.async = true;
       script.onreadystatechange = script.onload = () => {
         if (!script.readyState || /loaded|complete/.test(script.readyState)) {
           resolve();
@@ -13,66 +13,51 @@ const google = (() => {
     });
   };
 
-  const init = config => {
+  const init = () => {
     return new Promise(resolve => {
       window.gapi.load('auth2', () => {
+        const config = {
+          clientId: '577711782769-d4ouf4e9u77ligpgkuf2asusocvoekt4.apps.googleusercontent.com',
+          scope: 'https://www.googleapis.com/auth/userinfo.profile',
+          prompt: 'select_account',
+          fetch_basic_profile: true,
+        };
+
         window.gapi.auth2.init(config).then(() => {
-          resolve(window.gapi);
+          resolve();
         });
       });
     });
   };
 
   const Auth = function() {
-    this.GoogleAuth = null; /* window.gapi.auth2.getAuthInstance() */
-    // this.isAuthorized = false;
-    this.isInit = false;
-    this.prompt = null;
+    this.GoogleAuth = null;
     this.isLoaded = () => {
       return !!this.GoogleAuth;
     };
 
+    // Загрузим SDK и нициализируем его
     this.load = () => {
-      const config = {
-        clientId: '577711782769-in3gqdrl5fsmt2v6jctffeqpvadps7pc.apps.googleusercontent.com',
-        scope: 'https://www.googleapis.com/auth/userinfo.profile',
-        prompt: 'select_account',
-        fetch_basic_profile: true,
-      };
-
-      install()
-        .then(() => {
-          return init(config);
-        })
-        .then(gapi => {
-          this.GoogleAuth = gapi.auth2.getAuthInstance();
-          this.isInit = true;
-          // this.prompt = config.prompt;
-          // this.isAuthorized = this.GoogleAuth.isSignedIn.get();
+      if (!window.gapi) {
+        install().then(() => {
+          return init();
         });
+      }
     };
 
-    this.signIn = (successCallback, errorCallback) => {
+    this.login = () => {
       return new Promise((resolve, reject) => {
+        this.GoogleAuth = gapi.auth2.getAuthInstance();
+
         if (!this.GoogleAuth) {
-          // if (typeof errorCallback === 'function') {
-          //   errorCallback(false);
-          // }
           reject(false);
           return;
         }
         this.GoogleAuth.signIn()
-          .then(googleUser => {
-            // if (typeof successCallback === 'function') {
-            //   successCallback(googleUser);
-            // }
-            // this.isAuthorized = this.GoogleAuth.isSignedIn.get();
-            resolve(googleUser);
+          .then(user => {
+            resolve(user.getBasicProfile());
           })
           .catch(error => {
-            // if (typeof errorCallback === 'function') {
-            //   errorCallback(error);
-            // }
             reject(error);
           });
       });
@@ -87,6 +72,7 @@ const facebook = (() => {
     return new Promise(resolve => {
       const script = document.createElement('script');
       script.src = '//connect.facebook.net/en_US/sdk.js';
+      script.async = true;
       script.onreadystatechange = script.onload = () => {
         if (!script.readyState || /loaded|complete/.test(script.readyState)) {
           resolve();
@@ -100,7 +86,7 @@ const facebook = (() => {
   const init = () => {
     return new Promise(async resolve => {
       if (window.FB) {
-        window.fbAsyncInit = function() {
+        window.fbAsyncInit = () => {
           const config = {
             cookie: true,
             xfbml: true,
@@ -118,12 +104,16 @@ const facebook = (() => {
 
   const Auth = function() {
     this.load = () => {
-      install().then(() => {
-        return init();
-      });
+      // Загрузим SDK и нициализируем его
+      if (!window.FB) {
+        install().then(() => {
+          init();
+        });
+      }
     };
+
     this.login = () => {
-      return new Promise(resolve => {
+      return new Promise(async resolve => {
         window.FB.login(() => {
           window.FB.api(
             '/me',
@@ -135,6 +125,63 @@ const facebook = (() => {
             }
           );
         });
+      });
+    };
+  };
+
+  return new Auth();
+})();
+
+const vk = (() => {
+  const install = () => {
+    return new Promise(resolve => {
+      const script = document.createElement('script');
+      script.src = 'https://vk.com/js/api/openapi.js?161';
+      script.async = true;
+      script.onreadystatechange = script.onload = () => {
+        if (!script.readyState || /loaded|complete/.test(script.readyState)) {
+          resolve();
+        }
+      };
+
+      document.getElementsByTagName('head')[0].appendChild(script);
+    });
+  };
+
+  const init = () => {
+    return new Promise(async resolve => {
+      if (window.VK) {
+        VK.init({
+          apiId: '7044244',
+        });
+      } else {
+        await install();
+      }
+
+      resolve(window.VK);
+    });
+  };
+
+  const Auth = function() {
+    this.load = () => {
+      // Загрузим SDK и нициализируем его
+      install().then(() => {
+        return init();
+      });
+    };
+    this.login = () => {
+      return new Promise(resolve => {
+        // Т.к. VK заблокирован на территории Украины - загружаем и инициализируем SDK только при попытке входа с помощью VK,
+        // чтобы не грузить его при инициализации страницы авторизации как остальные.
+        install()
+          .then(() => {
+            init();
+          })
+          .then(() => {
+            VK.Auth.login(res => {
+              resolve(res);
+            });
+          });
       });
     };
   };
@@ -157,8 +204,14 @@ const telegram = () => {
 };
 
 if (process.env.CLIENT) {
-  google.load();
-  facebook.load();
+  // google.load();
+  // facebook.load();
+  // vk.load();
 }
 
-export default { google, facebook, telegram };
+const install = () => {
+  google.load();
+  facebook.load();
+};
+
+export default { google, facebook, telegram, vk, install };

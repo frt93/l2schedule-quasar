@@ -46,6 +46,26 @@ module.exports.throwErrors = (name, res, params) => {
     });
   }
 
+  if (name === 'oauth: no user') {
+    return res.status(404).send({
+      type: name,
+    });
+  }
+
+  if (name === 'oauth: email already used') {
+    return res.status(403).send({
+      type: name,
+      message: messages(res.lang).errors[name](params),
+    });
+  }
+
+  if (name === 'oauth: username is not chosen') {
+    return res.status(403).send({
+      type: name,
+      message: messages(res.lang).errors[name],
+    });
+  }
+
   if (name === 'Repair key not found') {
     return res.status(404).send({
       type: 'repairKeyError',
@@ -146,42 +166,35 @@ module.exports.handleErrors = (e, res, params) => {
  *
  * @param {String} username   Указанный пользователем никнейм
  * @param res                 Экземпляр ответа сервера
+ * @param doRespond           Параметр, регулирующий что вернет функция в случае обнаружения ошибок при
+ *                            валидации: объект res с ответом или просто булево значение(true/false)
  */
-module.exports.validateUsername = (username, res) => {
-  let message = '',
-    charsToRemove = '',
-    chars;
+module.exports.validateUsername = (username, res, doRespond = true) => {
+  let message = '';
+
+  if (username.length > 16) {
+    message += `${messages(res.lang).errors['username length']}. `;
+  }
 
   // Выражение ищет пробелы в никнейме
   const spaces = /\s/g.test(username);
   if (spaces) {
-    message += messages(res.lang).errors['Username spaces'];
+    message += `${messages(res.lang).errors['Username spaces']}\n`;
   }
 
-  // Запрещенные символы
-  const forbiddenChars = /@|~|`|'|"|\/|\\|\|/g;
-
-  // Проверяем строку на наличие запрещенных символов. Проверка длится до конца строки
-  while ((chars = forbiddenChars.exec(username))) {
-    // Найденный символ дописываем в переменную charsToRemove только в том случае, если конкретно его там еще нет.
-    if (charsToRemove.indexOf(chars[0]) === -1) {
-      charsToRemove += `${chars[0]} `;
-    }
-  }
-
-  // Меньше трех (т.е. 2 символа) так как в строку символ добавляется с пробелом
-  if (charsToRemove.length && charsToRemove.length < 3)
-    message += messages(res.lang).errors['Prohibited char'](charsToRemove);
-  else if (charsToRemove.length >= 3) {
-    message += messages(res.lang).errors['Prohibited chars'](charsToRemove);
+  const pattern = /^[a-zA-Z0-9_\.-]+$/.test(username);
+  if (!pattern) {
+    message += `${messages(res.lang).errors['username pattern']}`;
   }
 
   if (message.length) {
-    res.status(400).send({
-      type: 'usernameError',
-      msgType: 'usernameErrorMessage',
-      message,
-    });
+    if (doRespond) {
+      res.status(400).send({
+        type: 'usernameError',
+        msgType: 'usernameErrorMessage',
+        message,
+      });
+    }
     return false;
   }
 
@@ -199,7 +212,7 @@ module.exports.validateEmail = (email, res) => {
 
   const spaces = /\s/g.test(email);
   if (spaces) {
-    message += messages(res.lang).errors['Email spaces'];
+    message += `${messages(res.lang).errors['Email spaces']}.\n`;
   }
 
   const pattern = /@+\w{1,}\.\w{2,}/g.test(email);
@@ -229,15 +242,14 @@ module.exports.passwordPattern = (password, res) => {
   let message = '';
 
   const spaces = /\s/g.test(password);
-
+  if (spaces) {
+    message += `${messages(res.lang).errors['Password spaces']}.\n`;
+  }
   if (password.length < 7) {
     message += messages(res.lang).errors['Password min length'];
   }
   if (password.length > 30) {
     message += messages(res.lang).errors['Password max length'];
-  }
-  if (spaces) {
-    message += messages(res.lang).errors['Password spaces'];
   }
 
   return message;

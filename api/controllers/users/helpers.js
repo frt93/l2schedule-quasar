@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken'),
 const redis = require('api/config/redis').redisUsersDB,
   { GraphQLClient } = require('api/config/graphql'),
   { jwtKey } = require('api/config/auth'),
+  { replaceSpaces } = require('api/utils/filters'),
   validator = require('./validator');
 
 /**
@@ -32,6 +33,7 @@ module.exports.saveUserInRedis = user => {
 
 /**
  * Составляем токен для подтверждения email адреса, смены пароля или других операций
+ *
  * @param id                Уникальный идентификатор пользователя, для которого генерируется токен
  * @return {String}
  */
@@ -46,6 +48,7 @@ module.exports.generateToken = async (id, key) => {
 
 /**
  * Хэшируем пароль пользователя
+ *
  * @param {String} password Пароль пользователя
  * @return {String}
  */
@@ -56,6 +59,7 @@ module.exports.hashPassword = password => {
 
 /**
  * Проверяем совпадение указанного пароля с хэшированным паролем, сохраненным в БД
+ *
  * @param {String} unhashed   Пароль, указанный пользователем
  * @param {String} hashed     Пароль, сохраненный в базе данных в виде хэша
  * @return Boolean
@@ -67,10 +71,10 @@ module.exports.comparePasswords = async (unhashed, hashed) => {
 
 /**
  * Ищем пользователя в Redis кэше или в базе данных
+ *
  * @param {String} key        Ключ (поле) по которому осуществляется поиск (id/username/email, etc)
  * @param {String} value      Значение ключа поиска
  * @param res                 Экземпляр ответа сервера
- *
  */
 module.exports.findUser = async (key, value, res) => {
   let user;
@@ -96,4 +100,117 @@ module.exports.findUser = async (key, value, res) => {
     });
 
   return user;
+};
+
+/**
+ * Проверим наличие в базе данных пользователя с указанным никнеймом
+ *
+ * @param {String} username   Никнейм
+ * @param res                 Экземпляр ответа сервера
+ */
+module.exports.findUsername = async (username, res) => {
+  let isExist, error;
+  const { query, response } = require('api/controllers/users/query/checkUsername');
+  username = query(username);
+
+  await GraphQLClient.request(username)
+    .then(data => {
+      isExist = response(data);
+    })
+    .catch(e => {
+      error = e;
+    });
+
+  return { isExist, error };
+};
+
+/**
+ * Проверим наличие в базе данных пользователя с указанным email адресом
+ *
+ * @param {String} email      Email адрес
+ * @param res                 Экземпляр ответа сервера
+ */
+module.exports.findEmail = async (email, res) => {
+  let isExist, error;
+  const { query, response } = require('api/controllers/users/query/checkemail');
+  email = query(email);
+
+  await GraphQLClient.request(email)
+    .then(data => {
+      isExist = response(data);
+    })
+    .catch(e => {
+      error = e;
+    });
+
+  return { isExist, error };
+};
+
+/**
+ * Подготовим данные для регистрации пользователя на основе данных, полученных по oauth api.
+ *
+ * @param {String} credentials   Данные пользователя
+ * @param res                    Экземпляр ответа сервера
+ */
+module.exports.oauthChooseUsername = async (credentials, res) => {
+  let username = '';
+
+  if (credentials.username) {
+    // Если в выбранном oauth приложении присутствует никнейм - попробуем воспользоваться им
+    username = credentials.username;
+    // Проверим его на валидность
+    const isValid = validator.validateUsername(username, res, (doRespond = false));
+
+    if (isValid) {
+      // Никнейм валиден. Проверим не занят ли он?
+      const { isExist } = await this.findUsername(username, res);
+      if (isExist === null) {
+        // Не занят. Возвращаем и продолжаем регистрацию
+        return { username };
+      } else {
+        // Занят. "Обнулим" значение переменной
+        username = '';
+      }
+    }
+  }
+
+  if (credentials.email) {
+    // Если не удалось получить никнейм - воспользуемся email адресом (если удалось получить его).
+    // Обрежем часть адреса до символа @ и отправим ее на валидацию
+    username = credentials.email.split('@')[0];
+    const isValid = validator.validateUsername(username, res, (doRespond = false));
+
+    if (isValid) {
+      // Валидно. Проверяем, не занят ли такой никнейм?
+      const { isExist } = await this.findUsername(username, res);
+      if (isExist === null) {
+        // Не занят. Возвращаем и продолжаем регистрацию
+        return { username };
+      } else {
+        // Занят. "Обнулим" значение переменной
+        username = '';
+      }
+    }
+  }
+
+  if (credentials.name) {
+    // Напоследок - попытаемся воспользовать именем+фамилией пользователя. Валидность пройдет
+    // только в случае, если значение на латинице, без спец. символов и длиной не более 16 символов. Попытка - не пытка
+    username = replaceSpaces(credentials.name).toLowerCase();
+    const isValid = validator.validateUsername(username, res, (doRespond = false));
+
+    if (isValid) {
+      // Валидно. Проверяем, не занят ли такой никнейм?
+      const { isExist } = await this.findUsername(username, res);
+      if (isExist === null) {
+        // Не занят. Возвращаем и продолжаем регистрацию
+        return { username };
+      } else {
+        // Занят. "Обнулим" значение переменной
+        username = '';
+      }
+    }
+  }
+
+  return { username };
 };

@@ -18,26 +18,27 @@ module.exports = {
     'Email already exists': email => {
       return `Email address ${email} is already being used by another user.`;
     },
+    'oauth: email already used': email => {
+      return `Based on the received data, we assume that you may have logged in earlier using another third-party application, cause the email address ${email} is already linked to an existing account. Check it for the presence of a letter with authorization data or restore access to the account with its help.`;
+    },
+    'oauth: username is not chosen':
+      "Sorry, but we can't choose username for you. Please enter it yourself",
     'Repair key not found': 'The specified key was not found in the database',
     'Wrong repair key': 'Invalid confirmation key pattern',
     'Email confirm key not found':
       'The specified confirmation key was not found in the database. Email address not confirmed',
     'Wrong email confirm key': 'Invalid confirmation key pattern. Email address not confirmed',
     'Wrong password': 'Wrong password',
-    'Password change failed': 'Cмена пароля не удалась. Попробуйте снова',
+    'Password change failed': 'Password change failed. Try again',
     FetchError: "Couldn't connect to database. Try again",
-    'Username spaces': 'Spaces in the username are prohibited\n',
-    'Prohibited char': char => {
-      return `Character ${char}is prohibited`;
-    },
-    'Prohibited chars': chars => {
-      return `Characters ${chars}are prohibited`;
-    },
-    'Email spaces': 'Spaces in the email address are prohibited\n',
+    'Username spaces': 'Spaces are prohibited',
+    'username length': 'Up to 16 characters',
+    'username pattern': 'Only latin letters, numbers and - _ or .',
+    'Email spaces': 'Spaces are prohibited',
     'Wrong email pattern': 'Wrong email address pattern',
-    'Password min length': 'Password must be at least 7 characters\n',
-    'Password max length': 'Password must be a maximum of 30 characters.\n',
-    'Password spaces': 'Spaces in the password are prohibited\n',
+    'Password min length': 'Password must be at least 7 characters',
+    'Password max length': 'Password must be a maximum of 30 characters.',
+    'Password spaces': 'Spaces are prohibited',
     'Constraint violation': 'The data you entered already exist in the database',
   },
 };

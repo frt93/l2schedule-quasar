@@ -1,7 +1,7 @@
 
 
 <script>
-import mainheader from "component/ui/header/main";
+import mainheader from "components/ui/header/main";
 import { mapState, mapGetters } from "vuex";
 export default {
   name: "settingsLayout",

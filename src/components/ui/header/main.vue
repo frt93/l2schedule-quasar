@@ -1,6 +1,6 @@
 <script>
 import { mapState } from "vuex";
-import userMenu from "component/ui/userMenu";
+import userMenu from "components/ui/userMenu";
 export default {
   name: "headerComponent",
   components: {

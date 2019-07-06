@@ -18,6 +18,11 @@ module.exports = {
     'Email already exists': email => {
       return `Email адрес ${email} уже используется другим пользователем`;
     },
+    'oauth: email already used': email => {
+      return `На основании полученных данных мы пологаем, что возможно вы авторизовались ранее с помощью другого стороннего приложения, так как email адрес ${email} уже привязан к существующему аккаунту. Проверьте его на наличие письма с авторизационными данными или восстановите с его помощью доступ к аккаунту.`;
+    },
+    'oauth: username is not chosen':
+      'Извините, но мы не можем подобрать для вас никнейм. Пожалуйста, укажите его самостоятельно',
     'Repair key not found': 'Указанный ключ не найден в базе данных',
     'Wrong repair key': 'Неверный формат ключа подтверждения',
     'Email confirm key not found':
@@ -26,18 +31,14 @@ module.exports = {
     'Wrong password': 'Неверный пароль',
     'Password change failed': 'Cмена пароля не удалась. Попробуйте снова',
     FetchError: 'Не удалось связаться с базой данных. Попробуйте снова',
-    'Username spaces': 'Пробелы в никнейме запрещены\n',
-    'Prohibited char': char => {
-      return `Символ ${char}запрещен`;
-    },
-    'Prohibited chars': chars => {
-      return `Символы ${chars}запрещены`;
-    },
-    'Email spaces': 'Пробелы в email адресе запрещены\n',
+    'Username spaces': 'Пробелы запрещены',
+    'username length': 'Не более 16 символов',
+    'username pattern': 'Только латинские буквы, числа, а также - _ и .',
+    'Email spaces': 'Пробелы в email адресе запрещены',
     'Wrong email pattern': 'Неверный формат email адреса',
-    'Password min length': 'Пароль должен состоять минимум из 7 символов\n',
-    'Password max length': 'Пароль должен состоять максимум из 30 символов\n',
-    'Password spaces': 'Пробелы в пароле запрещены\n',
+    'Password min length': 'Пароль должен состоять минимум из 7 символов',
+    'Password max length': 'Пароль должен состоять максимум из 30 символов',
+    'Password spaces': 'Пробелы в пароле запрещены',
     'Constraint violation': 'Введенные вами данные уже существуют в базе данных',
   },
 };

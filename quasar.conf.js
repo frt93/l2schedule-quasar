@@ -33,6 +33,7 @@ module.exports = function(ctx) {
         'QTab',
         'QMenu',
         'QToolbar',
+        'QToolbarTitle',
         'QBtn',
         'QIcon',
         'QCard',
@@ -80,7 +81,7 @@ module.exports = function(ctx) {
           ...cfg.resolve.alias, // This adds the existing alias
 
           // Add your own alias like this
-          component: path.resolve(__dirname, './src/components'),
+          components: path.resolve(__dirname, './src/components'),
           store: path.resolve(__dirname, './src/store'),
           boot: path.resolve(__dirname, './src/boot'),
           mixin: path.resolve(__dirname, './src/mixins'),

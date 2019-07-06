@@ -41,6 +41,48 @@ export default {
   },
 
   /**
+   * Авторизуем пользователя на основании данных его аккаунта в выбранном oauth-приложения
+   *
+   * @param {Object} credentials   Регистрационные данные пользователя
+   */
+  async oauthLogin(credentials) {
+    let user, error;
+
+    await axiosInstance
+      .post('/users/signin/oauth', credentials)
+      .then(res => {
+        user = res.data.user;
+        cookies.set('auth', res.data.token, { expires: 3650 });
+      })
+      .catch(e => {
+        error = e;
+      });
+
+    return { user, error };
+  },
+
+  /**
+   * Регистрируем пользователя на основании данных его аккаунта в выбранном oauth-приложения
+   *
+   * @param {Object} credentials   Регистрационные данные пользователя
+   */
+  async oauthRegister(credentials) {
+    let user, error;
+
+    await axiosInstance
+      .post('/users/create/oauth', credentials)
+      .then(res => {
+        user = res.data.user;
+        cookies.set('auth', res.data.token, { expires: 3650 });
+      })
+      .catch(e => {
+        error = e;
+      });
+
+    return { user, error };
+  },
+
+  /**
    * Запрос на регистрацию пользователя
    *
    * @param {Object} credentials   Регистрационные данные пользователя
@@ -90,10 +132,14 @@ export default {
    */
   async getCountry() {
     let country = null;
+    //Сервис запрещает устанавливать сторонние заголовки, поэтому удалим их, а в конце вернем обратно
+    const lang = axiosInstance.defaults.headers.common['lang'];
+    delete axiosInstance.defaults.headers.common['lang'];
+
     await axiosInstance.get('https://ipapi.co/json/').then(res => {
       country = res.data.country.toLowerCase();
     });
-
+    this.setLanguageHeader(lang);
     return country;
   },
 

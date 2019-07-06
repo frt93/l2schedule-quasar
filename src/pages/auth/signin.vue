@@ -3,8 +3,8 @@ import { debounce } from "quasar";
 
 import userAPI from "handlers/user/api";
 import controllers from "handlers/user/controllers";
-// import oauth from "boot/oAuth";
-import { axiosInstance } from "boot/axios";
+
+import oauth from "components/auth/oauth";
 
 export default {
   name: "loginPage",
@@ -14,16 +14,7 @@ export default {
       titleTemplate: title => `${title} - L2Schedule`
     };
   },
-
-  beforeMount() {
-    if (process.env.CLIENT) {
-      import("boot/oAuth").then(data => {
-        this.oauth = data.default;
-        const { script } = this.oauth.telegram();
-        this.$refs.providers.appendChild(script);
-      });
-    }
-  },
+  components: { oauth },
 
   data() {
     return {
@@ -34,9 +25,7 @@ export default {
       passwordError: false,
       passwordErrorMessage: "",
       hidePwd: true,
-      loading: false,
-      sending: false,
-      oauth: null
+      sending: false
     };
   },
 
@@ -70,8 +59,7 @@ export default {
         (this.password.length < 7 || this.password.length > 30) ||
         (this.loginKey === "username" && this.login.length > 16) ||
         this.loginError ||
-        this.passwordError ||
-        this.loading
+        this.passwordError
       ) {
         return false;
       } else {
@@ -80,33 +68,6 @@ export default {
     }
   },
   methods: {
-    google() {
-      let user;
-      this.oauth.google
-        .signIn()
-        .then(GoogleUser => {
-          const profile = GoogleUser.getBasicProfile();
-          user = {
-            id: profile.getId(),
-            email: profile.getEmail(),
-            avatar: profile.getImageUrl(),
-            name: profile.getName()
-          };
-          console.log(user);
-        })
-        .catch(error => {
-          //on fail do something
-        });
-    },
-    fb() {
-      let user;
-      this.oauth.facebook.login().then(res => {
-        console.log(res);
-      });
-    },
-    telegram() {
-      return TWidgetLogin.auth();
-    },
     async submit() {
       this.sending = true;
       const { user, error } = await userAPI.signin(this.credentials);
@@ -137,22 +98,10 @@ export default {
     /**
      * Отслеживаем значение переменной логина и трансформируем инпут в зависимости от выбранного пользователем ключа авторизации
      */
-    login: debounce(function(newValue) {
+    login(newValue) {
       this.loginError = this.passwordError = false;
       this.loginErrorMessage = this.passwordErrorMessage = "";
-
-      if (this.loginKey === "username") {
-        this.loginErrorMessage = controllers.validateUsername(newValue, false);
-      } else {
-        this.loginErrorMessage = controllers.validateEmail(newValue, false);
-      }
-
-      if (this.loginErrorMessage) {
-        this.loginError = true;
-      }
-
-      this.loading = false;
-    }, 1500)
+    }
   },
 
   render(h) {
@@ -160,7 +109,7 @@ export default {
       h(
         "q-form",
         {
-          class: "q-gutter-md",
+          staticClass: "q-gutter-md",
           attrs: {
             autocomplete: false
           },
@@ -182,23 +131,15 @@ export default {
                 label: this.$t("labels.login"),
                 counter: this.loginKey === "username" ? true : false,
                 error: this.loginError,
-                errorMessage: this.loginErrorMessage,
-                loading: this.loading
+                errorMessage: this.loginErrorMessage
               },
               on: {
                 input: value => {
-                  this.loading = true;
                   this.login = value;
                 }
               }
             },
             [
-              h("q-spinner-puff", {
-                attrs: {
-                  color: this.loginError ? "negative" : "primary"
-                },
-                slot: "loading"
-              }),
               h("q-icon", {
                 attrs: {
                   name:
@@ -263,11 +204,21 @@ export default {
               })
             ]
           ),
-          h("div", { staticClass: "q-my-md" }, [
+          h("div", { staticClass: "q-my-md row justify-between" }, [
+            h("q-btn", {
+              attrs: {
+                label: this.$t("labels.restoreAccess"),
+                color: "yellow-7"
+              },
+              on: {
+                click: () => {
+                  this.$router.push({ name: "repair" });
+                }
+              }
+            }),
             h(
               "q-btn",
               {
-                staticClass: "float-right",
                 class: {
                   loading: this.sending
                 },
@@ -288,49 +239,23 @@ export default {
                   [this._v(this.$t("labels.sending")), h("q-spinner-dots")]
                 )
               ]
-            ),
-            h("q-btn", {
-              staticClass: "float-left",
-              attrs: {
-                label: this.$t("labels.forgot"),
-                color: "yellow-7"
-              },
-              on: {
-                click: () => {
-                  this.$router.push({ name: "repair" });
-                }
-              }
-            }),
-            h("div", { ref: "providers" }, [
-              h("q-btn", {
-                staticClass: "float-left",
-                attrs: {
-                  label: "google",
-                  color: "yellow-4"
-                },
-                on: {
-                  click: () => {
-                    this.google();
-                  }
-                }
-              }),
-              h("q-btn", {
-                staticClass: "float-left",
-                attrs: {
-                  label: "fb",
-                  color: "yellow-4"
-                },
-                on: {
-                  click: () => {
-                    this.fb();
-                  }
-                }
-              })
-            ])
-          ])
+            )
+          ]),
+          h(oauth)
         ]
       )
     ]);
   }
 };
 </script>
+
+<style scope>
+iframe {
+  width: 100px;
+  height: 36px !important;
+  position: absolute;
+  left: -20px;
+  opacity: 0.5;
+  z-index: 1;
+}
+</style>

@@ -12,6 +12,7 @@ export default {
     login: 'Your username or email address',
     signin: 'Sign in',
     forgot: 'Forgot?',
+    restoreAccess: 'Restore access',
     logout: 'Log out',
     haveKey: 'Already have a key?',
     repair: {
@@ -38,10 +39,8 @@ export default {
   },
   errors: {
     spaces: 'Spaces are prohibited',
-    char: 'Remove the character',
-    chars: 'Remove characters',
-    wrongEmail: 'Invalid email adress',
     network: 'Failed to contact the server. Check your internet connection and try again.',
+    authError: 'Authorization error',
   },
   titles: {
     mainPage: 'Homepage',
@@ -77,8 +76,8 @@ export default {
       },
     },
     auth: {
-      username: '16 characters maximum',
-      email: 'A confirmation email will be sent to the indicated address',
+      username: 'Up to 16 characters',
+      email: 'A confirmation email will be sent to the specified address',
       password: 'From 7 to 30 characters',
     },
   },

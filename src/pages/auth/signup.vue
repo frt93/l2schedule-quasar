@@ -124,16 +124,14 @@ export default {
       this.usernameError = false;
       this.usernameErrorMessage = "";
 
-      this.usernameErrorMessage = controllers.validateUsername(username);
-      if (this.usernameErrorMessage) {
-        this.usernameError = true;
-      } else {
+      if (username.length) {
         const { message } = await controllers.checkUsername(username);
         if (message) {
           this.usernameError = true;
           this.usernameErrorMessage = message;
         }
       }
+
       this.loading.username = false;
     }, 1500),
 
@@ -141,16 +139,14 @@ export default {
       this.emailError = false;
       this.emailErrorMessage = "";
 
-      this.emailErrorMessage = controllers.validateEmail(email);
-      if (this.emailErrorMessage) {
-        this.emailError = true;
-      } else {
+      if (email.length) {
         const { message } = await controllers.checkEmail(email);
         if (message) {
           this.emailError = true;
           this.emailErrorMessage = message;
         }
       }
+
       this.loading.email = false;
     }, 1500)
   },

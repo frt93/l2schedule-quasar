@@ -8,7 +8,9 @@ router.post('/check/username', users.checkUsername);
 router.post('/check/email', users.checkEmail);
 
 router.post('/create', users.create);
+router.post('/create/oauth', users.oauthCreate);
 router.post('/signin', users.signin);
+router.post('/signin/oauth', users.oauthLogin);
 router.post('/confirm/email', users.confirmEmail);
 
 router.post('/repair', users.repair);
