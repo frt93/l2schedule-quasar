@@ -3,6 +3,9 @@
 <script>
 import userAPI from "handlers/user/api";
 import controllers from "handlers/user/controllers";
+
+import addPassword from "components/ui/settings/addPasswordInput";
+
 export default {
   name: "passwordSettingsPage",
   meta() {
@@ -40,19 +43,23 @@ export default {
         !this.newPasswordError
         ? true
         : false;
+    },
+
+    payload() {
+      return {
+        current: this.password,
+        new: this.newPassword,
+        id: this.userInstance.id
+      };
     }
   },
 
   methods: {
     async submit() {
       if (this.canSubmit) {
-        const payload = {
-          current: this.password,
-          new: this.newPassword,
-          id: this.userInstance.id
-        };
-        const { success, error } = await userAPI.submitPasswordSettings(
-          payload
+        const { success, error } = await userAPI.settings(
+          "password",
+          this.payload
         );
 
         if (error) {
@@ -104,114 +111,117 @@ export default {
   },
 
   render(h) {
-    return h("div", { staticClass: "form" }, [
-      h(
-        "q-input",
-        {
-          attrs: {
-            autofocus: true,
-            autocomplete: false,
-            type: this.hidePwd ? "password" : "text",
-            maxlength: 30,
-            counter: true,
-            value: this.password,
-            label: this.$t("labels.currentPassword"),
-            error: this.passwordError,
-            errorMessage: this.passwordErrorMessage
-          },
-          on: {
-            input: value => {
-              this.passwordError = false;
-              this.passwordErrorMessage = "";
+    return this.userInstance.password === null
+      ? h(addPassword, { props: { userInstance: this.userInstance } })
+      : h("div", { staticClass: "form" }, [
+          h(
+            "q-input",
+            {
+              attrs: {
+                autofocus: true,
+                autocomplete: false,
+                type: this.hidePwd ? "password" : "text",
+                maxlength: 30,
+                counter: true,
+                value: this.password,
+                label: this.$t("labels.currentPassword"),
+                error: this.passwordError,
+                errorMessage: this.passwordErrorMessage
+              },
+              on: {
+                input: value => {
+                  this.passwordError = false;
+                  this.passwordErrorMessage = "";
 
-              this.password = value;
-              this.passwordErrorMessage = controllers.validatePassword(value);
+                  this.password = value;
+                  this.passwordErrorMessage = controllers.validatePassword(
+                    value
+                  );
 
-              if (this.passwordErrorMessage) {
-                this.passwordError = true;
-              }
-            }
-          }
-        },
-        [
-          h("div", { slot: "hint" }, [
-            h(
-              "span",
-              {
-                staticClass: "cursor-pointer dashed",
-                on: {
-                  click: () => {
-                    this.$router.push({ name: "repair" });
+                  if (this.passwordErrorMessage) {
+                    this.passwordError = true;
                   }
                 }
+              }
+            },
+            [
+              h("div", { slot: "hint" }, [
+                h(
+                  "span",
+                  {
+                    staticClass: "cursor-pointer dashed",
+                    on: {
+                      click: () => {
+                        this.$router.push({ name: "repair" });
+                      }
+                    }
+                  },
+                  this.$t("labels.forgot")
+                )
+              ]),
+              h("q-icon", {
+                staticClass: "cursor-pointer q-ml-sm",
+                attrs: {
+                  name: this.hidePwd ? "fas fa-eye" : "fas fa-eye-slash"
+                },
+                on: {
+                  click: () => {
+                    this.hidePwd = !this.hidePwd;
+                  }
+                },
+                slot: "append"
+              })
+            ]
+          ),
+
+          h(
+            "q-input",
+            {
+              attrs: {
+                autocomplete: false,
+                type: this.hidePwd2 ? "password" : "text",
+                maxlength: 30,
+                counter: true,
+                value: this.newPassword,
+                label: this.$t("labels.newPassword"),
+                hint: this.$t("hints.auth.password"),
+                error: this.newPasswordError,
+                errorMessage: this.newPasswordErrorMessage
               },
-              this.$t("labels.forgot")
-            )
-          ]),
-          h("q-icon", {
-            staticClass: "cursor-pointer q-ml-sm",
-            attrs: {
-              name: this.hidePwd ? "fas fa-eye" : "fas fa-eye-slash"
-            },
-            on: {
-              click: () => {
-                this.hidePwd = !this.hidePwd;
+              on: {
+                input: value => {
+                  this.newPasswordError = false;
+                  this.newPasswordErrorMessage = "";
+
+                  this.newPassword = value;
+                  this.newPasswordErrorMessage = controllers.validatePassword(
+                    value
+                  );
+
+                  if (this.newPasswordErrorMessage) {
+                    this.newPasswordError = true;
+                  }
+                }
               }
             },
-            slot: "append"
-          }),
-          h()
-        ]
-      ),
+            [
+              h("q-icon", {
+                staticClass: "cursor-pointer q-ml-sm",
+                attrs: {
+                  name: this.hidePwd2 ? "fas fa-eye" : "fas fa-eye-slash"
+                },
+                on: {
+                  click: () => {
+                    this.hidePwd2 = !this.hidePwd2;
+                  }
+                },
+                slot: "append"
+              })
+            ]
+          ),
 
-      h(
-        "q-input",
-        {
-          attrs: {
-            autocomplete: false,
-            type: this.hidePwd2 ? "password" : "text",
-            maxlength: 30,
-            counter: true,
-            value: this.newPassword,
-            label: this.$t("labels.newPassword"),
-            hint: this.$t("hints.auth.password"),
-            error: this.newPasswordError,
-            errorMessage: this.newPasswordErrorMessage
-          },
-          on: {
-            input: value => {
-              this.newPasswordError = false;
-              this.newPasswordErrorMessage = "";
-
-              this.newPassword = value;
-              this.newPasswordErrorMessage = controllers.validatePassword(
-                value
-              );
-
-              if (this.newPasswordErrorMessage) {
-                this.newPasswordError = true;
-              }
-            }
-          }
-        },
-        [
-          h("q-icon", {
-            staticClass: "cursor-pointer q-ml-sm",
-            attrs: {
-              name: this.hidePwd2 ? "fas fa-eye" : "fas fa-eye-slash"
-            },
-            on: {
-              click: () => {
-                this.hidePwd2 = !this.hidePwd2;
-              }
-            },
-            slot: "append"
-          })
-        ]
-      ),
-
-      this.__submitButton(h)
-    ]);
+          this.__submitButton(h)
+        ]);
   }
 };
 </script>

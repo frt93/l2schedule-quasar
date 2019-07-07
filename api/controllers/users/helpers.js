@@ -49,11 +49,12 @@ module.exports.createUser = async (credentials, res) => {
 
   GraphQLClient.request(mutation, user)
     .then(async data => {
-      const createdUser = response(data);
+      let createdUser = response(data);
       const { token } = await this.generateToken(createdUser.id);
 
       this.saveUserInRedis(createdUser); // Сохраняем пользователя в Redis
-      delete createdUser.password; // Удаляем из передаваемого экземпляра пароль
+      createdUser = await this.cutPassword(createdUser);
+
       res.send({ user: createdUser, token });
 
       if (credentials.email) {
@@ -257,15 +258,30 @@ module.exports.saveSettings = (id, payload, res, successMessage) => {
   const data = variables(id, payload);
 
   GraphQLClient.request(mutation, data)
-    .then(updated => {
-      const updatedUser = response(updated);
+    .then(async updated => {
+      let updatedUser = response(updated);
 
       this.saveUserInRedis(updatedUser); // Сохраняем пользователя в Redis
-      delete updatedUser.password; // Убираем из возвращаемого экземпляра пароль
+
+      updatedUser = await this.cutPassword(updatedUser); // Убираем из возвращаемого экземпляра пароль
       const message = messages(res.lang).success[successMessage];
       res.send({ user: updatedUser, message });
     })
     .catch(e => {
       return validator.handleErrors(e, res, payload.user);
     });
+};
+
+/**
+ * Удалим из инстанса данных пользователя пароль в том случае, если он не равен null. В этом случае
+ * мы оставим этот null, чтобы на клиенте рекомендовать пользователю задать пароль от аккаунта
+ *
+ *  @param user                Инстанс данных пользователя
+ */
+module.exports.cutPassword = user => {
+  if (user.password !== null) {
+    delete user.password;
+  }
+
+  return user;
 };

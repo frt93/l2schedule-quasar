@@ -74,7 +74,7 @@ module.exports.signin = async (req, res) => {
     if (comparePasswords) {
       // Пароль правльный. Генерируем токен авторизации и отправляем данные пользователю
       const { token } = await helpers.generateToken(user.id);
-      delete user.password; // Удаляем из передаваемого экземпляра пароль
+      user = await helpers.cutPassword(user);
 
       res.send({ token, user });
     } else {
@@ -107,9 +107,10 @@ module.exports.oauthLogin = (req, res) => {
       user = response(data);
       if (user) {
         helpers.saveUserInRedis(user);
-        // Пароль правльный. Генерируем токен авторизации и отправляем данные пользователю
+        // Генерируем токен авторизации и отправляем данные пользователю
         const { token } = await helpers.generateToken(user.id);
-        delete user.password; // Удаляем из передаваемого экземпляра пароль
+        user = await helpers.cutPassword(user);
+
         res.send({ token, user });
       } else {
         // Пользователь не найден. Попытаемся зарегистрировать его
@@ -204,7 +205,7 @@ module.exports.authorize = (req, res) => {
     if (!user) {
       res.status(404).send('User not found.');
     } else {
-      delete user.password; // Удаляем из передаваемого экземпляра пароль
+      user = await helpers.cutPassword(user);
       res.send(user);
     }
   });
@@ -265,6 +266,30 @@ module.exports.checkEmail = async (req, res) => {
 };
 
 /**
+ * Устанавливаем электронный адрес пользователя.
+ * Вызывается метод из личного кабинета в настройках безопасности в том случае, если пользователь регистрировался с помощью
+ * oauth провайдера, который не вернул его email адрес
+ *
+ * @param req               Объект запроса сервера
+ * @param res               Объект ответа сервера
+ */
+module.exports.addEmail = async (req, res) => {
+  const email = req.body.email;
+  const id = req.body.id;
+
+  const valid = await validator.validateEmail(email, res);
+  //Если валидация провалилась - прекращаем выполнение
+  if (!valid) return;
+
+  // Сгенерируем ключ подтверждения
+  const { key } = await helpers.generateToken();
+
+  const payload = { user: { email }, metadata: { emailVerification: key } };
+
+  helpers.saveSettings(id, payload, res, 'Email saved');
+};
+
+/**
  * Подтверждаем электронный адрес пользователя
  *
  * @param req               Объект запроса сервера
@@ -297,8 +322,9 @@ module.exports.confirmEmail = async (req, res) => {
       // Поэтому передадим email, чтобы обновленные данные сначала взялись из базы данных, а затем переписались в кэше
       user = await helpers.findUser('email', email, res);
       if (user) {
-        delete user.password; // Удаляем пароль из отсылаемого экземпляра
+        user = helpers.cutPassword(user);
       }
+
       const message = messages(res.lang).success.emailConfirmed;
 
       /**
@@ -437,6 +463,7 @@ module.exports.accountSettings = async (req, res) => {
   const user = await helpers.findUser('id', id, res);
 
   if (!(user.username === payload.user.username && user.email === payload.user.email)) {
+    // Если изменены никнейм или email - отвалидируем их
     const valid = await validator.accountSettingsValidation(payload.user, password, res);
     //Если валидация провалилась - прекращаем выполнение
     if (!valid) return;
@@ -461,7 +488,30 @@ module.exports.accountSettings = async (req, res) => {
 };
 
 /**
- * Изменяем или устанавливаем пароль от аккаунта пользователя
+ * Устанавливаем электронный адрес пользователя.
+ * Вызывается метод из личного кабинета в настройках безопасности в том случае, если пользователь регистрировался с помощью
+ * oauth провайдера, который не вернул его email адрес
+ *
+ * @param req               Объект запроса сервера
+ * @param res               Объект ответа сервера
+ */
+module.exports.addPassword = async (req, res) => {
+  const password = req.body.password;
+  const id = req.body.id;
+
+  const valid = await validator.validatePassword(password, res);
+  //Если валидация провалилась - прекращаем выполнение
+  if (!valid) return;
+
+  const hashPassword = await helpers.hashPassword(password); // Хэшируем пароль
+  console.log(password);
+  let payload = { user: { password: hashPassword }, metadata: {} };
+  console.log(payload);
+  helpers.saveSettings(id, payload, res, 'Password saved');
+};
+
+/**
+ * Изменяем пароль от аккаунта пользователя и другие, связанные с безопасностью параметры
  *
  * @param req               Объект запроса сервера
  * @param res               Объект ответа сервера
@@ -469,36 +519,25 @@ module.exports.accountSettings = async (req, res) => {
  * @todo Организовать отправку письма после удачной смены пароля
  */
 module.exports.passwordSettings = async (req, res) => {
-  const payload = req.body;
+  const credentials = req.body;
 
-  const valid = await validator.accountPasswordValidation(payload, res);
+  const valid = await validator.accountPasswordValidation(credentials, res);
   //Если валидация провалилась - прекращаем выполнение
   if (!valid) return;
 
-  const user = await helpers.findUser('id', payload.id, res);
+  const user = await helpers.findUser('id', credentials.id, res);
 
-  const comparePasswords = await helpers.comparePasswords(payload.current, user.password);
+  const comparePasswords = await helpers.comparePasswords(credentials.current, user.password);
   if (!comparePasswords) {
     // Пароль неверен.Выбрасываем ошибку
     return validator.throwErrors('Wrong password', res);
   }
 
-  // Текущий пароль верен. Отправляем запрос на его изменение
-  const { mutation, variables, response } = require('./mutations/settings/password');
-  const hashPassword = await helpers.hashPassword(payload.new); // Хэшируем новый пароль
-  const data = variables(payload.id, { password: hashPassword });
+  const hashPassword = await helpers.hashPassword(credentials.new); // Хэшируем новый пароль
+  const payload = { user: { password: hashPassword }, metadata: {} },
+    id = credentials.id;
 
-  GraphQLClient.request(mutation, data)
-    .then(updated => {
-      const updatedUser = response(updated);
-      helpers.saveUserInRedis(updatedUser); // Сохраняем пользователя в Redis
-
-      const message = messages(res.lang).success.passwordChanged;
-      res.send({ message });
-    })
-    .catch(e => {
-      return validator.handleErrors(e, res);
-    });
+  helpers.saveSettings(id, payload, res, 'Password changed');
 };
 
 /**
@@ -510,21 +549,18 @@ module.exports.passwordSettings = async (req, res) => {
  * @todo Организовать отправку письма в случае установки email адреса
  */
 module.exports.safetySettings = async (req, res) => {
-  const settings = req.body,
-    id = settings.id;
-  let payload = { user: {}, metadata: {} };
-
-  if (settings.email) {
-    payload.user.email = settings.email;
-    // Сгенерируем ключ подтверждения
-    const { key } = await helpers.generateToken();
-
-    payload.metadata = {
-      emailVerification: key,
-    };
-  }
-
-  helpers.saveSettings(id, payload, res, 'safetySettings');
+  // const settings = req.body,
+  //   id = settings.id;
+  // let payload = { user: {}, metadata: {} };
+  // if (settings.email) {
+  //   payload.user.email = settings.email;
+  //   // Сгенерируем ключ подтверждения
+  //   const { key } = await helpers.generateToken();
+  //   payload.metadata = {
+  //     emailVerification: key,
+  //   };
+  // }
+  // helpers.saveSettings(id, payload, res, 'safetySettings');
 };
 
 /**
@@ -536,13 +572,18 @@ module.exports.safetySettings = async (req, res) => {
  * @todo Организовать отправку письма после удачной смены пароля
  */
 module.exports.resendEmailConfirmationKey = async (req, res) => {
-  const id = req.body.id;
-  const user = await helpers.findUser('id', id, res);
-  const key = user.metadata.emailVerification;
+  const id = req.body.id,
+    user = await helpers.findUser('id', id, res),
+    key = user.metadata.emailVerification;
+  let message;
 
   if (key) {
+    const email = user.email;
     console.log(key);
-    // @todo Отсылаем письмо
+    message = messages(res.lang).success['confirmation key resended'];
+    // @todo Отсылаем письмо.
+  } else {
+    message = messages(res.lang).success['email already confirmed'];
   }
-  res.send({ message: 'okey' });
+  res.send({ message });
 };

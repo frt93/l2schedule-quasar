@@ -1,8 +1,12 @@
 module.exports = {
   success: {
+    'Email saved': 'Email адрес сохранен',
+    'Password saved': 'Пароль успешно сохранен',
     emailConfirmed: 'Email адрес успешно подтвержден',
+    'confirmation key resended': 'Отправлено. Проверьте ваш email',
+    'email already confirmed': 'Похоже, что ваш email уже подтвержден',
     accountSettings: 'Данные учетной записи обновлены',
-    passwordChanged: 'Пароль успешно изменен',
+    'Password changed': 'Пароль успешно изменен',
     safetySettings: 'Настройки безопасности обновлены',
   },
   errors: {

@@ -154,7 +154,8 @@ export default {
           payload = { ...payload, password: this.password };
         }
 
-        const { user, success, error } = await userAPI.submitAccountSettings(
+        const { user, success, error } = await userAPI.settings(
+          "account",
           payload,
           lang
         );

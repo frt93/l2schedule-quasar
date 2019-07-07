@@ -5,25 +5,23 @@ import userAPI from "handlers/user/api";
 import controllers from "handlers/user/controllers";
 
 export default {
-  name: "setEmailComponent",
+  name: "addEmailInput",
   props: ["userInstance"],
 
   data() {
     return {
       email: "",
-      emailError: false,
-      emailErrorMessage: "",
+      error: false,
+      errorMessage: "",
 
-      emailLoading: false,
+      loading: false,
       sending: false
     };
   },
 
   computed: {
     canSubmit() {
-      return this.emailError || this.emailLoading || !this.email.length
-        ? false
-        : true;
+      return this.error || this.loading || !this.email.length ? false : true;
     }
   },
 
@@ -36,15 +34,16 @@ export default {
         };
 
         this.sending = true;
-        const { user, success, error } = await userAPI.submitSafetySettings(
+        const { user, success, error } = await userAPI.settings(
+          "addemail",
           payload
         );
         this.sending = false;
 
         if (error) {
           const { errorType, message } = controllers.handleErrors(error);
-          this[errorType] = true;
-          this[`${errorType}Message`] = message;
+          this.error = true;
+          this.errorMessage = message;
 
           return;
         }
@@ -58,18 +57,18 @@ export default {
 
   watch: {
     email: debounce(async function(email) {
-      this.emailError = false;
-      this.emailErrorMessage = "";
+      this.error = false;
+      this.errorMessage = "";
 
       if (email.length) {
         const { message } = await controllers.checkEmail(email);
         if (message) {
-          this.emailError = true;
-          this.emailErrorMessage = message;
+          this.error = true;
+          this.errorMessage = message;
         }
       }
 
-      this.emailLoading = false;
+      this.loading = false;
     }, 1500)
   },
 
@@ -83,24 +82,23 @@ export default {
               autocomplete: false,
               value: this.email,
               label: this.$t("labels.email"),
-              hint: this.$t("hints.settings.safety.enterEmail"),
-              error: this.emailError || !this.email.length,
+              hint: this.$t("hints.settings.addEmail"),
+              error: this.error || !this.email.length,
               errorMessage:
-                this.emailErrorMessage ||
-                this.$t("hints.settings.safety.enterEmail"),
-              loading: this.emailLoading
+                this.errorMessage || this.$t("hints.settings.addEmail"),
+              loading: this.loading
             },
             on: {
               input: value => {
                 this.email = value;
-                this.emailLoading = true;
+                this.loading = true;
               }
             }
           },
           [
             h("q-spinner-puff", {
               attrs: {
-                color: this.emailError ? "negative" : "primary"
+                color: this.error ? "negative" : "primary"
               },
               slot: "loading"
             })
@@ -115,7 +113,7 @@ export default {
               loading: this.sending
             },
             attrs: {
-              label: this.$t("labels.save"),
+              label: this.$t("labels.add"),
               loading: this.sending,
               color: this.canSubmit ? "green-6" : "red-6",
               disable: !this.canSubmit

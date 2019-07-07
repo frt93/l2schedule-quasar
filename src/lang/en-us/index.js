@@ -9,7 +9,7 @@ export default {
     currentPassword: 'Your current password',
     newPassword: 'Desired new password',
     signup: 'Sign up',
-    login: 'Your username or email address',
+    login: 'Your username or email',
     signin: 'Sign in',
     forgot: 'Forgot?',
     restoreAccess: 'Restore access',
@@ -17,12 +17,14 @@ export default {
     haveKey: 'Already have a key?',
     repair: {
       guest1:
-        'To start the process of restoring access to your account, enter the email address you provided during registration. An email will be sent with the transaction confirmation key',
+        'To start the process of restoring access to your account, enter the email you provided during registration. An email will be sent with the transaction confirmation key',
       user1:
-        'You have been redirected to this page indicating that you have forgotten the password for your account. You can reset the current password and set a new one. Сlick "Next" to continue and we\'ll send a confirmation key to your email address',
-      2: 'Enter the confirmation key from the letter that came to your email address',
+        'You have been redirected to this page indicating that you have forgotten the password for your account. You can reset the current password and set a new one. Сlick "Next" to continue and we\'ll send a confirmation key to your email',
+      2: 'Enter the confirmation key from the message that came to your email',
       3: 'Now you can enter your new password. After confirmation, you will be redirected to the login page',
     },
+    add: 'Add',
+    confirm: 'Confirm',
     save: 'Save',
     next: 'Next',
     back: 'Back',
@@ -35,7 +37,7 @@ export default {
     settings: 'Settings',
     confirmEmail: 'Email confirmation key',
     confirm: 'Confirm',
-    resendConfirmKey: 'The confirmation key will be resend to the email address',
+    resendConfirmKey: 'The confirmation key will be resend to the email',
   },
   errors: {
     spaces: 'Spaces are prohibited',
@@ -63,24 +65,26 @@ export default {
       username: 'Name under which other users are see you. Can be used for authorization',
       email: 'Email will not be publicly displayed',
       password:
-        'If you change your nickname or email address, you must enter your current account password to confirm the operation',
+        'If you change your nickname or email, you must enter your current account password to confirm the operation',
       now: 'Current time',
       DST: 'Auto transition to daylight/standard time',
       country: 'Select the country you live in',
+      addPassword:
+        'For increased security and account control, we recommend you to set a password. In the future, you may need it for performing certain operations (e.g., changing a username, email, etc.)',
+      addEmail:
+        'To reduce the risk of losing access to this account - link your email to it. \n It will be hidden from other users.',
       safety: {
-        enterEmail:
-          'To reduce the risk of losing access to this account - enter your email address. \n It will be hidden from other users.',
         email1:
-          "Was sent to the email address you specified during registration. If you can't find the letter - we can ",
+          "It was sent to the email you specified during registration. If you can't find the message - we can ",
         email2: 'resend it',
         email3: ". If that didn't help either - ",
         email4: 'check',
-        email5: '  if you entered your email address correctly',
+        email5: '  if you entered your email correctly',
       },
     },
     auth: {
-      username: 'Up to 16 characters',
-      email: 'A confirmation email will be sent to the specified address',
+      username: 'Only latin letters, numbers and - _ or .',
+      email: 'A confirmation message will be sent to the specified email',
       password: 'From 7 to 30 characters',
     },
   },

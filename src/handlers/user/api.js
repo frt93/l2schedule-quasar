@@ -205,7 +205,8 @@ export default {
   },
 
   /**
-   *Запрос на подтверждения email адреса
+   * Запрос на подтверждения email адреса
+   *
    * @param {String} key         Ключ подтверждения
    * @param {String | null} id   id пользователя
    */
@@ -236,19 +237,87 @@ export default {
     axiosInstance.defaults.headers.common['lang'] = lang;
   },
 
+  // /**
+  //  * Отправляем запрос на изменение данных аккаунта пользователя
+  //  *
+  //  * @param {Object} payload     Отправляемые данные пользователя
+  //  * @param {String} lang        Текущий язык пользователя
+  //  */
+  // async submitAccountSettings(payload, lang) {
+  //   let user, success, error;
+  //   // Установим языковой заголовок перед запросом, чтобы пользователь получил оповещение об успешной операции или возникшей в ее ходе ошибке на выбранном языке
+  //   this.setLanguageHeader(lang);
+
+  //   await axiosInstance
+  //     .post('/users/settings/account', payload)
+  //     .then(res => {
+  //       user = res.data.user;
+  //       success = res.data.message;
+  //     })
+  //     .catch(e => {
+  //       error = e;
+  //     });
+
+  //   return { user, success, error };
+  // },
+
+  // /**
+  //  * Отправляем запрос на изменение пароля от аккаунта аккаунта пользователя
+  //  *
+  //  * @param {Object} payload     Отправляемые данные пользователя
+  //  */
+  // async submitPasswordSettings(payload) {
+  //   let success, error;
+  //   await axiosInstance
+  //     .post('/users/settings/password', payload)
+  //     .then(res => {
+  //       success = res.data.message;
+  //     })
+  //     .catch(e => {
+  //       error = e;
+  //     });
+
+  //   return { success, error };
+  // },
+
+  // /**
+  //  * Отправляем запрос на изменение настроек безопасности
+  //  *
+  //  * @param {Object} payload     Отправляемые данные пользователя
+  //  */
+  // async addEmail(payload) {
+  //   let user, success, error;
+  //   await axiosInstance
+  //     .post('/users/settings/addemail', payload)
+  //     .then(res => {
+  //       user = res.data.user;
+  //       success = res.data.message;
+  //     })
+  //     .catch(e => {
+  //       error = e;
+  //     });
+
+  //   return { user, success, error };
+  // },
+
   /**
-   * Отправляем запрос на изменение данных аккаунта пользователя
+   * Отправляем запрос на сохранение внесенных пользователем настроек аккаунта
    *
+   * @param {String} clause      "Раздел" настроек. Необходим для формирования url запроса
    * @param {Object} payload     Отправляемые данные пользователя
-   * @param {String} lang        Текущий язык пользователя
+   * @param {String} lang        Язык пользователя
    */
-  async submitAccountSettings(payload, lang) {
+  async settings(sub, payload, lang) {
     let user, success, error;
-    // Установим языковой заголовок перед запросом, чтобы пользователь получил оповещение об успешной операции или возникшей в ее ходе ошибке на выбранном языке
-    this.setLanguageHeader(lang);
+
+    if (lang) {
+      // Если пользователь сменил язык - изменим языковой заголовок перед запросом, чтобы пользователь
+      // получил оповещение об успешной операции или возникшей в ее ходе ошибке на выбранном языке
+      this.setLanguageHeader(lang);
+    }
 
     await axiosInstance
-      .post('/users/settings/account', payload)
+      .post(`/users/settings/${sub}`, payload)
       .then(res => {
         user = res.data.user;
         success = res.data.message;
@@ -260,62 +329,22 @@ export default {
     return { user, success, error };
   },
 
-  /**
-   * Отправляем запрос на изменение пароля от аккаунта аккаунта пользователя
-   *
-   * @param {Object} payload     Отправляемые данные пользователя
-   */
-  async submitPasswordSettings(payload) {
-    let success, error;
-    await axiosInstance
-      .post('/users/settings/password', payload)
-      .then(res => {
-        success = res.data.message;
-      })
-      .catch(e => {
-        error = e;
-      });
+  // /**
+  //  * Отправляем запрос на изменение пароля от аккаунта аккаунта пользователя
+  //  *
+  //  * @param {String} id          ID пользователя
+  //  */
+  // async resendEmailConfirmationKey(id) {
+  //   let success, error;
+  //   await axiosInstance
+  //     .post('/users/settings/resendEmailConfirmationKey', { id })
+  //     .then(res => {
+  //       success = res.data.message;
+  //     })
+  //     .catch(e => {
+  //       error = e;
+  //     });
 
-    return { success, error };
-  },
-
-  /**
-   * Отправляем запрос на изменение настроек безопасности
-   *
-   * @param {Object} payload     Отправляемые данные пользователя
-   */
-  async submitSafetySettings(payload) {
-    let user, success, error;
-    await axiosInstance
-      .post('/users/settings/safety', payload)
-      .then(res => {
-        user = res.data.user;
-        success = res.data.message;
-      })
-      .catch(e => {
-        error = e;
-      });
-
-    return { user, success, error };
-  },
-
-  /**
-   * Отправляем запрос на изменение пароля от аккаунта аккаунта пользователя
-   *
-   * @param {String} id          ID пользователя
-   */
-  async resendEmailConfirmationKey(id) {
-    let success, error;
-    await axiosInstance
-      .post('/users/settings/resendEmailConfirmationKey', { id })
-      .then(res => {
-        success = res.data.message;
-      })
-      .catch(e => {
-        0;
-        error = e;
-      });
-
-    return { success, error };
-  },
+  //   return { success, error };
+  // },
 };

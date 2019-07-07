@@ -34,7 +34,8 @@ export default {
             {
               staticClass: "float-left window-height q-mr-xl",
               style: {
-                "max-width": "30vw"
+                "max-width": "30vw",
+                width: "250px"
               }
             },
             [
@@ -99,6 +100,7 @@ export default {
               )
             ]
           ),
+
           h("router-view", {
             attrs: {
               userInstance: this.user,

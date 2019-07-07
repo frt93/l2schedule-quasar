@@ -155,7 +155,7 @@ export default {
           attrs: {
             name: 1,
             color: this.emailError ? "negative" : "warning",
-            title: "Enter your email adress",
+            title: "Enter your email",
             done: this.step > 1 ? true : false,
             doneColor: "green-6"
           }

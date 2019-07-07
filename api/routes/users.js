@@ -19,6 +19,8 @@ router.post('/repair/change-password', users.repairChangePassword);
 
 router.post('/settings/account', users.accountSettings);
 router.post('/settings/password', users.passwordSettings);
+router.post('/settings/addpassword', users.addPassword);
+router.post('/settings/addemail', users.addEmail);
 router.post('/settings/safety', users.safetySettings);
 router.post('/settings/resendEmailConfirmationKey', users.resendEmailConfirmationKey);
 

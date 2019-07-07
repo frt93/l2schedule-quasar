@@ -1,8 +1,12 @@
 module.exports = {
   success: {
-    emailConfirmed: 'Email address successfully confirmed',
+    'Email saved': 'Email successfully saved',
+    'Password saved': 'Password successfully saved',
+    emailConfirmed: 'Email successfully confirmed',
+    'confirmation key resended': 'Done. Check your email',
+    'email already confirmed': 'Seems your email already confirmed',
     accountSettings: 'Account details updated',
-    passwordChanged: 'Password successfully changed',
+    'Password changed': 'Password successfully changed',
     safetySettings: 'Safety settings updated',
   },
   errors: {
@@ -14,21 +18,21 @@ module.exports = {
       return `Username ${username} is already being used by another user.`;
     },
     'Email not found': email => {
-      return `User with email address ${email} not found in database`;
+      return `User with email ${email} not found in database`;
     },
     'Email already exists': email => {
-      return `Email address ${email} is already being used by another user.`;
+      return `Email ${email} is already being used by another user.`;
     },
     'oauth: email already used': email => {
-      return `Based on the received data, we assume that you may have logged in earlier using another third-party application, cause the email address ${email} is already linked to an existing account. Check it for the presence of a letter with authorization data or restore access to the account with its help.`;
+      return `Based on the received data, we assume that you may have logged in earlier using another third-party application, cause the email ${email} is already linked to an existing account. Check it for the presence of a message with authorization data or restore access to the account with its help.`;
     },
     'oauth: username is not chosen':
       "Sorry, but we can't choose username for you. Please enter it yourself",
     'Repair key not found': 'The specified key was not found in the database',
     'Wrong repair key': 'Invalid confirmation key pattern',
     'Email confirm key not found':
-      'The specified confirmation key was not found in the database. Email address not confirmed',
-    'Wrong email confirm key': 'Invalid confirmation key pattern. Email address not confirmed',
+      'The specified confirmation key was not found in the database. Email not confirmed',
+    'Wrong email confirm key': 'Invalid confirmation key pattern. Email not confirmed',
     'Wrong password': 'Wrong password',
     'No password':
       'This account has no password. Log in using a third-party application or go through the procedure to restore access',
@@ -38,7 +42,7 @@ module.exports = {
     'username length': 'Up to 16 characters',
     'username pattern': 'Only latin letters, numbers and - _ or .',
     'Email spaces': 'Spaces are prohibited',
-    'Wrong email pattern': 'Wrong email address pattern',
+    'Wrong email pattern': 'Wrong email pattern',
     'Password min length': 'Password must be at least 7 characters',
     'Password max length': 'Password must be a maximum of 30 characters.',
     'Password spaces': 'Spaces are prohibited',
