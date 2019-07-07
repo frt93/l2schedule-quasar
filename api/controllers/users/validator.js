@@ -106,6 +106,14 @@ module.exports.throwErrors = (name, res, params) => {
     });
   }
 
+  if (name === 'No password') {
+    return res.status(401).send({
+      type: 'passwordError',
+      msgType: 'passwordErrorMessage',
+      message: messages(res.lang).errors[name],
+    });
+  }
+
   if (name === 'Password change failed') {
     return res.status(500).send({
       message: messages(res.lang).errors[name],
@@ -195,6 +203,7 @@ module.exports.validateUsername = (username, res, doRespond = true) => {
         message,
       });
     }
+
     return false;
   }
 

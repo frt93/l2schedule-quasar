@@ -33,4 +33,8 @@ export default {
   setLangCookies(lang) {
     jsCookie.set('lang', lang, { expires: 3650 });
   },
+
+  getLangCookies() {
+    return jsCookie.get('lang');
+  },
 };

@@ -17,6 +17,12 @@ export default {
 
   props: ["message", "title"],
 
+  computed: {
+    canSubmit() {
+      return this.loading || this.error || !this.username.length ? false : true;
+    }
+  },
+
   methods: {
     // following method is REQUIRED
     // (don't change its name --> "show")
@@ -36,18 +42,18 @@ export default {
       this.$emit("hide");
     },
 
-    onOKClick() {
+    onConfirm() {
       // on OK, it is REQUIRED to
       // emit "ok" event (with optional payload)
       // before hiding the QDialog
-      this.$emit("ok");
+      this.$emit("ok", this.username);
       // or with payload: this.$emit('ok', { ... })
 
       // then hiding dialog
       this.hide();
     },
 
-    onCancelClick() {
+    onCancel() {
       // we just need to hide dialog
       this.hide();
     }
@@ -99,7 +105,7 @@ export default {
                 },
                 on: {
                   click: () => {
-                    this.onCancelClick();
+                    this.onCancel();
                   }
                 }
               })
@@ -139,10 +145,14 @@ export default {
             ]),
             h("q-card-actions", { attrs: { align: "right" } }, [
               h("q-btn", {
-                attrs: { color: "primary", label: "ok" },
+                props: {
+                  color: this.canSubmit ? "green-6" : "red-6",
+                  disable: !this.canSubmit,
+                  label: "ok"
+                },
                 on: {
                   click: () => {
-                    this.onOKClick();
+                    this.onConfirm();
                   }
                 }
               })

@@ -1,8 +1,8 @@
-const userInstancePattern = require('../../query/userInstancePattern');
+const { returningPattern, responsePattern } = require('../../query/userInstancePattern');
 const mutation = `mutation update_settings_password($id: Int, $user: users_set_input) {  
   update_users(where: {id: {_eq: $id}}, _set: $user) {
     returning {
-      ${userInstancePattern}
+      ${returningPattern}
     }
   }
 }
@@ -22,15 +22,13 @@ const variables = (id, password) => {
 };
 
 /**
- * Обрабатываем полученные в результате запроса данные, добираясь до необходимого уровня вложенности,
- * в котором непосредственно находится возвращаемый экземпляр пользователя с обновленными данными
- *
+ * Обрабатываем полученные в результате запроса данные
  * @param {Object} data     Данные, полученные с сервера
  * @return {Object} user
  */
 const response = data => {
   const user = data.update_users.returning[0];
-  return user;
+  return responsePattern(user);
 };
 
 module.exports = { mutation, variables, response };

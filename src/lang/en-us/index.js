@@ -41,6 +41,7 @@ export default {
     spaces: 'Spaces are prohibited',
     network: 'Failed to contact the server. Check your internet connection and try again.',
     authError: 'Authorization error',
+    chooseUsername: 'Enter your username',
   },
   titles: {
     mainPage: 'Homepage',

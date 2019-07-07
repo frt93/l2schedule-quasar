@@ -75,9 +75,9 @@ export default {
       name: `${data.first_name} ${data.last_name}`,
     };
 
-    if (data.email) {
-      user.email = data.email;
-    }
+    // if (data.email) {
+    //   user.email = data.email;
+    // }
 
     return user;
   },

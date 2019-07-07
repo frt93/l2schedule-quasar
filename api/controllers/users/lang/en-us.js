@@ -29,6 +29,8 @@ module.exports = {
       'The specified confirmation key was not found in the database. Email address not confirmed',
     'Wrong email confirm key': 'Invalid confirmation key pattern. Email address not confirmed',
     'Wrong password': 'Wrong password',
+    'No password':
+      'This account has no password. Log in using a third-party application or go through the procedure to restore access',
     'Password change failed': 'Password change failed. Try again',
     FetchError: "Couldn't connect to database. Try again",
     'Username spaces': 'Spaces are prohibited',

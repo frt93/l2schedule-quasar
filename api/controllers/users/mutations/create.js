@@ -1,8 +1,8 @@
-const userInstancePattern = require('../query/userInstancePattern');
+const { returningPattern, responsePattern } = require('../query/userInstancePattern');
 const mutation = `mutation create_user ($users: [users_insert_input!]!) {
   insert_users(objects: $users) {
     returning {
-      ${userInstancePattern}
+      ${returningPattern} 
     }
   }
 }`;
@@ -27,7 +27,7 @@ const variable = user => {
  */
 const response = data => {
   const user = data.insert_users.returning[0];
-  return user;
+  return responsePattern(user);
 };
 
 module.exports = { mutation, variable, response };

@@ -1,17 +1,23 @@
 <script>
 import userAPI from "handlers/user/api";
 import controllers from "handlers/user/controllers";
+import dateAPI from "handlers/date";
+
 import chooseUsername from "./oauthChooseUsername";
 export default {
   name: "oauthComponent",
 
-  beforeCreate() {
+  async beforeMount() {
+    const lang = this.lang;
+    this.tz = await dateAPI.isTimezoneInList(lang);
+
     if (process.env.CLIENT) {
       import("boot/oAuth").then(data => {
         this.oauth = data.default;
 
         // Загружаем и инициализируем SDK
         this.oauth.install();
+
         // Инициализируем telegram виджет
         const { script } = this.oauth.telegram();
         this.$refs.providers.appendChild(script);
@@ -23,7 +29,9 @@ export default {
   data() {
     return {
       username: "",
-      oauth: null
+      oauth: null,
+      tz: null,
+      lang: this.$store.state.user.language
     };
   },
 
@@ -37,20 +45,29 @@ export default {
         }
       });
     },
-    fb() {
+    facebook() {
       this.oauth.facebook.login().then(res => {
-        const user = controllers.facebookInstance(res);
-        console.log(user);
+        const credentials = controllers.facebookInstance(res);
+
+        if (credentials) {
+          this.oauthLogin(credentials);
+        }
       });
     },
     telegram(res) {
-      const user = controllers.telegramInstance(res);
-      console.log(user);
+      const credentials = controllers.telegramInstance(res);
+
+      if (credentials) {
+        this.oauthLogin(credentials);
+      }
     },
     vk() {
       this.oauth.vk.login().then(res => {
-        const user = controllers.vkInstance(res);
-        console.log(user);
+        const credentials = controllers.vkInstance(res);
+
+        if (credentials) {
+          this.oauthLogin(credentials);
+        }
       });
     },
 
@@ -58,30 +75,32 @@ export default {
       const { user, error } = await userAPI.oauthLogin(credentials);
 
       if (error) {
-        const { errorType, message } = controllers.handleErrors(error);
+        const { errorType } = controllers.handleErrors(error);
 
         if (errorType === "oauth: no user") {
-          this.oauthRegister(credentials);
+          return this.oauthRegister(credentials);
         }
 
         return;
       }
 
-      this.$store.dispatch("user/signin", user);
-      // Проверяем наличие параметра переадресации в текущем роуте.
-      // Если он есть - перенаправляем пользователя на указанный маршрут. В противном случае отправляем на главную страницу
-      const redirectTo = this.$route.params.redirect;
-      const to = redirectTo ? redirectTo : "home";
-      this.$router.replace({ name: to });
+      this.dispatch(user);
     },
 
     async oauthRegister(credentials) {
-      //@todo Добавить определение страны, часового пояса и языка
+      credentials.lang = this.lang;
+      credentials.timezone = this.tz;
+
+      if (!credentials.country) {
+        credentials.country = await userAPI.getCountry();
+      }
+
       const { user, error } = await userAPI.oauthRegister(credentials);
 
       if (error) {
         const { errorType, message } = controllers.handleErrors(error);
         if (errorType === "oauth: email already used") {
+          // Полученный от oauth провайдера email уже занят
           this.$q
             .dialog({
               title: this.$t("errors.authError"),
@@ -93,19 +112,32 @@ export default {
         }
 
         if (errorType === "oauth: username is not chosen") {
+          // Не удалось подобрать пользователю никнейм
           this.$q
             .dialog({
-              title: "One moment, please",
+              title: this.$t("errors.chooseUsername"),
               component: chooseUsername,
-
-              // optional if you want to have access to
-              // Router, Vuex store, and so on, in your
-              // custom component:
               root: this.$root,
               message
             })
-            .onOk(async () => {});
+            .onOk(async username => {
+              credentials.customUsername = username;
+              this.oauthRegister(credentials);
+            });
         }
+      }
+
+      this.dispatch(user);
+    },
+
+    dispatch(user) {
+      if (typeof user === "object") {
+        this.$store.dispatch("user/signin", user);
+        // Проверяем наличие параметра переадресации в текущем роуте.
+        // Если он есть - перенаправляем пользователя на указанный маршрут. В противном случае отправляем на главную страницу
+        const redirectTo = this.$route.params.redirect;
+        const to = redirectTo ? redirectTo : "home";
+        this.$router.replace({ name: to });
       }
     }
   },
@@ -127,12 +159,12 @@ export default {
         }),
         h("q-btn", {
           attrs: {
-            label: "fb",
+            label: "facebook",
             color: "yellow-4"
           },
           on: {
             click: () => {
-              this.fb();
+              this.facebook();
             }
           }
         }),

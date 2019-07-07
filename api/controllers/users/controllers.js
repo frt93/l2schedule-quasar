@@ -29,23 +29,7 @@ module.exports.create = async (req, res) => {
   const hashedPassword = await helpers.hashPassword(unhashedPassword);
   credentials.password = hashedPassword;
 
-  const { key } = await helpers.generateToken();
-  credentials.metadata.data.emailVerification = key;
-
-  const { mutation, variable, response } = require('api/controllers/users/mutations/create');
-  user = variable(credentials);
-
-  GraphQLClient.request(mutation, user)
-    .then(async data => {
-      const createdUser = response(data);
-      const { token } = await helpers.generateToken(createdUser.id);
-
-      res.send({ user: createdUser, token });
-      helpers.saveUserInRedis(createdUser); // Сохраняем пользователя в Redis
-    })
-    .catch(e => {
-      validator.handleErrors(e, res, credentials);
-    });
+  helpers.createUser(credentials, res);
 };
 
 /**
@@ -80,6 +64,10 @@ module.exports.signin = async (req, res) => {
     // Пользователь не найден - выбрасываем ошибку (параметры ошибки в переменной error)
     return validator.throwErrors(error.name, res, error.params);
   } else {
+    if (user.password === null) {
+      // Пользователь регистрировался с помощью oauth-провайдера и у него нет пароля
+      return validator.throwErrors('No password', res);
+    }
     // Пользователь найден. Сверяем введенный и хранящийся в БД пароли
     const comparePasswords = await helpers.comparePasswords(credentials.password, user.password);
 
@@ -129,14 +117,28 @@ module.exports.oauthLogin = (req, res) => {
       }
     })
     .catch(e => {
-      console.log(e);
       return validator.handleErrors(e, res);
     });
 };
 
 module.exports.oauthCreate = async (req, res) => {
   const credentials = req.body;
+  let instance = {
+    username: '',
+    email: null,
+    metadata: {
+      data: {
+        language: credentials.lang,
+        timezone: credentials.timezone,
+        country: credentials.country,
+      },
+    },
+  };
+
+  instance.metadata.data[`${credentials.provider}ID`] = credentials.id;
+
   if (credentials.email) {
+    // Если получили от oauth провайдера email-адрес - проверим, чтобы он был свободен
     const { isExist, error } = await helpers.findEmail(credentials.email, res);
 
     if (error) {
@@ -146,16 +148,35 @@ module.exports.oauthCreate = async (req, res) => {
     if (isExist !== null) {
       return validator.throwErrors('oauth: email already used', res, isExist);
     }
+
+    instance.email = credentials.email;
   }
 
-  const { username } = await helpers.oauthChooseUsername(credentials, res);
-  if (!username) {
-    return validator.throwErrors('oauth: username is not chosen', res);
+  if (credentials.customUsername) {
+    // Если не получилось автоматически подобрать никнейм в блоке else ниже и пользователю было
+    // предложено указать его самостоятельно
+    instance.username = credentials.customUsername;
   } else {
-    console.log(username);
+    // Попытаемся подобрать пользователю никнейм на основе полученных от oauth провайдера данных
+    const { username } = await helpers.oauthChooseUsername(credentials, res);
+    if (!username) {
+      // Подобрать не удалось. Выбросим ошибку и на клиенте пользователю будет предложено указать его самостоятельно.
+      // И этот указанный никнейм будет отправлен в свойстве credentials.customUsername
+      return validator.throwErrors('oauth: username is not chosen', res);
+    } else {
+      instance.username = username;
+    }
   }
 
-  return;
+  if (credentials.name) {
+    instance.metadata.data.name = credentials.name;
+  }
+
+  if (credentials.avatar) {
+    instance.metadata.data.avatar = credentials.avatar;
+  }
+
+  helpers.createUser(instance, res);
 };
 
 /**

@@ -1,4 +1,6 @@
 <script>
+import { debounce } from "quasar";
+
 import userAPI from "handlers/user/api";
 import controllers from "handlers/user/controllers";
 export default {
@@ -14,9 +16,15 @@ export default {
   props: ["userInstance"],
   data() {
     return {
+      email: "",
+      emailError: false,
+      emailErrorMessage: "",
+
       confirmKey: "",
       confirmKeyError: false,
       confirmKeyErrorMessage: "",
+
+      emailLoading: false,
       sending: false
     };
   },
@@ -84,6 +92,39 @@ export default {
 
           controllers.successNotify(success);
         });
+    },
+
+    __emailInput(h) {
+      if (!this.userInstance.email) {
+        return h(
+          "q-input",
+          {
+            attrs: {
+              autocomplete: false,
+              value: this.email,
+              label: this.$t("labels.email"),
+              hint: this.$t("hints.settings.email"),
+              error: this.emailError,
+              errorMessage: this.emailErrorMessage,
+              loading: this.emailLoading
+            },
+            on: {
+              input: value => {
+                this.email = value;
+                this.emailLoading = true;
+              }
+            }
+          },
+          [
+            h("q-spinner-puff", {
+              attrs: {
+                color: this.emailError ? "negative" : "primary"
+              },
+              slot: "loading"
+            })
+          ]
+        );
+      }
     },
 
     /**
@@ -193,8 +234,32 @@ export default {
     }
   },
 
+  watch: {
+    email: debounce(async function(email) {
+      this.emailError = false;
+      this.emailErrorMessage = "";
+
+      if (email !== this.userInstance.email) {
+        this.emailErrorMessage = controllers.validateEmail(email);
+
+        if (this.emailErrorMessage) {
+          this.emailError = true;
+        } else {
+          const { message } = await controllers.checkEmail(email);
+          if (message) {
+            this.emailError = true;
+            this.emailErrorMessage = message;
+          }
+        }
+      }
+
+      this.loading.email = false;
+    }, 1500)
+  },
+
   render(h) {
     return h("div", { staticClass: "form" }, [
+      this.__emailInput(h),
       this.__emailConfirmInput(h),
       this.__submitButton(h)
     ]);

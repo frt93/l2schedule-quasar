@@ -57,7 +57,12 @@ export default {
         h("q-tabs", { props: { align: "right" } }, [
           h("q-avatar", [
             h("img", {
-              attrs: { src: "statics/avatar.png" }
+              attrs: {
+                src:
+                  typeof this.user === "object" && this.user.metadata.avatar
+                    ? this.user.metadata.avatar
+                    : "statics/avatar.png"
+              }
             }),
             h("userMenu", { props: { user: this.user } })
           ])

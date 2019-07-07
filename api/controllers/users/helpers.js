@@ -31,6 +31,29 @@ module.exports.saveUserInRedis = user => {
   redis.set(`user:${user.id}`, JSON.stringify(user), 'EX', 172800);
 };
 
+module.exports.createUser = async (credentials, res) => {
+  if (credentials.email) {
+    const { key } = await this.generateToken();
+    credentials.metadata.data.emailVerification = key;
+  }
+
+  const { mutation, variable, response } = require('api/controllers/users/mutations/create');
+  user = variable(credentials);
+
+  GraphQLClient.request(mutation, user)
+    .then(async data => {
+      const createdUser = response(data);
+      const { token } = await this.generateToken(createdUser.id);
+
+      this.saveUserInRedis(createdUser); // Сохраняем пользователя в Redis
+      delete createdUser.password; // Удаляем из передаваемого экземпляра пароль
+      res.send({ user: createdUser, token });
+    })
+    .catch(e => {
+      validator.handleErrors(e, res, credentials);
+    });
+};
+
 /**
  * Составляем токен для подтверждения email адреса, смены пароля или других операций
  *
@@ -147,7 +170,7 @@ module.exports.findEmail = async (email, res) => {
 };
 
 /**
- * Подготовим данные для регистрации пользователя на основе данных, полученных по oauth api.
+ * Подготовим данные для регистрации пользователя на основе данных, полученных от oauth провайдера.
  *
  * @param {String} credentials   Данные пользователя
  * @param res                    Экземпляр ответа сервера
@@ -156,10 +179,10 @@ module.exports.oauthChooseUsername = async (credentials, res) => {
   let username = '';
 
   if (credentials.username) {
-    // Если в выбранном oauth приложении присутствует никнейм - попробуем воспользоваться им
+    // Если в данных, полученных от oauth провайдера, присутствует никнейм - попробуем воспользоваться им
     username = credentials.username;
     // Проверим его на валидность
-    const isValid = validator.validateUsername(username, res, (doRespond = false));
+    const isValid = await validator.validateUsername(username, res, (doRespond = false));
 
     if (isValid) {
       // Никнейм валиден. Проверим не занят ли он?
@@ -167,18 +190,16 @@ module.exports.oauthChooseUsername = async (credentials, res) => {
       if (isExist === null) {
         // Не занят. Возвращаем и продолжаем регистрацию
         return { username };
-      } else {
-        // Занят. "Обнулим" значение переменной
-        username = '';
       }
     }
   }
 
   if (credentials.email) {
+    username = '';
     // Если не удалось получить никнейм - воспользуемся email адресом (если удалось получить его).
     // Обрежем часть адреса до символа @ и отправим ее на валидацию
     username = credentials.email.split('@')[0];
-    const isValid = validator.validateUsername(username, res, (doRespond = false));
+    const isValid = await validator.validateUsername(username, res, (doRespond = false));
 
     if (isValid) {
       // Валидно. Проверяем, не занят ли такой никнейм?
@@ -186,18 +207,16 @@ module.exports.oauthChooseUsername = async (credentials, res) => {
       if (isExist === null) {
         // Не занят. Возвращаем и продолжаем регистрацию
         return { username };
-      } else {
-        // Занят. "Обнулим" значение переменной
-        username = '';
       }
     }
   }
 
   if (credentials.name) {
+    username = '';
     // Напоследок - попытаемся воспользовать именем+фамилией пользователя. Валидность пройдет
     // только в случае, если значение на латинице, без спец. символов и длиной не более 16 символов. Попытка - не пытка
     username = replaceSpaces(credentials.name).toLowerCase();
-    const isValid = validator.validateUsername(username, res, (doRespond = false));
+    const isValid = await validator.validateUsername(username, res, (doRespond = false));
 
     if (isValid) {
       // Валидно. Проверяем, не занят ли такой никнейм?
@@ -205,12 +224,11 @@ module.exports.oauthChooseUsername = async (credentials, res) => {
       if (isExist === null) {
         // Не занят. Возвращаем и продолжаем регистрацию
         return { username };
-      } else {
-        // Занят. "Обнулим" значение переменной
-        username = '';
       }
     }
   }
+
+  username = '';
 
   return { username };
 };

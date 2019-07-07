@@ -14,11 +14,9 @@ export default {
     };
   },
 
-  beforeMount() {
+  async beforeMount() {
     const lang = this.lang;
-    import(`lang/${lang}/timezones-countries`).then(data => {
-      this.tz = dateAPI.isTimezoneInList(data.default.getTimezonesList());
-    });
+    this.tz = await dateAPI.isTimezoneInList(lang);
   },
 
   data() {

@@ -4,7 +4,6 @@ import { debounce } from "quasar";
 import userAPI from "handlers/user/api";
 import controllers from "handlers/user/controllers";
 import date from "handlers/date";
-import { setInterval } from "timers";
 
 export default {
   name: "accountSettingsPage",
@@ -16,7 +15,6 @@ export default {
     };
   },
 
-  props: ["userInstance", "lang", "timezoneList", "timezone", "countriesList"],
   async preFetch({ store }) {
     /**
      * Загружаем список временных зон
@@ -27,6 +25,19 @@ export default {
     });
   },
 
+  async beforeMount() {
+    if (process.env.CLIENT) {
+      // Запускаем таймер для отображения часов в реальном времени под селектом с часовыми поясами
+      this.clock();
+    }
+  },
+
+  destroyed() {
+    // Удаляем таймер
+    clearInterval(this.clockID._id);
+  },
+
+  props: ["userInstance", "lang", "timezoneList", "timezone", "countriesList"],
   data() {
     return {
       username: this.userInstance.username,
@@ -64,18 +75,6 @@ export default {
       time: date.now(this.timezone),
       clockID: null // Сюда записывается идентификатор setInterval-функции в методе clock()
     };
-  },
-
-  async beforeMount() {
-    if (process.env.CLIENT) {
-      // Запускаем таймер для отображения часов в реальном времени под селектом с часовыми поясами
-      this.clock();
-    }
-  },
-
-  destroyed() {
-    // Удаляем таймер
-    clearInterval(this.clockID._id);
   },
 
   computed: {
@@ -127,8 +126,9 @@ export default {
      * Если пользователь внес изменения в email адрес или никнейм - запрашиваем у него пароль для подтверждения
      */
     needPasswordConfirm() {
-      if (typeof this.userInstance === "object" &&
-        this.username !== this.userInstance.username ||
+      if (
+        (typeof this.userInstance === "object" &&
+          this.username !== this.userInstance.username) ||
         this.email !== this.userInstance.email
       ) {
         return true;
@@ -211,6 +211,42 @@ export default {
           if (v.label.toLowerCase().indexOf(needle) > -1) return v;
         });
       });
+    },
+
+    /**
+     * Рендер инпута для email адреса по условию
+     */
+    __emailInput(h) {
+      if (this.userInstance.email) {
+        h(
+          "q-input",
+          {
+            attrs: {
+              autocomplete: false,
+              value: this.email,
+              label: this.$t("labels.email"),
+              hint: this.$t("hints.settings.email"),
+              error: this.emailError,
+              errorMessage: this.emailErrorMessage,
+              loading: this.loading.email
+            },
+            on: {
+              input: value => {
+                this.email = value;
+                this.loading.email = true;
+              }
+            }
+          },
+          [
+            h("q-spinner-puff", {
+              attrs: {
+                color: this.emailError ? "negative" : "primary"
+              },
+              slot: "loading"
+            })
+          ]
+        );
+      }
     },
 
     /**
@@ -402,35 +438,7 @@ export default {
         ]
       ),
 
-      h(
-        "q-input",
-        {
-          attrs: {
-            autocomplete: false,
-            value: this.email,
-            label: this.$t("labels.email"),
-            hint: this.$t("hints.settings.email"),
-            error: this.emailError,
-            errorMessage: this.emailErrorMessage,
-            loading: this.loading.email
-          },
-          on: {
-            input: value => {
-              this.email = value;
-              this.loading.email = true;
-            }
-          }
-        },
-        [
-          h("q-spinner-puff", {
-            attrs: {
-              color: this.emailError ? "negative" : "primary"
-            },
-            slot: "loading"
-          })
-        ]
-      ),
-
+      this.__emailInput(h),
       this.__passwordInput(h),
 
       h(

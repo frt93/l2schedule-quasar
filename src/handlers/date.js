@@ -38,21 +38,28 @@ export default {
 
   /**
    * На странице настроек данных аккаунта пользователь может выбрать подходящий для него часовой пояс из предложенного списка.
-   * Постараемся в процессе регистрации проверить вхождения определенного пакетом luxon часового пояса пользователя в данный список.
+   * Постараемся в процессе регистрации проверить вхождение определенного пакетом luxon часового пояса пользователя в данный список.
    * Если вхождение есть - вернем значение. В противном случае вернем null и время для пользователя будет отображаться на основании
    * системных данных его ПО без привязки к выбранному часовому поясу
    *
-   * @param {Array} list        Массив с перечнем часовых поясов, предлагаемый для выбора пользователю в настройках
+   * @param {Array} lang        Язык пользователя
    */
-  isTimezoneInList(list) {
+  async isTimezoneInList(lang) {
+    let list;
     const userTimezone = this.getCurrentTimezone();
+
+    await import(`lang/${lang}/timezones-countries`).then(data => {
+      list = data.default.getTimezonesList();
+    });
 
     const tz = list.filter(zone => {
       return zone.value === userTimezone;
     });
+
     if (tz.length) {
       return tz[0].value;
     }
+
     return null;
   },
 
