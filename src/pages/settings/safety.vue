@@ -3,8 +3,11 @@ import { debounce } from "quasar";
 
 import userAPI from "handlers/user/api";
 import controllers from "handlers/user/controllers";
+
+import setEmail from "components/ui/settings/safety/setEmail";
+
 export default {
-  name: "accountSettingsPage",
+  name: "safetytSettingsPage",
   meta() {
     return {
       title: this.$t("titles.settings.safety"),
@@ -16,15 +19,10 @@ export default {
   props: ["userInstance"],
   data() {
     return {
-      email: "",
-      emailError: false,
-      emailErrorMessage: "",
+      confirmEmail: "",
+      confirmEmailError: false,
+      confirmEmailErrorMessage: "",
 
-      confirmKey: "",
-      confirmKeyError: false,
-      confirmKeyErrorMessage: "",
-
-      emailLoading: false,
       sending: false
     };
   },
@@ -34,38 +32,33 @@ export default {
      * Проверяем отсутствие ошибок и разблокируем кнопку отправки
      */
     canSubmit() {
-      return this.confirmKey.length == 36 && !this.confirmKeyError
-        ? true
-        : false;
+      return false;
+    },
+
+    payload() {
+      let payload = { id: this.userInstance.id };
+      return payload;
     }
   },
 
   methods: {
     async submit() {
-      if (this.canSubmit) {
-        this.sending = true;
-
-        const { user, success, error } = await userAPI.confirmEmail(
-          this.confirmKey,
-          this.userInstance.id
-        );
-        this.sending = false;
-
-        if (error) {
-          const { message } = controllers.handleErrors(error);
-          this.confirmKeyError = true;
-          this.confirmKeyErrorMessage = message;
-
-          return;
-        }
-
-        if (user) {
-          this.$store.commit("user/setUser", user);
-        }
-
-        this.confirmKey = "";
-        controllers.successNotify(success);
-      }
+      // if (this.canSubmit) {
+      //   this.sending = true;
+      //   const { user, success, error } = await userAPI.submitSafetySettings(
+      //     this.payload
+      //   );
+      //   this.sending = false;
+      //   if (error) {
+      //     const { errorType, message } = controllers.handleErrors(error);
+      //     this[errorType] = true;
+      //     this[`${errorType}Message`] = message;
+      //     return;
+      //   }
+      //   // Устанавливаем новый инстанс пользователя
+      //   this.$store.commit("user/setUser", user);
+      //   controllers.successNotify(success);
+      // }
     },
 
     /**
@@ -94,44 +87,46 @@ export default {
         });
     },
 
-    __emailInput(h) {
-      if (!this.userInstance.email) {
-        return h(
-          "q-input",
-          {
-            attrs: {
-              autocomplete: false,
-              value: this.email,
-              label: this.$t("labels.email"),
-              hint: this.$t("hints.settings.email"),
-              error: this.emailError,
-              errorMessage: this.emailErrorMessage,
-              loading: this.emailLoading
-            },
-            on: {
-              input: value => {
-                this.email = value;
-                this.emailLoading = true;
-              }
-            }
-          },
-          [
-            h("q-spinner-puff", {
-              attrs: {
-                color: this.emailError ? "negative" : "primary"
-              },
-              slot: "loading"
-            })
-          ]
-        );
-      }
-    },
+    // __emailInput(h) {
+    //   if (!this.userInstance.email) {
+    //     return h(
+    //       "q-input",
+    //       {
+    //         attrs: {
+    //           autocomplete: false,
+    //           value: this.email,
+    //           label: this.$t("labels.email"),
+    //           hint: this.$t("hints.settings.safety.enterEmail"),
+    //           error: this.emailError || !this.email.length,
+    //           errorMessage:
+    //             this.emailErrorMessage ||
+    //             this.$t("hints.settings.safety.enterEmail"),
+    //           loading: this.emailLoading
+    //         },
+    //         on: {
+    //           input: value => {
+    //             this.email = value;
+    //             this.emailLoading = true;
+    //           }
+    //         }
+    //       },
+    //       [
+    //         h("q-spinner-puff", {
+    //           attrs: {
+    //             color: this.emailError ? "negative" : "primary"
+    //           },
+    //           slot: "loading"
+    //         })
+    //       ]
+    //     );
+    //   }
+    // },
 
     /**
      * Рендер инпута для ключа подтверждения email адреса
      */
     __emailConfirmInput(h) {
-      if (this.userInstance.metadata.emailVerification !== undefined) {
+      if (this.userInstance.metadata.emailVerification) {
         // Если у пользователя не подтвержден email адрес
         return h(
           "q-input",
@@ -140,17 +135,17 @@ export default {
               autocomplete: false,
               maxlength: 36,
               counter: true,
-              value: this.confirmKey,
-              label: this.$t("labels.confirmKey"),
-              error: this.confirmKeyError,
-              errorMessage: this.confirmKeyErrorMessage
+              value: this.confirmEmail,
+              label: this.$t("labels.confirmEmail"),
+              error: this.confirmEmailError,
+              errorMessage: this.confirmEmailErrorMessage
             },
             on: {
               input: value => {
-                this.confirmKeyError = false;
-                this.confirmKeyErrorMessage = "";
+                this.confirmEmailError = false;
+                this.confirmEmailErrorMessage = "";
 
-                this.confirmKey = value;
+                this.confirmEmail = value;
               }
             }
           },
@@ -234,34 +229,12 @@ export default {
     }
   },
 
-  watch: {
-    email: debounce(async function(email) {
-      this.emailError = false;
-      this.emailErrorMessage = "";
-
-      if (email !== this.userInstance.email) {
-        this.emailErrorMessage = controllers.validateEmail(email);
-
-        if (this.emailErrorMessage) {
-          this.emailError = true;
-        } else {
-          const { message } = await controllers.checkEmail(email);
-          if (message) {
-            this.emailError = true;
-            this.emailErrorMessage = message;
-          }
-        }
-      }
-
-      this.loading.email = false;
-    }, 1500)
-  },
-
   render(h) {
     return h("div", { staticClass: "form" }, [
-      this.__emailInput(h),
-      this.__emailConfirmInput(h),
-      this.__submitButton(h)
+      // this.__emailInput(h),
+      // this.__emailConfirmInput(h)
+      // this.__submitButton(h)
+      h(setEmail, { props: { userInstance: this.userInstance } })
     ]);
   }
 };

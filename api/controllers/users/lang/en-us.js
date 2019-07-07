@@ -3,6 +3,7 @@ module.exports = {
     emailConfirmed: 'Email address successfully confirmed',
     accountSettings: 'Account details updated',
     passwordChanged: 'Password successfully changed',
+    safetySettings: 'Safety settings updated',
   },
   errors: {
     'Empty credentials': "You haven't completely filled out the form.",

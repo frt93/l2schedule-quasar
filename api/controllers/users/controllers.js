@@ -457,25 +457,11 @@ module.exports.accountSettings = async (req, res) => {
   }
 
   // Пароль верен. Отправляем запрос на изменение данных
-  const { mutation, variables, response } = require('./mutations/settings/account');
-  const data = variables(id, payload);
-
-  GraphQLClient.request(mutation, data)
-    .then(updated => {
-      const updatedUser = response(updated);
-
-      helpers.saveUserInRedis(updatedUser); // Сохраняем пользователя в Redis
-      delete updatedUser.password; // Убираем из возвращаемого экземпляра пароль
-      const message = messages(res.lang).success.accountSettings;
-      res.send({ user: updatedUser, message });
-    })
-    .catch(e => {
-      return validator.handleErrors(e, res, payload.user);
-    });
+  helpers.saveSettings(id, payload, res, 'accountSettings');
 };
 
 /**
- * Изменяем пароль от аккаунта пользователя
+ * Изменяем или устанавливаем пароль от аккаунта пользователя
  *
  * @param req               Объект запроса сервера
  * @param res               Объект ответа сервера
@@ -513,6 +499,32 @@ module.exports.passwordSettings = async (req, res) => {
     .catch(e => {
       return validator.handleErrors(e, res);
     });
+};
+
+/**
+ * Изменяем настройки безопасности аккаунта пользователя
+ *
+ * @param req               Объект запроса сервера
+ * @param res               Объект ответа сервера
+ *
+ * @todo Организовать отправку письма в случае установки email адреса
+ */
+module.exports.safetySettings = async (req, res) => {
+  const settings = req.body,
+    id = settings.id;
+  let payload = { user: {}, metadata: {} };
+
+  if (settings.email) {
+    payload.user.email = settings.email;
+    // Сгенерируем ключ подтверждения
+    const { key } = await helpers.generateToken();
+
+    payload.metadata = {
+      emailVerification: key,
+    };
+  }
+
+  helpers.saveSettings(id, payload, res, 'safetySettings');
 };
 
 /**

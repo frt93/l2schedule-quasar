@@ -148,7 +148,7 @@ export default {
           metadata: this.metadata,
           id: this.userInstance.id
         };
-        const lang = this.metadata.language;
+        const lang = this.metadata.language; //@todo payload в computed. lang вытаскивать в api из свойства metadata
 
         if (this.needPasswordConfirm) {
           payload = { ...payload, password: this.password };
@@ -218,7 +218,7 @@ export default {
      */
     __emailInput(h) {
       if (this.userInstance.email) {
-        h(
+        return h(
           "q-input",
           {
             attrs: {
@@ -368,17 +368,12 @@ export default {
       this.usernameError = false;
       this.usernameErrorMessage = "";
 
-      if (username !== this.userInstance.username) {
-        this.usernameErrorMessage = controllers.validateUsername(username);
+      if (username.length && username !== this.userInstance.username) {
+        const { message } = await controllers.checkUsername(username);
 
-        if (this.usernameErrorMessage) {
+        if (message) {
           this.usernameError = true;
-        } else {
-          const { message } = await controllers.checkUsername(username);
-          if (message) {
-            this.usernameError = true;
-            this.usernameErrorMessage = message;
-          }
+          this.usernameErrorMessage = message;
         }
       }
 
@@ -389,17 +384,12 @@ export default {
       this.emailError = false;
       this.emailErrorMessage = "";
 
-      if (email !== this.userInstance.email) {
-        this.emailErrorMessage = controllers.validateEmail(email);
+      if (email.length && email !== this.userInstance.email) {
+        const { message } = await controllers.checkEmail(email);
 
-        if (this.emailErrorMessage) {
+        if (message) {
           this.emailError = true;
-        } else {
-          const { message } = await controllers.checkEmail(email);
-          if (message) {
-            this.emailError = true;
-            this.emailErrorMessage = message;
-          }
+          this.emailErrorMessage = message;
         }
       }
 

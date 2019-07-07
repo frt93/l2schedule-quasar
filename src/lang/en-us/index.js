@@ -33,7 +33,7 @@ export default {
     noCountry: 'The specified country not found',
     sending: 'Sending',
     settings: 'Settings',
-    confirmKey: 'Confirmation key',
+    confirmEmail: 'Email confirmation key',
     confirm: 'Confirm',
     resendConfirmKey: 'The confirmation key will be resend to the email address',
   },
@@ -68,6 +68,8 @@ export default {
       DST: 'Auto transition to daylight/standard time',
       country: 'Select the country you live in',
       safety: {
+        enterEmail:
+          'To reduce the risk of losing access to this account - enter your email address. \n It will be hidden from other users.',
         email1:
           "Was sent to the email address you specified during registration. If you can't find the letter - we can ",
         email2: 'resend it',

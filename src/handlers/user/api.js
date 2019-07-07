@@ -280,6 +280,26 @@ export default {
   },
 
   /**
+   * Отправляем запрос на изменение настроек безопасности
+   *
+   * @param {Object} payload     Отправляемые данные пользователя
+   */
+  async submitSafetySettings(payload) {
+    let user, success, error;
+    await axiosInstance
+      .post('/users/settings/safety', payload)
+      .then(res => {
+        user = res.data.user;
+        success = res.data.message;
+      })
+      .catch(e => {
+        error = e;
+      });
+
+    return { user, success, error };
+  },
+
+  /**
    * Отправляем запрос на изменение пароля от аккаунта аккаунта пользователя
    *
    * @param {String} id          ID пользователя
@@ -292,6 +312,7 @@ export default {
         success = res.data.message;
       })
       .catch(e => {
+        0;
         error = e;
       });
 
