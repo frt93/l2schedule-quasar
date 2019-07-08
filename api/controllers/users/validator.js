@@ -433,8 +433,8 @@ module.exports.accountSettingsValidation = async (credentials, password, res) =>
   return true;
 };
 
-module.exports.accountPasswordValidation = async (passwords, res) => {
-  if (!passwords.current || !passwords.new) {
+module.exports.accountPasswordValidation = async (password, newPassword, res) => {
+  if (!password || !newPassword) {
     // Форма заполнена неполностью - выбрасываем ошибку
     this.throwErrors('Empty credentials', res);
     return false;
@@ -443,11 +443,11 @@ module.exports.accountPasswordValidation = async (passwords, res) => {
   let valid, message;
 
   // Проверим текущий пароль при помощи готового метода валидации
-  valid = await this.validatePassword(passwords.current, res);
+  valid = await this.validatePassword(password, res);
   if (!valid) return false;
 
   // Проверим новый пароль с помощью функции-проверки паттерна пароля и перепишем тип возможной ошибки
-  message = this.passwordPattern(passwords.new, res);
+  message = this.passwordPattern(newPassword, res);
 
   if (message.length) {
     res.status(400).send({

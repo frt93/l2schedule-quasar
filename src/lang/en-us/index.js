@@ -28,6 +28,7 @@ export default {
     save: 'Save',
     next: 'Next',
     back: 'Back',
+    change: 'Change',
     language: 'Language',
     timezone: 'Timezone',
     noTimezone: 'The specified time zone not found',
@@ -62,10 +63,8 @@ export default {
   },
   hints: {
     settings: {
-      username: 'Name under which other users are see you. Can be used for authorization',
+      needPasswordToChange: 'To make changes you need first to set an account password',
       email: 'Email will not be publicly displayed',
-      password:
-        'If you change your nickname or email, you must enter your current account password to confirm the operation',
       now: 'Current time',
       DST: 'Auto transition to daylight/standard time',
       country: 'Select the country you live in',
@@ -86,6 +85,7 @@ export default {
       username: 'Only latin letters, numbers and - _ or .',
       email: 'A confirmation message will be sent to the specified email',
       password: 'From 7 to 30 characters',
+      confirmOperation: 'Enter your account password to confirm the operation',
     },
   },
   tabs: {

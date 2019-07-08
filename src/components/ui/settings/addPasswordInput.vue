@@ -35,7 +35,7 @@ export default {
 
         this.sending = true;
         const { user, success, error } = await userAPI.settings(
-          "addpassword",
+          "change/password",
           payload
         );
         this.sending = false;
@@ -56,86 +56,93 @@ export default {
   },
 
   render(h) {
-    return h("div", { staticClass: "form" }, [
-      h(
-        "q-input",
-        {
-          attrs: {
-            autofocus: true,
-            autocomplete: false,
-            type: this.hidePwd ? "password" : "text",
-            maxlength: 30,
-            counter: true,
-            value: this.password,
-            label: this.$t("labels.password"),
-            hint: this.$t("hints.settings.addPassword"),
-            error:
-              this.error ||
-              this.password.length < 7 ||
-              this.password.length > 30,
-            errorMessage:
-              this.errorMessage || this.$t("hints.settings.addPassword")
-          },
-          on: {
-            input: value => {
-              this.error = false;
-              this.errorMessage = "";
-
-              this.password = value;
-              this.errorMessage = controllers.validatePassword(value);
-
-              if (this.errorMessage) {
-                this.error = true;
-              }
-            }
+    return h(
+      "form",
+      {
+        on: {
+          submit: e => {
+            e.preventDefault();
+            this.submit();
           }
-        },
-        [
-          h("q-icon", {
-            staticClass: "cursor-pointer q-ml-sm",
+        }
+      },
+      [
+        h(
+          "q-input",
+          {
             attrs: {
-              name: this.hidePwd ? "fas fa-eye" : "fas fa-eye-slash"
+              autofocus: true,
+              autocomplete: false,
+              type: this.hidePwd ? "password" : "text",
+              maxlength: 30,
+              counter: true,
+              value: this.password,
+              label: this.$t("labels.password"),
+              hint: this.$t("hints.settings.addPassword"),
+              error:
+                this.error ||
+                this.password.length < 7 ||
+                this.password.length > 30,
+              errorMessage:
+                this.errorMessage || this.$t("hints.settings.addPassword")
             },
             on: {
-              click: () => {
-                this.hidePwd = !this.hidePwd;
-              }
-            },
-            slot: "append"
-          })
-        ]
-      ),
+              input: value => {
+                this.error = false;
+                this.errorMessage = "";
 
-      h(
-        "q-btn",
-        {
-          staticClass: "float-right q-my-lg",
-          class: {
-            loading: this.sending
-          },
-          attrs: {
-            label: this.$t("labels.save"),
-            loading: this.sending,
-            color: this.canSubmit ? "green-6" : "red-6",
-            disable: !this.canSubmit
-          },
-          on: {
-            click: () => {
-              this.submit();
+                this.password = value;
+                this.errorMessage = controllers.validatePassword(value);
+
+                if (this.errorMessage) {
+                  this.error = true;
+                }
+              }
             }
-          }
-        },
-        [
-          h(
-            "div",
-            {
-              slot: "loading"
+          },
+          [
+            h("q-icon", {
+              staticClass: "cursor-pointer q-ml-sm",
+              attrs: {
+                name: this.hidePwd ? "mdi-eye" : "mdi-eye-off"
+              },
+              on: {
+                click: () => {
+                  this.hidePwd = !this.hidePwd;
+                }
+              },
+              slot: "append"
+            })
+          ]
+        ),
+
+        h(
+          "q-btn",
+          {
+            staticClass: "float-right q-my-lg",
+            class: {
+              loading: this.sending
             },
-            [this._v(this.$t("labels.sending")), h("q-spinner-dots")]
-          )
-        ]
-      )
-    ]);
+            attrs: {
+              type: "submit",
+              label: this.$t("labels.save"),
+              loading: this.sending,
+              color: this.canSubmit ? "green-6" : "red-6",
+              disable: !this.canSubmit
+            }
+          },
+          [
+            h(
+              "div",
+              {
+                slot: "loading"
+              },
+              [this._v(this.$t("labels.sending")), h("q-spinner-dots")]
+            )
+          ]
+        )
+      ]
+    );
   }
 };
 </script>

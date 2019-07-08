@@ -18,9 +18,10 @@ router.post('/confirm-repair', users.confirmRepair);
 router.post('/repair/change-password', users.repairChangePassword);
 
 router.post('/settings/account', users.accountSettings);
-router.post('/settings/password', users.passwordSettings);
-router.post('/settings/addpassword', users.addPassword);
-router.post('/settings/addemail', users.addEmail);
+// router.post('/settings/password', users.passwordSettings);
+router.post('/settings/change/password', users.savePassword);
+router.post('/settings/change/email', users.saveEmail);
+router.post('/settings/change/username', users.saveUsername);
 router.post('/settings/safety', users.safetySettings);
 router.post('/settings/resendEmailConfirmationKey', users.resendEmailConfirmationKey);
 

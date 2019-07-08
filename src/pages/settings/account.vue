@@ -5,6 +5,9 @@ import userAPI from "handlers/user/api";
 import controllers from "handlers/user/controllers";
 import date from "handlers/date";
 
+import usernameInput from "components/ui/settings/changeUsernameInput";
+import emailInput from "components/ui/settings/changeEmailInput";
+
 export default {
   name: "accountSettingsPage",
   meta() {
@@ -16,9 +19,7 @@ export default {
   },
 
   async preFetch({ store }) {
-    /**
-     * Загружаем список временных зон
-     */
+    // Загружаем список временных зон
     const lang = store.state.user.language;
     await import(`lang/${lang}/timezones-countries`).then(data => {
       store.commit("user/setTimezonesAndCountriesLists", data.default);
@@ -40,29 +41,9 @@ export default {
   props: ["userInstance", "lang", "timezoneList", "timezone", "countriesList"],
   data() {
     return {
-      username: this.userInstance.username,
-      email: this.userInstance.email,
-      password: "",
-
-      metadata: {
-        language: this.lang,
-        timezone: this.timezone,
-        country: this.userInstance.metadata.country
-      },
-
-      usernameError: false,
-      emailError: false,
-      passwordError: false,
-
-      usernameErrorMessage: "",
-      emailErrorMessage: "",
-      passwordErrorMessage: "",
-
-      loading: {
-        username: false,
-        email: false,
-        submit: false
-      },
+      language: this.lang,
+      tz: this.timezone,
+      country: this.userInstance.metadata.country,
 
       timezoneOptions: this.timezoneList,
       languageOptions: [
@@ -73,93 +54,48 @@ export default {
       countriesOptions: this.countriesList,
 
       time: date.now(this.timezone),
-      clockID: null // Сюда записывается идентификатор setInterval-функции в методе clock()
+      clockID: null, // Сюда записывается идентификатор setInterval-функции в методе clock()
+      sending: false
     };
   },
 
   computed: {
-    user() {
+    payload() {
       return {
-        username: this.username,
-        email: this.email
+        language: this.language,
+        timezone: this.tz,
+        country: this.country
       };
     },
-    /**
-     * Проверяем отсутствие ошибок и разблокируем кнопку отправки
-     */
+
+    // Проверяем отсутствие ошибок и разблокируем кнопку отправки
     canSubmit() {
-      let anyChanges = false;
-      for (let field in this.user) {
-        if (this.user[field] !== this.userInstance[field]) {
-          anyChanges = true;
+      for (let field in this.payload) {
+        if (this.payload[field] !== this.userInstance.metadata[field]) {
+          return true;
           break;
         }
       }
 
-      if (this.metadata.language !== this.lang) {
-        anyChanges = true;
-      }
-
-      if (this.metadata.timezone && this.metadata.timezone !== this.timezone) {
-        anyChanges = true;
-      }
-
-      if (
-        this.metadata.country &&
-        this.metadata.country !== this.userInstance.metadata.country
-      ) {
-        anyChanges = true;
-      }
-
-      return !anyChanges ||
-        this.usernameError ||
-        this.emailError ||
-        (this.needPasswordConfirm &&
-          (this.passwordError ||
-            this.password.length < 7 ||
-            this.password.length > 30))
-        ? false
-        : true;
-    },
-
-    /**
-     * Если пользователь внес изменения в email адрес или никнейм - запрашиваем у него пароль для подтверждения
-     */
-    needPasswordConfirm() {
-      if (
-        (typeof this.userInstance === "object" &&
-          this.username !== this.userInstance.username) ||
-        this.email !== this.userInstance.email
-      ) {
-        return true;
-      } else {
-        this.password = "";
-        return false;
-      }
+      return false;
     }
   },
 
   methods: {
     async submit() {
       if (this.canSubmit) {
-        this.loading.submit = true;
-        let payload = {
-          user: this.user,
-          metadata: this.metadata,
+        const payload = {
+          data: this.payload,
           id: this.userInstance.id
         };
-        const lang = this.metadata.language; //@todo payload в computed. lang вытаскивать в api из свойства metadata
-
-        if (this.needPasswordConfirm) {
-          payload = { ...payload, password: this.password };
-        }
+        this.sending = true;
 
         const { user, success, error } = await userAPI.settings(
           "account",
           payload,
-          lang
+          this.language
         );
-        this.loading.submit = false;
+        this.sending = false;
 
         if (error) {
           const { errorType, message } = controllers.handleErrors(error);
@@ -169,22 +105,24 @@ export default {
           return;
         }
 
+        if (this.tz !== this.timezone) {
+          //Меняем локализацию luxon только если пользователь сменил часовой пояс
+          date.setDefaultZone(this.tz);
+          date.setTimezoneCookie(this.tz);
+        }
+
+        if (this.language !== this.lang) {
+          //Меняем локализацию только если пользователь сменил язык
+          this.$store
+            .dispatch("user/changeLanguage", this.language)
+            .then(() => {
+              this.timezoneOptions = this.timezoneList; // Обновляем список часовых поясов, который используется селектом, для перевода текущего выбранного пояса
+              this.countriesOptions = this.countriesList; // Обновляем список стран, который используется селектом, для перевода текущей выбранной страны
+            });
+        }
+
         // Устанавливаем новый инстанс пользователя
         this.$store.commit("user/setUser", user);
-
-        if (this.metadata.timezone !== this.timezone) {
-          //Меняем локализацию luxon только если пользователь сменил часовой пояс
-          date.setDefaultZone(this.metadata.timezone);
-          date.setTimezoneCookie(this.metadata.timezone);
-        }
-
-        if (this.metadata.language !== this.lang) {
-          //Меняем локализацию только если пользователь сменил язык
-          this.$store.dispatch("user/changeLanguage", lang).then(() => {
-            this.timezoneOptions = this.timezoneList; // Обновляем список часовых поясов, который используется селектом, для перевода текущего выбранного пояса
-            this.countriesOptions = this.countriesList; // Обновляем список стран, который используется селектом, для перевода текущей выбранной страны
-          });
-        }
 
         controllers.successNotify(success);
       }
@@ -215,100 +153,10 @@ export default {
     },
 
     /**
-     * Рендер инпута для email адреса по условию
-     */
-    __emailInput(h) {
-      if (this.userInstance.email) {
-        return h(
-          "q-input",
-          {
-            attrs: {
-              autocomplete: false,
-              value: this.email,
-              label: this.$t("labels.email"),
-              hint: this.$t("hints.settings.email"),
-              error: this.emailError,
-              errorMessage: this.emailErrorMessage,
-              loading: this.loading.email
-            },
-            on: {
-              input: value => {
-                this.email = value;
-                this.loading.email = true;
-              }
-            }
-          },
-          [
-            h("q-spinner-puff", {
-              attrs: {
-                color: this.emailError ? "negative" : "primary"
-              },
-              slot: "loading"
-            })
-          ]
-        );
-      }
-    },
-
-    /**
-     * Рендер инпута для пароля по условию
-     */
-    __passwordInput(h) {
-      if (this.needPasswordConfirm)
-        return h(
-          "q-input",
-          {
-            attrs: {
-              autocomplete: false,
-              type: this.hidePwd ? "password" : "text",
-              maxlength: 30,
-              counter: true,
-              value: this.password,
-              label: this.$t("labels.password"),
-              hint: this.$t("hints.settings.password"),
-              error:
-                this.passwordError ||
-                this.password.length < 7 ||
-                this.password.length > 30,
-              errorMessage:
-                this.passwordErrorMessage || this.$t("hints.settings.password")
-            },
-            on: {
-              input: value => {
-                this.passwordError = false;
-                this.passwordErrorMessage = "";
-
-                this.password = value;
-                this.passwordErrorMessage = controllers.validatePassword(value);
-
-                if (this.passwordErrorMessage) {
-                  this.passwordError = true;
-                }
-              }
-            }
-          },
-          [
-            h("q-icon", {
-              staticClass: "cursor-pointer q-ml-sm",
-              attrs: {
-                name: this.hidePwd ? "fas fa-eye" : "fas fa-eye-slash"
-              },
-              on: {
-                click: () => {
-                  this.hidePwd = !this.hidePwd;
-                }
-              },
-              slot: "append"
-            })
-          ]
-        );
-    },
-
-    /**
      * Хинт для блока выбора часового пояса. В нем указывается текущее время в выбранном часовом поясе и наличие перехода на зимнее/летнее время
      */
     __timezoneHint(h) {
-      const timezone = this.metadata.timezone;
+      const timezone = this.tz;
 
       let message = `${this.$t("hints.settings.now")} - ${this.time}`;
       if (date.isTimezoneInDST(timezone)) {
@@ -324,7 +172,7 @@ export default {
 
     clock() {
       this.clockID = setInterval(() => {
-        this.time = date.now(this.metadata.timezone);
+        this.time = date.now(this.tz);
       }, 1000);
     },
 
@@ -337,11 +185,11 @@ export default {
         {
           staticClass: "float-right q-my-lg",
           class: {
-            loading: this.loading.submit
+            loading: this.sending
           },
           attrs: {
             label: this.$t("labels.save"),
-            loading: this.loading.submit,
+            loading: this.sending,
             color: this.canSubmit ? "green-6" : "red-6",
             disable: !this.canSubmit
           },
@@ -364,73 +212,10 @@ export default {
     }
   },
 
-  watch: {
-    username: debounce(async function(username) {
-      this.usernameError = false;
-      this.usernameErrorMessage = "";
-
-      if (username.length && username !== this.userInstance.username) {
-        const { message } = await controllers.checkUsername(username);
-
-        if (message) {
-          this.usernameError = true;
-          this.usernameErrorMessage = message;
-        }
-      }
-
-      this.loading.username = false;
-    }, 1500),
-
-    email: debounce(async function(email) {
-      this.emailError = false;
-      this.emailErrorMessage = "";
-
-      if (email.length && email !== this.userInstance.email) {
-        const { message } = await controllers.checkEmail(email);
-
-        if (message) {
-          this.emailError = true;
-          this.emailErrorMessage = message;
-        }
-      }
-
-      this.loading.email = false;
-    }, 1500)
-  },
-
   render(h) {
     return h("div", { staticClass: "form" }, [
-      h(
-        "q-input",
-        {
-          attrs: {
-            autocomplete: false,
-            value: this.username,
-            label: this.$t("labels.username"),
-            hint: this.$t("hints.settings.username"),
-            error: this.usernameError,
-            errorMessage: this.usernameErrorMessage,
-            loading: this.loading.username
-          },
-          on: {
-            input: value => {
-              this.username = value;
-              this.loading.username = true;
-            }
-          }
-        },
-        [
-          h("q-spinner-puff", {
-            attrs: {
-              color: this.usernameError ? "negative" : "primary"
-            },
-            slot: "loading"
-          })
-        ]
-      ),
-
-      this.__emailInput(h),
-      this.__passwordInput(h),
+      h(usernameInput, { props: { user: this.userInstance } }),
+      h(emailInput, { props: { user: this.userInstance } }),
 
       h(
         "q-select",
@@ -439,7 +224,7 @@ export default {
             "max-width": "500px"
           },
           props: {
-            value: this.metadata.timezone,
+            value: this.tz,
             label: this.$t("labels.timezone"),
             bottomSlots: true,
             useInput: true,
@@ -453,7 +238,7 @@ export default {
           },
           on: {
             input: value => {
-              this.metadata.timezone = value;
+              this.tz = value;
             },
             filter: (value, update, abort) => {
               this.timezonesFilterFn(value, update, abort);
@@ -489,7 +274,7 @@ export default {
             },
             on: {
               click: () => {
-                this.metadata.timezone = null;
+                this.tz = null;
               }
             }
           })
@@ -503,7 +288,7 @@ export default {
             "max-width": "500px"
           },
           props: {
-            value: this.metadata.country,
+            value: this.country,
             label: this.$t("labels.country"),
             hint: this.$t("hints.settings.country"),
             bottomSlots: true,
@@ -518,7 +303,7 @@ export default {
           },
           on: {
             input: value => {
-              this.metadata.country = value;
+              this.country = value;
             },
             filter: (value, update, abort) => {
               this.countriesFilterFn(value, update, abort);
@@ -545,7 +330,7 @@ export default {
             },
             on: {
               click: () => {
-                this.metadata.country = null;
+                this.country = null;
               }
             }
           })
@@ -557,7 +342,7 @@ export default {
           "max-width": "300px"
         },
         props: {
-          value: this.metadata.language,
+          value: this.language,
           label: this.$t("labels.language"),
           options: this.languageOptions,
           optionsSelectedClass: "selected",
@@ -566,7 +351,7 @@ export default {
         },
         on: {
           input: value => {
-            this.metadata.language = value;
+            this.language = value;
           }
         },
         scopedSlots: {

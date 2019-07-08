@@ -13,14 +13,14 @@ export default {
 
   computed: {
     ...mapState({
-      user: state => state.user.instance,
       lang: state => state.user.language,
       timezoneList: state => state.user.timezoneList,
       countriesList: state => state.user.countriesList
     }),
 
     ...mapGetters({
-      timezone: "user/timezone"
+      timezone: "user/timezone",
+      user: "user/user"
     })
   },
 

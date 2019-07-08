@@ -266,27 +266,68 @@ module.exports.checkEmail = async (req, res) => {
 };
 
 /**
- * Устанавливаем электронный адрес пользователя.
- * Вызывается метод из личного кабинета в настройках безопасности в том случае, если пользователь регистрировался с помощью
- * oauth провайдера, который не вернул его email адрес
+ * Изменяем никнейм пользователя
  *
  * @param req               Объект запроса сервера
  * @param res               Объект ответа сервера
  */
-module.exports.addEmail = async (req, res) => {
-  const email = req.body.email;
-  const id = req.body.id;
+module.exports.saveUsername = async (req, res) => {
+  const username = req.body.username,
+    id = req.body.id,
+    password = req.body.password;
+
+  const valid = await validator.validateUsername(username, res);
+  //Если валидация провалилась - прекращаем выполнение
+  if (!valid) return;
+
+  const user = await helpers.findUser('id', id, res);
+
+  const comparePasswords = await helpers.comparePasswords(password, user.password);
+  if (!comparePasswords) {
+    // Пароль неверен.Выбрасываем ошибку
+    return validator.throwErrors('Wrong password', res);
+  }
+
+  const payload = { user: { username }, metadata: {} };
+
+  helpers.saveSettings(id, payload, res, 'Username changed');
+};
+
+/**
+ * Изменяем email пользователя
+ *
+ * @param req               Объект запроса сервера
+ * @param res               Объект ответа сервера
+ */
+module.exports.saveEmail = async (req, res) => {
+  const email = req.body.email,
+    id = req.body.id,
+    password = req.body.password;
+
+  let succesMessageName = 'Email saved';
 
   const valid = await validator.validateEmail(email, res);
   //Если валидация провалилась - прекращаем выполнение
   if (!valid) return;
+
+  const user = await helpers.findUser('id', id, res);
+
+  if (user.email) {
+    // Если у пользователя уже есть email и он его меняет - запрашиваем на клиенте пароль и сверяем его
+    const comparePasswords = await helpers.comparePasswords(password, user.password);
+    if (!comparePasswords) {
+      // Пароль неверен.Выбрасываем ошибку
+      return validator.throwErrors('Wrong password', res);
+    }
+    succesMessageName = 'Email changed';
+  }
 
   // Сгенерируем ключ подтверждения
   const { key } = await helpers.generateToken();
 
   const payload = { user: { email }, metadata: { emailVerification: key } };
 
-  helpers.saveSettings(id, payload, res, 'Email saved');
+  helpers.saveSettings(id, payload, res, succesMessageName);
 };
 
 /**
@@ -452,36 +493,34 @@ module.exports.repairChangePassword = async (req, res) => {
  * @todo Организовать отправку письма на случай, если были изменены никнейм или email
  */
 module.exports.accountSettings = async (req, res) => {
-  const payload = {
-    user: req.body.user,
-    metadata: req.body.metadata,
-  };
-
-  const id = req.body.id;
-  const password = req.body.password;
-
-  const user = await helpers.findUser('id', id, res);
-
-  if (!(user.username === payload.user.username && user.email === payload.user.email)) {
-    // Если изменены никнейм или email - отвалидируем их
-    const valid = await validator.accountSettingsValidation(payload.user, password, res);
-    //Если валидация провалилась - прекращаем выполнение
-    if (!valid) return;
-
-    const comparePasswords = await helpers.comparePasswords(password, user.password);
-
-    if (!comparePasswords)
-      // Пароль неверен.Выбрасываем ошибку
-      return validator.throwErrors('Wrong password', res);
-  }
-
-  if (user.email !== payload.user.email) {
-    //Пользователь сменил email адрес. Сгенерируем ключ подтверждения
-    const { key } = await helpers.generateToken();
-    payload.metadata = {
-      emailVerification: key,
+  const id = req.body.id,
+    payload = {
+      user: { id },
+      metadata: req.body.data,
     };
-  }
+
+  // const user = await helpers.findUser('id', id, res);
+
+  // if (!(user.username === payload.user.username && user.email === payload.user.email)) {
+  //   // Если изменены никнейм или email - отвалидируем их
+  //   const valid = await validator.accountSettingsValidation(payload.user, password, res);
+  //   //Если валидация провалилась - прекращаем выполнение
+  //   if (!valid) return;
+
+  //   const comparePasswords = await helpers.comparePasswords(password, user.password);
+
+  //   if (!comparePasswords)
+  //     // Пароль неверен.Выбрасываем ошибку
+  //     return validator.throwErrors('Wrong password', res);
+  // }
+
+  // if (user.email !== payload.user.email) {
+  //   //Пользователь сменил email адрес. Сгенерируем ключ подтверждения
+  //   const { key } = await helpers.generateToken();
+  //   payload.metadata = {
+  //     emailVerification: key,
+  //   };
+  // }
 
   // Пароль верен. Отправляем запрос на изменение данных
   helpers.saveSettings(id, payload, res, 'accountSettings');
@@ -495,19 +534,41 @@ module.exports.accountSettings = async (req, res) => {
  * @param req               Объект запроса сервера
  * @param res               Объект ответа сервера
  */
-module.exports.addPassword = async (req, res) => {
-  const password = req.body.password;
-  const id = req.body.id;
+module.exports.savePassword = async (req, res) => {
+  const password = req.body.password,
+    id = req.body.id,
+    newPassword = req.body.newPassword;
 
-  const valid = await validator.validatePassword(password, res);
-  //Если валидация провалилась - прекращаем выполнение
-  if (!valid) return;
+  let succesMessageName = 'Password saved';
+
+  const user = await helpers.findUser('id', id, res);
+
+  if (user.password === null) {
+    // Если устанавливаем пароль впервые
+    const valid = await validator.validatePassword(password, res);
+
+    //Если валидация провалилась - прекращаем выполнение
+    if (!valid) return;
+  } else {
+    // Если меняем пароль
+    const valid = await validator.accountPasswordValidation(password, newPassword, res);
+
+    //Если валидация провалилась - прекращаем выполнение
+    if (!valid) return;
+
+    const comparePasswords = await helpers.comparePasswords(password, user.password);
+    if (!comparePasswords) {
+      // Пароль неверен.Выбрасываем ошибку
+      return validator.throwErrors('Wrong password', res);
+    }
+
+    succesMessageName = 'Password changed';
+  }
 
   const hashPassword = await helpers.hashPassword(password); // Хэшируем пароль
-  console.log(password);
   let payload = { user: { password: hashPassword }, metadata: {} };
-  console.log(payload);
-  helpers.saveSettings(id, payload, res, 'Password saved');
+
+  helpers.saveSettings(id, payload, res, succesMessageName);
 };
 
 /**
@@ -518,27 +579,27 @@ module.exports.addPassword = async (req, res) => {
  *
  * @todo Организовать отправку письма после удачной смены пароля
  */
-module.exports.passwordSettings = async (req, res) => {
-  const credentials = req.body;
+// module.exports.passwordSettings = async (req, res) => {
+//   const credentials = req.body;
 
-  const valid = await validator.accountPasswordValidation(credentials, res);
-  //Если валидация провалилась - прекращаем выполнение
-  if (!valid) return;
+//   const valid = await validator.accountPasswordValidation(credentials, res);
+//   //Если валидация провалилась - прекращаем выполнение
+//   if (!valid) return;
 
-  const user = await helpers.findUser('id', credentials.id, res);
+//   const user = await helpers.findUser('id', credentials.id, res);
 
-  const comparePasswords = await helpers.comparePasswords(credentials.current, user.password);
-  if (!comparePasswords) {
-    // Пароль неверен.Выбрасываем ошибку
-    return validator.throwErrors('Wrong password', res);
-  }
+//   const comparePasswords = await helpers.comparePasswords(credentials.current, user.password);
+//   if (!comparePasswords) {
+//     // Пароль неверен.Выбрасываем ошибку
+//     return validator.throwErrors('Wrong password', res);
+//   }
 
-  const hashPassword = await helpers.hashPassword(credentials.new); // Хэшируем новый пароль
-  const payload = { user: { password: hashPassword }, metadata: {} },
-    id = credentials.id;
+//   const hashPassword = await helpers.hashPassword(credentials.new); // Хэшируем новый пароль
+//   const payload = { user: { password: hashPassword }, metadata: {} },
+//     id = credentials.id;
 
-  helpers.saveSettings(id, payload, res, 'Password changed');
-};
+//   helpers.saveSettings(id, payload, res, 'Password changed');
+// };
 
 /**
  * Изменяем настройки безопасности аккаунта пользователя

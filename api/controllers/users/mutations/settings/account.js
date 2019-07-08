@@ -34,6 +34,7 @@ const variables = (id, payload) => {
  */
 const response = data => {
   const user = data.update_users.returning[0];
+
   return responsePattern(user);
 };
 

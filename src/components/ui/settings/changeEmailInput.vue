@@ -4,13 +4,14 @@ import { debounce } from "quasar";
 import userAPI from "handlers/user/api";
 import controllers from "handlers/user/controllers";
 
-export default {
-  name: "addEmailInput",
-  props: ["userInstance"],
+import passwordDialog from "components/auth/askPassword";
 
+export default {
+  name: "changeEmailInput",
+  props: ["user"],
   data() {
     return {
-      email: "",
+      email: this.user.email,
       error: false,
       errorMessage: "",
 
@@ -21,18 +22,31 @@ export default {
 
   computed: {
     canSubmit() {
-      return this.error || this.loading || this.sending || !this.email.length
-        ? false
-        : true;
+      return this.email !== this.user.email && !this.error && !this.loading
+        ? true
+        : false;
     }
   },
 
   methods: {
-    async submit() {
+    askPassword(error) {
+      this.$q
+        .dialog({
+          component: passwordDialog,
+          root: this.$root,
+          isError: error
+        })
+        .onOk(password => {
+          this.submit(password);
+        });
+    },
+
+    async submit(password) {
       if (this.canSubmit) {
         const payload = {
-          id: this.userInstance.id,
-          email: this.email
+          id: this.user.id,
+          email: this.email,
+          password
         };
 
         this.sending = true;
@@ -44,8 +58,9 @@ export default {
 
         if (error) {
           const { errorType, message } = controllers.handleErrors(error);
-          this.error = true;
-          this.errorMessage = message;
+          if (errorType === "passwordError") {
+            this.askPassword(message);
+          }
 
           return;
         }
@@ -54,6 +69,15 @@ export default {
 
         controllers.successNotify(success);
       }
+    },
+
+    __hint(h) {
+      const name =
+        this.user.password === null
+          ? "hints.settings.needPasswordToChange"
+          : "hints.settings.email";
+
+      return this.$t(name);
     }
   },
 
@@ -62,8 +86,9 @@ export default {
       this.error = false;
       this.errorMessage = "";
 
-      if (email.length) {
+      if (email.length && email !== this.user.email) {
         const { message } = await controllers.checkEmail(email);
+
         if (message) {
           this.error = true;
           this.errorMessage = message;
@@ -75,14 +100,16 @@ export default {
   },
 
   render(h) {
-    if (!this.userInstance.email)
+    if (this.user.email) {
       return h(
         "form",
         {
           on: {
             submit: e => {
               e.preventDefault();
-              this.submit();
+              if (this.canSubmit) {
+                this.askPassword();
+              }
             }
           }
         },
@@ -94,10 +121,9 @@ export default {
                 autocomplete: false,
                 value: this.email,
                 label: this.$t("labels.email"),
-                hint: this.$t("hints.settings.addEmail"),
-                error: this.error || !this.email.length,
-                errorMessage:
-                  this.errorMessage || this.$t("hints.settings.addEmail"),
+                readonly: this.user.password === null ? true : false,
+                error: this.error,
+                errorMessage: this.errorMessage,
                 loading: this.loading
               },
               on: {
@@ -113,41 +139,42 @@ export default {
                   color: this.error ? "negative" : "primary"
                 },
                 slot: "loading"
-              })
-            ]
-          ),
-
-          h(
-            "q-btn",
-            {
-              staticClass: "float-right q-my-lg",
-              class: {
-                loading: this.sending
-              },
-              attrs: {
-                label: this.$t("labels.add"),
-                loading: this.sending,
-                color: this.canSubmit ? "green-6" : "red-6",
-                disable: !this.canSubmit
-              },
-              on: {
-                click: () => {
-                  this.submit();
-                }
-              }
-            },
-            [
+              }),
+              h("div", { slot: "hint" }, [this.__hint(h)]),
               h(
-                "div",
+                "q-btn",
                 {
-                  slot: "loading"
+                  slot: "append",
+                  attrs: {
+                    type: "submit",
+                    round: true,
+                    flat: true,
+                    icon: "mdi-cached",
+                    color: this.canSubmit ? "green-6" : "red-6",
+                    disable: !this.canSubmit,
+                    loading: this.sending
+                  }
                 },
-                [this._v(this.$t("labels.sending")), h("q-spinner-dots")]
+                [
+                  h("q-no-ssr", [
+                    h(
+                      "q-tooltip",
+                      {
+                        attrs: {
+                          transitionShow: "scale",
+                          transitionHide: "scale"
+                        }
+                      },
+                      this.$t("labels.save")
+                    )
+                  ])
+                ]
               )
             ]
           )
         ]
       );
+    }
   }
 };
 </script>

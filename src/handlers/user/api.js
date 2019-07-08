@@ -237,69 +237,6 @@ export default {
     axiosInstance.defaults.headers.common['lang'] = lang;
   },
 
-  // /**
-  //  * Отправляем запрос на изменение данных аккаунта пользователя
-  //  *
-  //  * @param {Object} payload     Отправляемые данные пользователя
-  //  * @param {String} lang        Текущий язык пользователя
-  //  */
-  // async submitAccountSettings(payload, lang) {
-  //   let user, success, error;
-  //   // Установим языковой заголовок перед запросом, чтобы пользователь получил оповещение об успешной операции или возникшей в ее ходе ошибке на выбранном языке
-  //   this.setLanguageHeader(lang);
-
-  //   await axiosInstance
-  //     .post('/users/settings/account', payload)
-  //     .then(res => {
-  //       user = res.data.user;
-  //       success = res.data.message;
-  //     })
-  //     .catch(e => {
-  //       error = e;
-  //     });
-
-  //   return { user, success, error };
-  // },
-
-  // /**
-  //  * Отправляем запрос на изменение пароля от аккаунта аккаунта пользователя
-  //  *
-  //  * @param {Object} payload     Отправляемые данные пользователя
-  //  */
-  // async submitPasswordSettings(payload) {
-  //   let success, error;
-  //   await axiosInstance
-  //     .post('/users/settings/password', payload)
-  //     .then(res => {
-  //       success = res.data.message;
-  //     })
-  //     .catch(e => {
-  //       error = e;
-  //     });
-
-  //   return { success, error };
-  // },
-
-  // /**
-  //  * Отправляем запрос на изменение настроек безопасности
-  //  *
-  //  * @param {Object} payload     Отправляемые данные пользователя
-  //  */
-  // async addEmail(payload) {
-  //   let user, success, error;
-  //   await axiosInstance
-  //     .post('/users/settings/addemail', payload)
-  //     .then(res => {
-  //       user = res.data.user;
-  //       success = res.data.message;
-  //     })
-  //     .catch(e => {
-  //       error = e;
-  //     });
-
-  //   return { user, success, error };
-  // },
-
   /**
    * Отправляем запрос на сохранение внесенных пользователем настроек аккаунта
    *

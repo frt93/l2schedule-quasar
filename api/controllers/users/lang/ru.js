@@ -1,12 +1,14 @@
 module.exports = {
   success: {
+    'Username changed': 'Никнейм изменен',
     'Email saved': 'Email адрес сохранен',
+    'Email changed': 'Email адрес изменен',
     'Password saved': 'Пароль успешно сохранен',
+    'Password changed': 'Пароль успешно изменен',
     emailConfirmed: 'Email адрес успешно подтвержден',
     'confirmation key resended': 'Отправлено. Проверьте ваш email',
     'email already confirmed': 'Похоже, что ваш email уже подтвержден',
     accountSettings: 'Данные учетной записи обновлены',
-    'Password changed': 'Пароль успешно изменен',
     safetySettings: 'Настройки безопасности обновлены',
   },
   errors: {

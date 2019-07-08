@@ -157,38 +157,52 @@ export default {
 
   render(h) {
     if (this.userInstance.metadata.emailVerification) {
-      return h("div", [
-        this.__input(h),
-        h(
-          "q-btn",
-          {
-            staticClass: "float-right q-my-lg",
-            class: {
-              loading: this.sending
-            },
-            attrs: {
-              label: this.$t("labels.confirm"),
-              loading: this.sending,
-              color: this.canSubmit ? "green-6" : "red-6",
-              disable: !this.canSubmit
-            },
-            on: {
-              click: () => {
-                this.submit();
-              }
-            }
+      return h(
+        "form",
+        {
+          attrs: {
+            autocomplete: false
           },
-          [
-            h(
-              "div",
-              {
-                slot: "loading"
+          on: {
+            submit: e => {
+              e.preventDefault();
+              this.submit();
+            }
+          }
+        },
+        [
+          this.__input(h),
+          h(
+            "q-btn",
+            {
+              staticClass: "float-right q-my-lg",
+              class: {
+                loading: this.sending
               },
-              [this._v(this.$t("labels.sending")), h("q-spinner-dots")]
-            )
-          ]
-        )
-      ]);
+              attrs: {
+                label: this.$t("labels.confirm"),
+                loading: this.sending,
+                color: this.canSubmit ? "green-6" : "red-6",
+                disable: !this.canSubmit
+              },
+              on: {
+                click: () => {
+                  this.submit();
+                }
+              }
+            },
+            [
+              h(
+                "div",
+                {
+                  slot: "loading"
+                },
+                [this._v(this.$t("labels.sending")), h("q-spinner-dots")]
+              )
+            ]
+          )
+        ]
+      );
     }
   }
 };

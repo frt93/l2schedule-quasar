@@ -1,4 +1,4 @@
-
+ 
 
 <script>
 import { debounce } from "quasar";
@@ -6,20 +6,25 @@ import { debounce } from "quasar";
 import controllers from "handlers/user/controllers";
 
 export default {
+  beforeMount() {
+    if (this.isError) this.error = true;
+  },
+
+  props: ["isError"],
   data() {
     return {
-      username: "",
+      password: "",
       error: false,
       errorMessage: "",
-      loading: false
+      hidePwd: true
     };
   },
 
-  props: ["message"],
-
   computed: {
     canSubmit() {
-      return this.loading || this.error || !this.username.length ? false : true;
+      return this.error || this.password.length < 7 || this.password.length > 30
+        ? false
+        : true;
     }
   },
 
@@ -37,28 +42,13 @@ export default {
     },
 
     onConfirm() {
-      this.$emit("ok", this.username);
+      this.$emit("ok", this.password);
       this.hide();
     },
 
     onCancel() {
       this.hide();
     }
-  },
-  watch: {
-    username: debounce(async function(username) {
-      this.error = false;
-      this.errorMessage = "";
-
-      if (username.length) {
-        const { message } = await controllers.checkUsername(username);
-        if (message) {
-          this.error = true;
-          this.errorMessage = message;
-        }
-      }
-      this.loading = false;
-    }, 1500)
   },
 
   render(h) {
@@ -82,13 +72,13 @@ export default {
           },
           [
             h("q-toolbar", [
-              h("q-toolbar-title", this.$t("errors.chooseUsername")),
+              h("q-toolbar-title", this.$t("labels.password")),
               h("q-btn", {
                 props: {
                   flat: true,
                   round: true,
                   ripple: false,
-                  icon: "fas fa-times"
+                  icon: "mdi-close"
                 },
                 on: {
                   click: () => {
@@ -98,7 +88,7 @@ export default {
               })
             ]),
             h("q-card-section", [
-              this._v(this.message),
+              this.$t("hints.auth.confirmOperation"),
               h(
                 "form",
                 {
@@ -118,27 +108,41 @@ export default {
                       attrs: {
                         autofocus: true,
                         autocomplete: false,
-                        maxlength: "16",
-                        value: this.username,
-                        hint: this.$t("hints.auth.username"),
+                        type: this.hidePwd ? "password" : "text",
+                        maxlength: 30,
+                        value: this.password,
                         counter: true,
                         error: this.error,
-                        errorMessage: this.errorMessage,
-                        loading: this.loading
+                        errorMessage: this.errorMessage || this.isError
                       },
                       on: {
                         input: value => {
-                          this.username = value;
-                          this.loading = true;
+                          this.error = false;
+                          this.errorMessage = "";
+
+                          this.password = value;
+                          this.errorMessage = controllers.validatePassword(
+                            value
+                          );
+
+                          if (this.errorMessage) {
+                            this.error = true;
+                          }
                         }
                       }
                     },
                     [
-                      h("q-spinner-puff", {
-                        props: {
-                          color: this.error ? "negative" : "primary"
+                      h("q-icon", {
+                        staticClass: "cursor-pointer q-ml-sm",
+                        attrs: {
+                          name: this.hidePwd ? "mdi-eye" : "mdi-eye-off"
                         },
-                        slot: "loading"
+                        on: {
+                          click: () => {
+                            this.hidePwd = !this.hidePwd;
+                          }
+                        },
+                        slot: "append"
                       })
                     ]
                   ),
@@ -148,7 +152,7 @@ export default {
                       type: "submit",
                       color: this.canSubmit ? "green-6" : "red-6",
                       disable: !this.canSubmit,
-                      label: "ok"
+                      label: this.$t("labels.confirm")
                     }
                   })
                 ]

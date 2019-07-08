@@ -196,7 +196,7 @@ export default {
     Notify.create({
       color: 'green-6',
       position: 'bottom-right',
-      icon: 'far fa-smile-wink',
+      icon: 'mdi-emoticon-wink-outline',
       message,
     });
   },

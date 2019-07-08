@@ -115,12 +115,11 @@ export default {
           // Не удалось подобрать пользователю никнейм
           this.$q
             .dialog({
-              title: this.$t("errors.chooseUsername"),
               component: chooseUsername,
               root: this.$root,
               message
             })
-            .onOk(async username => {
+            .onOk(username => {
               credentials.customUsername = username;
               this.oauthRegister(credentials);
             });

@@ -153,5 +153,9 @@ export default {
 
       return timezone;
     },
+
+    user(state) {
+      return state.instance === null ? { metadata: {} } : state.instance;
+    },
   },
 };

@@ -1,12 +1,14 @@
 module.exports = {
   success: {
+    'Username changed': 'Username successfully changed',
     'Email saved': 'Email successfully saved',
+    'Email changed': 'Email successfully changed',
     'Password saved': 'Password successfully saved',
+    'Password changed': 'Password successfully changed',
     emailConfirmed: 'Email successfully confirmed',
     'confirmation key resended': 'Done. Check your email',
     'email already confirmed': 'Seems your email already confirmed',
     accountSettings: 'Account details updated',
-    'Password changed': 'Password successfully changed',
     safetySettings: 'Safety settings updated',
   },
   errors: {
