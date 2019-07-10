@@ -6,6 +6,7 @@ import controllers from "handlers/user/controllers";
 
 import addEmail from "components/ui/settings/addEmailInput";
 import confirmEmail from "components/ui/settings/confirmEmailInput";
+import oauthList from "components/ui/settings/oauthList";
 
 export default {
   name: "safetytSettingsPage",
@@ -20,6 +21,7 @@ export default {
   props: ["userInstance"],
   data() {
     return {
+      oauth: null,
       sending: false
     };
   },
@@ -45,7 +47,8 @@ export default {
   render(h) {
     return h("div", { staticClass: "form column" }, [
       h(addEmail, { props: { userInstance: this.userInstance } }),
-      h(confirmEmail, { props: { userInstance: this.userInstance } })
+      h(confirmEmail, { props: { userInstance: this.userInstance } }),
+      h(oauthList, { props: { user: this.userInstance } })
     ]);
   }
 };

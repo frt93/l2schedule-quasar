@@ -9,6 +9,7 @@ export default {
   state: {
     instance: null,
     language: null,
+    languagesList: null,
     timezoneList: null,
     countriesList: null,
   },
@@ -33,10 +34,11 @@ export default {
      *
      * @param {Array} zones     Массив с временными зонами
      */
-    setTimezonesAndCountriesLists(state, payload) {
+    setTimezones_Countries_LanguagesLists(state, payload) {
       const userTimezone = this.getters['user/timezone'];
       state.timezoneList = payload.getTimezonesList(userTimezone);
       state.countriesList = payload.countries;
+      state.languagesList = payload.languages;
     },
 
     /**
@@ -91,8 +93,8 @@ export default {
       commit('setLanguage', lang);
       langAPI.init(lang);
 
-      await import(`lang/${lang}/timezones-countries`).then(data => {
-        commit('setTimezonesAndCountriesLists', data.default);
+      await import(`lang/${lang}/timezones-countries-languages-list`).then(data => {
+        commit('setTimezones_Countries_LanguagesLists', data.default);
       });
     },
 

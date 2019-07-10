@@ -8,6 +8,8 @@ import date from "handlers/date";
 import usernameInput from "components/ui/settings/changeUsernameInput";
 import emailInput from "components/ui/settings/changeEmailInput";
 
+import { axiosInstance } from "boot/axios";
+
 export default {
   name: "accountSettingsPage",
   meta() {
@@ -21,9 +23,14 @@ export default {
   async preFetch({ store }) {
     // Загружаем список временных зон
     const lang = store.state.user.language;
-    await import(`lang/${lang}/timezones-countries`).then(data => {
-      store.commit("user/setTimezonesAndCountriesLists", data.default);
-    });
+    await import(`lang/${lang}/timezones-countries-languages-list`).then(
+      data => {
+        store.commit(
+          "user/setTimezones_Countries_LanguagesLists",
+          data.default
+        );
+      }
+    );
   },
 
   async beforeMount() {
@@ -38,7 +45,14 @@ export default {
     clearInterval(this.clockID._id);
   },
 
-  props: ["userInstance", "lang", "timezoneList", "timezone", "countriesList"],
+  props: [
+    "userInstance",
+    "lang",
+    "languagesList",
+    "timezoneList",
+    "timezone",
+    "countriesList"
+  ],
   data() {
     return {
       language: this.lang,
@@ -46,11 +60,7 @@ export default {
       country: this.userInstance.metadata.country,
 
       timezoneOptions: this.timezoneList,
-      languageOptions: [
-        { label: "Русский", value: "ru" },
-        { label: "Українська", value: "uk" },
-        { label: "English", value: "en-us" }
-      ],
+      languageOptions: this.languagesList,
       countriesOptions: this.countriesList,
 
       time: date.now(this.timezone),
@@ -118,6 +128,7 @@ export default {
             .then(() => {
               this.timezoneOptions = this.timezoneList; // Обновляем список часовых поясов, который используется селектом, для перевода текущего выбранного пояса
               this.countriesOptions = this.countriesList; // Обновляем список стран, который используется селектом, для перевода текущей выбранной страны
+              this.languageOptions = this.languagesList; // Обновляем список языков, который используется селектом, для перевода текущего выбранного языка
             });
         }
 
@@ -216,7 +227,7 @@ export default {
     return h("div", { staticClass: "form" }, [
       h(usernameInput, { props: { user: this.userInstance } }),
       h(emailInput, { props: { user: this.userInstance } }),
-
+      h("q-separator"),
       h(
         "q-select",
         {

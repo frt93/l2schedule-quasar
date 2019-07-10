@@ -90,6 +90,7 @@ const facebook = (() => {
           const config = {
             cookie: true,
             xfbml: true,
+            // autoLogAppEvents: true,
             appId: '477463253007302',
             version: 'v3.3',
           };
@@ -104,12 +105,18 @@ const facebook = (() => {
 
   const Auth = function() {
     this.load = () => {
-      // Загрузим SDK и нициализируем его
-      if (!window.FB) {
-        install().then(() => {
-          init();
-        });
-      }
+      return new Promise(async resolve => {
+        // Загрузим SDK и нициализируем его
+        if (!window.FB) {
+          install()
+            .then(async () => {
+              init();
+            })
+            .then(() => {
+              resolve(window.FB);
+            });
+        }
+      });
     };
 
     this.login = () => {
@@ -210,8 +217,11 @@ if (process.env.CLIENT) {
 }
 
 const install = () => {
-  google.load();
-  facebook.load();
+  return new Promise(resolve => {
+    google.load();
+    facebook.load();
+    resolve();
+  });
 };
 
 export default { google, facebook, telegram, vk, install };

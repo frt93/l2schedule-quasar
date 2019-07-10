@@ -441,4 +441,10 @@ export default {
     { value: 'jm', label: 'Ямайка' },
     { value: 'jp', label: 'Япония' },
   ],
+
+  languages: [
+    { value: 'ru', label: 'Русский' },
+    { value: 'uk', label: 'Українська мова - Украинский' },
+    { value: 'en-us', label: 'English - Английский' },
+  ],
 };

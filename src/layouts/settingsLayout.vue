@@ -14,6 +14,7 @@ export default {
   computed: {
     ...mapState({
       lang: state => state.user.language,
+      languagesList: state => state.user.languagesList,
       timezoneList: state => state.user.timezoneList,
       countriesList: state => state.user.countriesList
     }),
@@ -105,6 +106,7 @@ export default {
             attrs: {
               userInstance: this.user,
               lang: this.lang,
+              languagesList: this.languagesList,
               timezoneList: this.timezoneList,
               timezone: this.timezone,
               countriesList: this.countriesList

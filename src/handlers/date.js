@@ -48,7 +48,7 @@ export default {
     let list;
     const userTimezone = this.getCurrentTimezone();
 
-    await import(`lang/${lang}/timezones-countries`).then(data => {
+    await import(`lang/${lang}/timezones-countries-languages-list.js`).then(data => {
       list = data.default.getTimezonesList();
     });
 
