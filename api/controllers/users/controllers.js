@@ -94,7 +94,7 @@ module.exports.signin = async (req, res) => {
  */
 module.exports.oauthLogin = (req, res) => {
   const credentials = req.body,
-    provider = credentials.provider,
+    provider = credentials.providerName,
     id = credentials.id;
 
   let user;
@@ -123,7 +123,8 @@ module.exports.oauthLogin = (req, res) => {
 };
 
 module.exports.oauthCreate = async (req, res) => {
-  const credentials = req.body;
+  const credentials = req.body,
+    provider = credentials.provider;
   let instance = {
     username: '',
     email: null,
@@ -136,11 +137,12 @@ module.exports.oauthCreate = async (req, res) => {
     },
   };
 
-  instance.metadata.data[`${credentials.provider}ID`] = credentials.id;
+  instance.metadata.data[`${provider.providerName}ID`] = provider.id;
+  instance.metadata.data[`${provider.providerName}Data`] = helpers.providerData(provider);
 
-  if (credentials.email) {
+  if (provider.email) {
     // Если получили от oauth провайдера email-адрес - проверим, чтобы он был свободен
-    const { isExist, error } = await helpers.findEmail(credentials.email, res);
+    const { isExist, error } = await helpers.findEmail(provider.email, res);
 
     if (error) {
       return validator.handleErrors(error, res);
@@ -150,7 +152,7 @@ module.exports.oauthCreate = async (req, res) => {
       return validator.throwErrors('oauth: email already used', res, isExist);
     }
 
-    instance.email = credentials.email;
+    instance.email = provider.email;
   }
 
   if (credentials.customUsername) {
@@ -159,7 +161,7 @@ module.exports.oauthCreate = async (req, res) => {
     instance.username = credentials.customUsername;
   } else {
     // Попытаемся подобрать пользователю никнейм на основе полученных от oauth провайдера данных
-    const { username } = await helpers.oauthChooseUsername(credentials, res);
+    const { username } = await helpers.oauthChooseUsername(provider, res);
     if (!username) {
       // Подобрать не удалось. Выбросим ошибку и на клиенте пользователю будет предложено указать его самостоятельно.
       // И этот указанный никнейм будет отправлен в свойстве credentials.customUsername
@@ -169,12 +171,12 @@ module.exports.oauthCreate = async (req, res) => {
     }
   }
 
-  if (credentials.name) {
-    instance.metadata.data.name = credentials.name;
+  if (provider.name) {
+    instance.metadata.data.name = provider.name;
   }
 
-  if (credentials.avatar) {
-    instance.metadata.data.avatar = credentials.avatar;
+  if (provider.avatar) {
+    instance.metadata.data.avatar = provider.avatar;
   }
 
   helpers.createUser(instance, res);
@@ -499,29 +501,6 @@ module.exports.accountSettings = async (req, res) => {
       metadata: req.body.data,
     };
 
-  // const user = await helpers.findUser('id', id, res);
-
-  // if (!(user.username === payload.user.username && user.email === payload.user.email)) {
-  //   // Если изменены никнейм или email - отвалидируем их
-  //   const valid = await validator.accountSettingsValidation(payload.user, password, res);
-  //   //Если валидация провалилась - прекращаем выполнение
-  //   if (!valid) return;
-
-  //   const comparePasswords = await helpers.comparePasswords(password, user.password);
-
-  //   if (!comparePasswords)
-  //     // Пароль неверен.Выбрасываем ошибку
-  //     return validator.throwErrors('Wrong password', res);
-  // }
-
-  // if (user.email !== payload.user.email) {
-  //   //Пользователь сменил email адрес. Сгенерируем ключ подтверждения
-  //   const { key } = await helpers.generateToken();
-  //   payload.metadata = {
-  //     emailVerification: key,
-  //   };
-  // }
-
   // Пароль верен. Отправляем запрос на изменение данных
   helpers.saveSettings(id, payload, res, 'accountSettings');
 };
@@ -570,36 +549,6 @@ module.exports.savePassword = async (req, res) => {
 
   helpers.saveSettings(id, payload, res, succesMessageName);
 };
-
-/**
- * Изменяем пароль от аккаунта пользователя и другие, связанные с безопасностью параметры
- *
- * @param req               Объект запроса сервера
- * @param res               Объект ответа сервера
- *
- * @todo Организовать отправку письма после удачной смены пароля
- */
-// module.exports.passwordSettings = async (req, res) => {
-//   const credentials = req.body;
-
-//   const valid = await validator.accountPasswordValidation(credentials, res);
-//   //Если валидация провалилась - прекращаем выполнение
-//   if (!valid) return;
-
-//   const user = await helpers.findUser('id', credentials.id, res);
-
-//   const comparePasswords = await helpers.comparePasswords(credentials.current, user.password);
-//   if (!comparePasswords) {
-//     // Пароль неверен.Выбрасываем ошибку
-//     return validator.throwErrors('Wrong password', res);
-//   }
-
-//   const hashPassword = await helpers.hashPassword(credentials.new); // Хэшируем новый пароль
-//   const payload = { user: { password: hashPassword }, metadata: {} },
-//     id = credentials.id;
-
-//   helpers.saveSettings(id, payload, res, 'Password changed');
-// };
 
 /**
  * Изменяем настройки безопасности аккаунта пользователя

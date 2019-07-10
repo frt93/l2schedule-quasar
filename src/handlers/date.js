@@ -64,20 +64,6 @@ export default {
   },
 
   /**
-   * Текущее время пользователя в установленном им часовом поясе
-   *
-   * @param {String} timezone   Установленный часовой пояс пользователя
-   */
-  now(timezone) {
-    if (!timezone || timezone === 'local') {
-      timezone = this.getCurrentTimezone();
-    }
-    let now = DateTime.local().setZone(timezone);
-
-    return now.toFormat('dd.LL.yyyy HH.mm.ss');
-  },
-
-  /**
    * Проверяем наличие в указанном часовом поясе перехода на зимнее/летнее время
    *
    * @param {String} timezone   Установленный часовой пояс пользователя
@@ -138,5 +124,23 @@ export default {
    */
   setTimezoneCookie(timezone) {
     jsCookie.set('timezone', timezone, { expires: 3650 });
+  },
+
+  /**
+   * Текущее время пользователя в установленном им часовом поясе
+   *
+   * @param {String} timezone   Установленный часовой пояс пользователя
+   */
+  now(timezone) {
+    if (!timezone || timezone === 'local') {
+      timezone = this.getCurrentTimezone();
+    }
+    let now = DateTime.local().setZone(timezone);
+
+    return now.toFormat('dd.LL.yyyy HH.mm.ss');
+  },
+
+  dateFromIso(date) {
+    return DateTime.fromISO(date).toFormat('dd.LL.yyyy HH.mm');
   },
 };

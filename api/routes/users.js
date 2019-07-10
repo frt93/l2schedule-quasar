@@ -18,7 +18,6 @@ router.post('/confirm-repair', users.confirmRepair);
 router.post('/repair/change-password', users.repairChangePassword);
 
 router.post('/settings/account', users.accountSettings);
-// router.post('/settings/password', users.passwordSettings);
 router.post('/settings/change/password', users.savePassword);
 router.post('/settings/change/email', users.saveEmail);
 router.post('/settings/change/username', users.saveUsername);

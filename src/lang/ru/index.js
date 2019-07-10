@@ -29,6 +29,7 @@ export default {
     next: 'Далее',
     back: 'Назад',
     change: 'Сменить',
+    update: 'Обновить',
     language: 'Язык',
     timezone: 'Часовой пояс',
     noTimezone: 'Указанный часовой пояс не найден',
@@ -39,6 +40,10 @@ export default {
     confirmEmail: 'Ключ подтверждения email адреса',
     confirm: 'Подтвердить',
     resendConfirmKey: 'Ключ подтверждения будет снова отправлен на электронный адрес',
+    fbLinked: 'Ваш аккаунт связан с профилем facebook',
+    connected: 'Подключен',
+    connectProvider: 'Подключить',
+    disconnectProvider: 'Отключить',
   },
   errors: {
     spaces: 'Пробелы запрещены',

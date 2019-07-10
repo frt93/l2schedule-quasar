@@ -32,7 +32,7 @@ module.exports = {
           type: 'run_sql',
           args: {
             sql:
-              'CREATE TABLE "public"."user_metadata"("user_id" serial NOT NULL, "avatar" text, "name" text,"emailVerification" uuid, "repairKey" uuid, "language" text NOT NULL DEFAULT "ru", "timezone" text, "country" text, "googleID" text, "facebookID" text,"vkID" text,"telegramID" text,"createdAt" timestamp with time zone NOT NULL DEFAULT now(), PRIMARY KEY ("user_id") , UNIQUE ("user_id"), UNIQUE("repairKey"), UNIQUE("googleID"), UNIQUE("facebookID"), UNIQUE("vkID"), UNIQUE("telegramID"));',
+              'CREATE TABLE "public"."user_metadata"("user_id" serial NOT NULL, "avatar" text, "name" text,"emailVerification" uuid, "repairKey" uuid, "language" text NOT NULL DEFAULT "ru", "timezone" text, "country" text, "googleID" text, "googleData" text, "facebookID" text,"facebookData" text, "vkID" text, "vkData" text,"telegramID" text, "telegramData" text, "createdAt" timestamp with time zone NOT NULL DEFAULT now(), PRIMARY KEY ("user_id") , UNIQUE ("user_id"), UNIQUE("repairKey"), UNIQUE("googleID"), UNIQUE("facebookID"), UNIQUE("vkID"), UNIQUE("telegramID"));',
           },
         },
         { type: 'add_existing_table_or_view', args: { name: 'user_metadata', schema: 'public' } },

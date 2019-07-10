@@ -48,7 +48,7 @@ export default {
    */
   googleInstance(data) {
     let user = {
-      provider: 'google',
+      providerName: 'google',
       id: data.getId(),
       email: data.getEmail(),
     };
@@ -70,13 +70,17 @@ export default {
    */
   facebookInstance(data) {
     let user = {
-      provider: 'facebook',
+      providerName: 'facebook',
       id: data.id,
       name: `${data.first_name} ${data.last_name}`,
     };
 
     if (data.email) {
       user.email = data.email;
+    }
+
+    if (data.picture) {
+      user.avatar = data.picture.data.url;
     }
 
     return user;
@@ -91,7 +95,7 @@ export default {
     let profile = data.session.user;
 
     let user = {
-      provider: 'vk',
+      providerName: 'vk',
       id: profile.id,
       name: `${profile.first_name} ${profile.last_name}`,
     };
@@ -110,7 +114,7 @@ export default {
    */
   telegramInstance(data) {
     let user = {
-      provider: 'telegram',
+      providerName: 'telegram',
       id: data.id,
     };
 

@@ -29,6 +29,7 @@ export default {
     next: 'Next',
     back: 'Back',
     change: 'Change',
+    update: 'Update',
     language: 'Language',
     timezone: 'Timezone',
     noTimezone: 'The specified time zone not found',
@@ -39,6 +40,10 @@ export default {
     confirmEmail: 'Email confirmation key',
     confirm: 'Confirm',
     resendConfirmKey: 'The confirmation key will be resend to the email',
+    fbLinked: 'Your account is linked with a facebook profile',
+    connected: 'Connected',
+    connectProvider: 'Connect',
+    disconnectProvider: 'Disconnect',
   },
   errors: {
     spaces: 'Spaces are prohibited',

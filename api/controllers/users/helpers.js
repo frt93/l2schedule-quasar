@@ -67,6 +67,23 @@ module.exports.createUser = async (credentials, res) => {
 };
 
 /**
+ * Преобразуем объект с данными от auth провайдера в строку и сохраним в базе данных. Предварительно удалим ненужные для этой цели поля
+ * @param {Object} provider      Данные oauth провайдера
+ *
+ * @return {String}
+ */
+module.exports.providerData = provider => {
+  provider.approved = new Date();
+  delete provider.providerName;
+  delete provider.id;
+  if (provider.email) {
+    delete provider.email;
+  }
+
+  return JSON.stringify(provider);
+};
+
+/**
  * Попытаемся подобрать никнейм пользователю, который регистрируется при помощи oauth провайдера.
  *
  * @param {String} credentials   Данные пользователя

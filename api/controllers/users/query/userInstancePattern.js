@@ -13,9 +13,13 @@ metadata {
   country
   createdAt
   googleID
+  googleData
   facebookID
+  facebookData
   vkID
+  vkData
   telegramID
+  telegramData
 }
 party {
   name
@@ -55,15 +59,28 @@ const responsePattern = user => {
     }
     if (user.metadata.googleID === null) {
       delete user.metadata.googleID;
+      delete user.metadata.googleData;
+    } else {
+      user.metadata.googleData = JSON.parse(user.metadata.googleData);
     }
+
     if (user.metadata.facebookID === null) {
       delete user.metadata.facebookID;
+      delete user.metadata.facebookData;
+    } else {
+      user.metadata.facebookData = JSON.parse(user.metadata.facebookData);
     }
     if (user.metadata.vkID === null) {
       delete user.metadata.vkID;
+      delete user.metadata.vkData;
+    } else {
+      user.metadata.vkData = JSON.parse(user.metadata.vkData);
     }
     if (user.metadata.telegramID === null) {
       delete user.metadata.telegramID;
+      delete user.metadata.telegramData;
+    } else {
+      user.metadata.telegramData = JSON.parse(user.metadata.telegramData);
     }
   }
   return user;

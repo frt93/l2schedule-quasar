@@ -78,7 +78,7 @@ export default {
         const { errorType } = controllers.handleErrors(error);
 
         if (errorType === "oauth: no user") {
-          return this.oauthRegister(credentials);
+          return this.oauthRegister({ provider: credentials });
         }
 
         return;

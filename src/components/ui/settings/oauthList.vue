@@ -1,4 +1,6 @@
 <script>
+import date from "handlers/date";
+
 export default {
   name: "oauthProvidersList",
   beforeMount() {
@@ -7,21 +9,21 @@ export default {
         this.oauth = data.default;
         let fbAccesToken;
         // Загружаем и инициализируем SDK
-        this.oauth.facebook.load().then(fb => {
-          fb.getLoginStatus(res => {
-            if (res.status === "connected") {
-              FB.api(
-                `/${this.user.metadata.facebookID}/`,
-                {
-                  fields: "id,first_name,last_name,email,link"
-                },
-                response => {
-                  this.facebookProfile = response;
-                }
-              );
-            }
-          });
-        });
+        // this.oauth.facebook.load().then(fb => {
+        //   fb.getLoginStatus(res => {
+        //     if (res.status === "connected") {
+        //       FB.api(
+        //         `/${this.user.metadata.facebookID}/`,
+        //         {
+        //           fields: "id,first_name,last_name,email,link"
+        //         },
+        //         response => {
+        //           this.facebookProfile = response;
+        //         }
+        //       );
+        //     }
+        //   });
+        // });
 
         // Инициализируем telegram виджет
         // const { script } = this.oauth.telegram();
@@ -34,19 +36,15 @@ export default {
   props: ["user"],
   data() {
     return {
-      oauth: {},
-      facebookProfile: null
+      oauth: {}
     };
   },
 
   computed: {
-    facebook() {
-      let message = "";
+    isFacebookLinked() {
+      let message;
       if (this.user.metadata.facebookID) {
-        message += "Вы привязали к аккаунту свою страничку в facebook";
-        if (this.facebookProfile !== null) {
-          message += `\n ${this.facebookProfile.first_name} ${this.facebookProfile.last_name}`;
-        }
+        message = this.$t("labels.fbLinked");
       } else {
         message += "Вы можете привязать к аккаунту свою страничку facebook";
       }
@@ -56,24 +54,70 @@ export default {
   },
 
   methods: {
-    getLinkedFacebookProfile(fb) {}
+    facebookData(h) {
+      let dataNodes = [];
+      if (this.user.metadata.facebookID) {
+        dataNodes.push(
+          h("q-item-label", { attrs: { caption: true } }, [
+            h("span", this.user.metadata.facebookData.name),
+            h(
+              "span",
+              { staticClass: "dot-separate cursor-pointer dashed" },
+              "Update"
+            )
+          ]),
+          h("q-item-label", [
+            h(
+              "span",
+              `${this.$t("labels.connected")}: ${date.dateFromIso(
+                this.user.metadata.facebookData.approved
+              )}`
+            )
+          ])
+        );
+      }
+
+      const connectButtonLabel = this.user.metadata.facebookID
+        ? this.$t("labels.disconnectProvider")
+        : this.$t("labels.connectProvider");
+
+      return {
+        data: [
+          h(
+            "q-item-label",
+            { attrs: { caption: true } },
+            this.isFacebookLinked
+          ),
+          h("q-item-label", { attrs: { caption: true } }, dataNodes)
+        ],
+        connectButtonLabel
+      };
+    }
   },
 
   render(h) {
     return h("div", { staticClass: "form column" }, [
       h("q-list", { attrs: { padding: true } }, [
-        h("q-item-label", { attrs: { header: true } }, "list header"),
+        h(
+          "q-item-label",
+          { attrs: { header: true } },
+          "Third-party authorization apps"
+        ),
         h("q-item", [
-          h("q-item-section", { attrs: { avatar: true, top: true } }, [
+          h("q-item-section", { attrs: { avatar: true } }, [
             h("q-icon", {
               attrs: { color: "primary", name: "mdi-facebook" }
             })
           ]),
           h("q-item-section", [
             h("q-item-label", "Facebook"),
-            h("q-item-label", { attrs: { caption: true } }, this.facebook)
+            this.facebookData(h).data
           ]),
-          h("q-item-section", { attrs: { side: true } }, ["Отвязать"])
+          h(
+            "q-item-section",
+            { attrs: { side: true } },
+            this.facebookData(h).connectButtonLabel
+          )
         ])
       ])
     ]);

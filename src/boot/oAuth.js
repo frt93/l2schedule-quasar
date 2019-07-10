@@ -125,7 +125,7 @@ const facebook = (() => {
           window.FB.api(
             '/me',
             {
-              fields: 'id,first_name,last_name,email',
+              fields: 'id,first_name,last_name,email,picture{url}',
             },
             res => {
               resolve(res);
@@ -209,12 +209,6 @@ const telegram = () => {
 
   return { script };
 };
-
-if (process.env.CLIENT) {
-  // google.load();
-  // facebook.load();
-  // vk.load();
-}
 
 const install = () => {
   return new Promise(resolve => {
