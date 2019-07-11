@@ -85,41 +85,30 @@ module.exports.signin = async (req, res) => {
 };
 
 /**
- * Авторизуем пользователя с помощью данных аккаунта одной из доступных социальных сетей
+ * Авторизуем пользователя с помощью данных аккаунта oauth провайдера
  *
  * @param req                    Объект запроса сервера
  * @param res                    Объект ответа сервера
  *
  * @return {Object}              Экземпляр пользователя
  */
-module.exports.oauthLogin = (req, res) => {
-  const credentials = req.body,
-    provider = credentials.providerName,
-    id = credentials.id;
+module.exports.oauthLogin = async (req, res) => {
+  const provider = req.body;
 
-  let user;
+  // Пытаемся получить экземпляр пользователя из базы данных
+  let user = await helpers.findOauthUser(provider, res);
 
-  const { composeQuery, response } = require('api/controllers/users/query/oauth');
-  const query = composeQuery(provider, id);
+  if (user) {
+    helpers.saveUserInRedis(user);
+    // Генерируем токен авторизации и отправляем данные пользователю
+    user = await helpers.cutPassword(user);
+    const { token } = await helpers.generateToken(user.id);
 
-  GraphQLClient.request(query)
-    .then(async data => {
-      user = response(data);
-      if (user) {
-        helpers.saveUserInRedis(user);
-        // Генерируем токен авторизации и отправляем данные пользователю
-        const { token } = await helpers.generateToken(user.id);
-        user = await helpers.cutPassword(user);
-
-        res.send({ token, user });
-      } else {
-        // Пользователь не найден. Попытаемся зарегистрировать его
-        return validator.throwErrors('oauth: no user', res);
-      }
-    })
-    .catch(e => {
-      return validator.handleErrors(e, res);
-    });
+    res.send({ token, user });
+  } else {
+    // Пользователь не найден. Попытаемся зарегистрировать его
+    return validator.throwErrors('oauth: no user', res);
+  }
 };
 
 module.exports.oauthCreate = async (req, res) => {
@@ -138,7 +127,7 @@ module.exports.oauthCreate = async (req, res) => {
   };
 
   instance.metadata.data[`${provider.providerName}ID`] = provider.id;
-  instance.metadata.data[`${provider.providerName}Data`] = helpers.providerData(provider);
+  instance.metadata.data[`${provider.providerName}Data`] = helpers.stringifyProviderData(provider);
 
   if (provider.email) {
     // Если получили от oauth провайдера email-адрес - проверим, чтобы он был свободен
@@ -180,6 +169,88 @@ module.exports.oauthCreate = async (req, res) => {
   }
 
   helpers.createUser(instance, res);
+};
+
+/**
+ * Обновляем данные oauth провайдера, с помощью которого авторизовался пользователь
+ *
+ * @param req                    Объект запроса сервера
+ * @param res                    Объект ответа сервера
+ */
+module.exports.updateProviderData = async (req, res) => {
+  const data = req.body,
+    id = data.id,
+    providerID = data.providerID,
+    provider = data.providerData;
+  succesMessageName = `${provider.providerName} data updated`;
+
+  if (providerID !== provider.id) {
+    return validator.throwErrors('Wrong provider account', res, provider.providerName);
+  }
+
+  let payload = { user: { id }, metadata: {} };
+  payload.metadata[`${provider.providerName}Data`] = helpers.stringifyProviderData(provider);
+
+  helpers.saveSettings(id, payload, res, succesMessageName);
+};
+
+/**
+ * Подключим профиль oauth провайдера к аккаунту пользователя
+ *
+ * @param req                    Объект запроса сервера
+ * @param res                    Объект ответа сервера
+ */
+module.exports.connectOauthProvider = async (req, res) => {
+  const data = req.body,
+    provider = data.providerData;
+  succesMessageName = `${provider.providerName} application connected`;
+
+  const alreadyConnected = await helpers.findOauthUser(provider, res);
+
+  if (alreadyConnected) {
+    return validator.throwErrors('Oauth profile already connected', res, provider.providerName);
+  }
+
+  const user = await helpers.findUser('id', data.id, res);
+  if (user) {
+    const comparePasswords = await helpers.comparePasswords(data.password, user.password);
+    if (!comparePasswords) {
+      // Пароль неверен.Выбрасываем ошибку
+      return validator.throwErrors('Wrong password', res);
+    }
+
+    let payload = { user: { id: data.id }, metadata: {} };
+    payload.metadata[`${provider.providerName}ID`] = provider.id;
+    payload.metadata[`${provider.providerName}Data`] = helpers.stringifyProviderData(provider);
+
+    helpers.saveSettings(data.id, payload, res, succesMessageName);
+  } else {
+    return res.status(404).send({ type: 'error', message: 'User not found.' });
+  }
+};
+
+/**
+ * Отсоединим профиль oauth провайдера от аккаунта пользователя
+ *
+ * @param req                    Объект запроса сервера
+ * @param res                    Объект ответа сервера
+ */
+module.exports.disconnectOauthProvider = async (req, res) => {
+  const data = req.body,
+    succesMessageName = `${data.provider} application disconnected`;
+  user = await helpers.findUser('id', data.id, res);
+
+  const comparePasswords = await helpers.comparePasswords(data.password, user.password);
+  if (!comparePasswords) {
+    // Пароль неверен.Выбрасываем ошибку
+    return validator.throwErrors('Wrong password', res);
+  }
+
+  let payload = { user: { id: data.id }, metadata: {} };
+  payload.metadata[`${data.provider}ID`] = null;
+  payload.metadata[`${data.provider}Data`] = null;
+
+  helpers.saveSettings(data.id, payload, res, succesMessageName);
 };
 
 /**
@@ -583,7 +654,7 @@ module.exports.safetySettings = async (req, res) => {
  */
 module.exports.resendEmailConfirmationKey = async (req, res) => {
   const id = req.body.id,
-    user = await helpers.findUser('id', id, res),
+    user = await helpers.findUser('id', id, res), // Получить надо не по id, т.к. в redis не хранится ключ подтверждения. Ну или просто сгенерировать новый
     key = user.metadata.emailVerification;
   let message;
 

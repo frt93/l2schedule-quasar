@@ -6,7 +6,7 @@ import controllers from "handlers/user/controllers";
 
 export default {
   name: "addEmailInput",
-  props: ["userInstance"],
+  props: ["user"],
 
   data() {
     return {
@@ -31,7 +31,7 @@ export default {
     async submit() {
       if (this.canSubmit) {
         const payload = {
-          id: this.userInstance.id,
+          id: this.user.id,
           email: this.email
         };
 
@@ -75,7 +75,7 @@ export default {
   },
 
   render(h) {
-    if (!this.userInstance.email)
+    if (!this.user.email)
       return h(
         "form",
         {

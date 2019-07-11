@@ -36,6 +36,7 @@ module.exports.saveUserInRedis = user => {
  * Создаем экземпляр пользователя в базе данных
  *
  * @param {Object} credentials   Экземпляр регистрационных данных пользователя
+ * @param res                    Экземпляр ответа сервера
  */
 module.exports.createUser = async (credentials, res) => {
   if (credentials.email) {
@@ -68,19 +69,23 @@ module.exports.createUser = async (credentials, res) => {
 
 /**
  * Преобразуем объект с данными от auth провайдера в строку и сохраним в базе данных. Предварительно удалим ненужные для этой цели поля
- * @param {Object} provider      Данные oauth провайдера
  *
+ * @param {Object} provider      Данные oauth провайдера
  * @return {String}
  */
-module.exports.providerData = provider => {
-  provider.approved = new Date();
-  delete provider.providerName;
-  delete provider.id;
-  if (provider.email) {
-    delete provider.email;
+module.exports.stringifyProviderData = provider => {
+  let data = provider;
+  data.updated = new Date();
+  delete data.id;
+  if (data.email && data.providerName !== 'google') {
+    delete data.email;
+  }
+  delete data.providerName;
+  if (data.avatar) {
+    delete data.avatar;
   }
 
-  return JSON.stringify(provider);
+  return JSON.stringify(data);
 };
 
 /**
@@ -209,10 +214,34 @@ module.exports.findUser = async (key, value, res) => {
   await GraphQLClient.request(query)
     .then(async data => {
       user = await response(data);
-      if (user) this.saveUserInRedis(user);
+      if (user) {
+        this.saveUserInRedis(user);
+      }
     })
     .catch(e => {
       validator.handleErrors(e, res);
+    });
+
+  return user;
+};
+
+/**
+ * Найдем пользователя при помощи идентификатора профиля oauth провайдера
+ *
+ * @param {Object} provider   Данные от oauth провайдера
+ * @param res                 Экземпляр ответа сервера
+ */
+module.exports.findOauthUser = async (provider, res) => {
+  let user;
+  const { composeQuery, response } = require('api/controllers/users/query/oauth');
+  const query = composeQuery(provider.providerName, provider.id);
+
+  await GraphQLClient.request(query)
+    .then(async data => {
+      user = response(data);
+    })
+    .catch(e => {
+      return validator.handleErrors(e, res);
     });
 
   return user;

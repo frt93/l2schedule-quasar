@@ -78,7 +78,7 @@ export default {
 
   render(h) {
     return this.userInstance.password === null
-      ? h(addPassword, { props: { userInstance: this.userInstance } })
+      ? h(addPassword, { props: { user: this.userInstance } })
       : h("div", { staticClass: "form" }, [
           h(
             "form",

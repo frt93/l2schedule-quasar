@@ -4,7 +4,7 @@ import controllers from "handlers/user/controllers";
 
 export default {
   name: "confrimEmailInput",
-  props: ["userInstance"],
+  props: ["user"],
 
   data() {
     return {
@@ -28,7 +28,7 @@ export default {
   methods: {
     async submit() {
       if (this.canSubmit) {
-        const id = this.userInstance.id;
+        const id = this.user.id;
 
         this.sending = true;
         const { user, success, error } = await userAPI.confirmEmail(
@@ -132,9 +132,7 @@ export default {
       this.$q
         .dialog({
           title: this.$t("labels.confirm"),
-          message: `${this.$t("labels.resendConfirmKey")} ${
-            this.userInstance.email
-          }`,
+          message: `${this.$t("labels.resendConfirmKey")} ${this.user.email}`,
           cancel: true,
           persistent: true
         })
@@ -142,7 +140,7 @@ export default {
           const { success, error } = await userAPI.settings(
             "resendEmailConfirmationKey",
             {
-              id: this.userInstance.id
+              id: this.user.id
             }
           );
 
@@ -156,7 +154,7 @@ export default {
   },
 
   render(h) {
-    if (this.userInstance.metadata.emailVerification) {
+    if (this.user.metadata.emailVerification) {
       return h(
         "form",
         {

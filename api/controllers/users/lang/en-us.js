@@ -10,6 +10,18 @@ module.exports = {
     'email already confirmed': 'Seems your email already confirmed',
     accountSettings: 'Account details updated',
     safetySettings: 'Safety settings updated',
+    'google data updated': 'Google account information updated',
+    'facebook data updated': 'Facebook account information updated',
+    'vk data updated': 'VK account information updated',
+    'telegram data updated': 'Telegram account information updated',
+    'google application disconnected': 'Google application disconnected',
+    'google application connected': 'Google application connected',
+    'facebook application disconnected': 'Facebook application disconnected',
+    'facebook application connected': 'Facebook application connected',
+    'vk application disconnected': 'VK application disconnected',
+    'vk application connected': 'VK application connected',
+    'telegram application disconnected': 'Telegram application disconnected',
+    'telegram application connected': 'Telegram application connected',
   },
   errors: {
     'Empty credentials': "You haven't completely filled out the form.",
@@ -29,7 +41,7 @@ module.exports = {
       return `Based on the received data, we assume that you may have logged in earlier using another third-party application, cause the email ${email} is already linked to an existing account. Check it for the presence of a message with authorization data or restore access to the account with its help.`;
     },
     'oauth: username is not chosen':
-      "Sorry, but we can't choose username for you. Please enter it yourself",
+      "Sorry, but we can't choose username for you. Please enter it yourself to complete registration",
     'Repair key not found': 'The specified key was not found in the database',
     'Wrong repair key': 'Invalid confirmation key pattern',
     'Email confirm key not found':
@@ -49,5 +61,11 @@ module.exports = {
     'Password max length': 'Password must be a maximum of 30 characters.',
     'Password spaces': 'Spaces are prohibited',
     'Constraint violation': 'The data you entered already exist in the database',
+    'Wrong provider account': providerName => {
+      return `Received ${providerName} ID is differs from that\'s assosiated with your account. If you want to connect another ${providerName} profile, first disconnect the current one.`;
+    },
+    'Oauth profile already connected': providerName => {
+      return `Recieved ${providerName} profile ID already linked with another account`;
+    },
   },
 };

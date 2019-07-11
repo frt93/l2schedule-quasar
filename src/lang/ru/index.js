@@ -1,6 +1,25 @@
 export default {
-  phrases: {
-    eg: 'Например',
+  eg: 'Например',
+  eg: 'e.g.',
+  fb: 'facebook',
+  ggl: 'google',
+  vk: 'vk.com',
+  tg: 'telegram',
+  oauth: {
+    link: 'Вы можете подключить к своему аккаунту приложение авторизации ',
+    linked: 'К вашему аккаунту подключено приложение авторизации',
+    googleLinked: '@:oauth.linked @:ggl',
+    facebookLinked: '@:oauth.linked @:fb',
+    vkLinked: '@:oauth.linked @:vk',
+    telegramLinked: '@:oauth.linked @:tg',
+    link_google: '@:oauth.link @:ggl',
+    link_facebook: '@:oauth.link @:fb',
+    link_vk: '@:oauth.link @:vk',
+    link_telegram: '@:oauth.link @:tg',
+    updateProvider: 'Update data',
+    lastUpdate: 'Last update',
+    connectProvider: 'Connect',
+    disconnectProvider: 'Disconnect',
   },
   labels: {
     username: 'Никнейм',
@@ -40,10 +59,6 @@ export default {
     confirmEmail: 'Ключ подтверждения email адреса',
     confirm: 'Подтвердить',
     resendConfirmKey: 'Ключ подтверждения будет снова отправлен на электронный адрес',
-    fbLinked: 'Ваш аккаунт связан с профилем facebook',
-    connected: 'Подключен',
-    connectProvider: 'Подключить',
-    disconnectProvider: 'Отключить',
   },
   errors: {
     spaces: 'Пробелы запрещены',

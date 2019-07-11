@@ -4,7 +4,7 @@ import { debounce } from "quasar";
 import userAPI from "handlers/user/api";
 import controllers from "handlers/user/controllers";
 
-import passwordDialog from "components/auth/askPassword";
+import askPassword from "components/auth/askPassword";
 export default {
   name: "changeUsernameInput",
   props: ["user"],
@@ -33,7 +33,7 @@ export default {
     askPassword(error) {
       this.$q
         .dialog({
-          component: passwordDialog,
+          component: askPassword,
           root: this.$root,
           isError: error
         })

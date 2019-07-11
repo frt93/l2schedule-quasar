@@ -88,7 +88,7 @@ export default {
                   flat: true,
                   round: true,
                   ripple: false,
-                  icon: "fas fa-times"
+                  icon: "mdi-close"
                 },
                 on: {
                   click: () => {

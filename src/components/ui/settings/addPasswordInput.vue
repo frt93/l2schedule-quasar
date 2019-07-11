@@ -4,7 +4,7 @@ import controllers from "handlers/user/controllers";
 
 export default {
   name: "addPasswordInput",
-  props: ["userInstance"],
+  props: ["user"],
 
   data() {
     return {
@@ -29,7 +29,7 @@ export default {
     async submit() {
       if (this.canSubmit) {
         const payload = {
-          id: this.userInstance.id,
+          id: this.user.id,
           password: this.password
         };
 

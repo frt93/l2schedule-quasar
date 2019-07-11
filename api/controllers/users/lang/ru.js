@@ -10,6 +10,11 @@ module.exports = {
     'email already confirmed': 'Похоже, что ваш email уже подтвержден',
     accountSettings: 'Данные учетной записи обновлены',
     safetySettings: 'Настройки безопасности обновлены',
+    'google data updated': 'Данные Google аккаунта обновлены',
+    'facebook data updated': 'Данные Facebook аккаунта обновлены',
+    'vk data updated': 'Данные аккаунта vk.com обновлены',
+    'telegram data updated': 'Данные Telegram аккаунта обновлены',
+    'facebook application disconnected': 'Приложение Facebook отключено',
   },
   errors: {
     'Empty credentials': 'Вы неполностью заполнили форму',
@@ -29,7 +34,7 @@ module.exports = {
       return `На основании полученных данных мы пологаем, что вы авторизовались ранее с помощью другого стороннего приложения, так как email адрес ${email} уже привязан к существующему аккаунту. Проверьте его на наличие письма с авторизационными данными или восстановите с его помощью доступ к аккаунту.`;
     },
     'oauth: username is not chosen':
-      'Извините, но мы не можем подобрать для вас никнейм. Пожалуйста, укажите его самостоятельно',
+      'Извините, но мы не можем подобрать для вас никнейм. Пожалуйста, укажите его самостоятельно чтобы завершить регистрацию',
     'Repair key not found': 'Указанный ключ не найден в базе данных',
     'Wrong repair key': 'Неверный формат ключа подтверждения',
     'Email confirm key not found':
@@ -49,5 +54,11 @@ module.exports = {
     'Password max length': 'Пароль должен состоять максимум из 30 символов',
     'Password spaces': 'Пробелы в пароле запрещены',
     'Constraint violation': 'Введенные вами данные уже существуют в базе данных',
+    'Wrong provider account': providerName => {
+      return `Полученный ${providerName} ID отличается от того, который привязан к вашему аккаунту. Если вы хотите подключить другой ${providerName} профиль - сначала отключите текущий`;
+    },
+    'Oauth profile already connected': providerName => {
+      return `Полученный ${providerName} ID уже связан с другим аккаунтом`;
+    },
   },
 };

@@ -2,12 +2,12 @@ const { returningPattern, responsePattern } = require('./userInstancePattern');
 /**
  * Компонуем запрос данных искомого пользователя
  *
- * @param {String} provider   Название oAuth провайдера, с помощью которого авторизуется пользователь
- * @param {Integer} id        ID его аккаунта в приложении-провайдере
+ * @param {String} providerName   Название oAuth провайдера, с помощью которого авторизуется пользователь
+ * @param {String} id             ID аккаунта пользователя в приложении oauth провайдера
  */
-const composeQuery = (provider, id) => {
+const composeQuery = (providerName, id) => {
   return `query find_user{
-    users(where: {metadata: {${provider}ID: {_ilike: "${id}"}}}) {
+    users(where: {metadata: {${providerName}ID: {_ilike: "${id}"}}}) {
       ${returningPattern}
     }
   }`;

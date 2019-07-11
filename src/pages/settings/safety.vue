@@ -46,8 +46,8 @@ export default {
 
   render(h) {
     return h("div", { staticClass: "form column" }, [
-      h(addEmail, { props: { userInstance: this.userInstance } }),
-      h(confirmEmail, { props: { userInstance: this.userInstance } }),
+      h(addEmail, { props: { user: this.userInstance } }),
+      h(confirmEmail, { props: { user: this.userInstance } }),
       h(oauthList, { props: { user: this.userInstance } })
     ]);
   }

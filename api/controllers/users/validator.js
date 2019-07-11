@@ -125,6 +125,20 @@ module.exports.throwErrors = (name, res, params) => {
       message: messages(res.lang).errors[name],
     });
   }
+
+  if (name === 'Wrong provider account') {
+    return res.status(400).send({
+      type: name,
+      message: messages(res.lang).errors[name](params),
+    });
+  }
+
+  if (name === 'Oauth profile already connected') {
+    return res.status(403).send({
+      type: name,
+      message: messages(res.lang).errors[name](params),
+    });
+  }
 };
 
 /**

@@ -1,6 +1,25 @@
 export default {
-  phrases: {
-    eg: 'e.g.',
+  eg: 'e.g.',
+  fb: 'facebook',
+  ggl: 'google',
+  vk: 'vk.com',
+  tg: 'telegram',
+  oApp: 'authorization app',
+  oauth: {
+    link: 'You can associate this account with ',
+    linked: 'Your account is associated with ',
+    googleLinked: '@:oauth.linked @:ggl @:oApp',
+    facebookLinked: '@:oauth.linked @:fb @:oApp',
+    vkLinked: '@:oauth.linked @:vk @:oApp',
+    telegramLinked: '@:oauth.linked @:tg profile',
+    link_google: '@:oauth.link @:ggl @:oApp',
+    link_facebook: '@:oauth.link @:fb @:oApp',
+    link_vk: '@:oauth.link @:vk @:oApp',
+    link_telegram: '@:oauth.link @:tg @:oApp',
+    updateProvider: 'Update app data',
+    lastUpdate: 'Last update',
+    connectProvider: 'Connect',
+    disconnectProvider: 'Disconnect app',
   },
   labels: {
     username: 'Username',
@@ -40,10 +59,6 @@ export default {
     confirmEmail: 'Email confirmation key',
     confirm: 'Confirm',
     resendConfirmKey: 'The confirmation key will be resend to the email',
-    fbLinked: 'Your account is linked with a facebook profile',
-    connected: 'Connected',
-    connectProvider: 'Connect',
-    disconnectProvider: 'Disconnect',
   },
   errors: {
     spaces: 'Spaces are prohibited',

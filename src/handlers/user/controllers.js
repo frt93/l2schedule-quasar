@@ -1,5 +1,5 @@
 import { i18n } from 'boot/i18n.js';
-import { Notify } from 'quasar';
+import { Notify, Dialog } from 'quasar';
 
 import api from './api';
 
@@ -166,6 +166,14 @@ export default {
           err.type = 'loginError';
         }
 
+        if (
+          err.type === 'Wrong provider account' ||
+          err.type === 'Oauth profile already connected'
+        ) {
+          // Если пользователь пытается перезаписать данные одного аккаунта данными другого - оповестим его об этом
+          this.openDialog(i18n.t('errors.authError'), err.message);
+        }
+
         return { errorType: err.type, message: err.message };
       }
     }
@@ -203,5 +211,9 @@ export default {
       icon: 'mdi-emoticon-wink-outline',
       message,
     });
+  },
+
+  openDialog(title, message) {
+    Dialog.create({ title, message, persistent: true, style: 'width: 700px; max-width: 80vw' });
   },
 };

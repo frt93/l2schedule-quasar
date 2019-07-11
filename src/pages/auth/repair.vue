@@ -232,7 +232,7 @@ export default {
                 maxlength: 36,
                 counter: true,
                 placeholder: `${this.$t(
-                  "phrases.eg"
+                  "eg"
                 )}, 133caea8-c3ad-490c-b70f-8eb0f4c29639`,
                 value: this.repairKey,
                 error: this.repairKeyError,
