@@ -172,9 +172,7 @@ const vk = (() => {
   const Auth = function() {
     this.load = () => {
       // Загрузим SDK и нициализируем его
-      install().then(() => {
-        return init();
-      });
+      return init();
     };
     this.login = () => {
       return new Promise(resolve => {

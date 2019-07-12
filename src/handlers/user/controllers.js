@@ -194,7 +194,7 @@ export default {
     Notify.create({
       color: 'negative',
       position: 'bottom',
-      icon: 'fas fa-exclamation',
+      icon: 'mdi-emoticon-sad-outline',
       message,
     });
   },
@@ -213,7 +213,27 @@ export default {
     });
   },
 
-  openDialog(title, message) {
-    Dialog.create({ title, message, persistent: true, style: 'width: 700px; max-width: 80vw' });
+  /**
+   * Откроем простой диалог с сообщением
+   *
+   * @param {String} title         Заголовок сообщения
+   * @param {String} message       Текст оповещения
+   * @param {Boolean} persistent   false - Можно закрыть диалог кликом на бэкграунде, true - только нажатием кнопки OK
+   */
+  openDialog(title, message, persistent) {
+    Dialog.create({
+      title,
+      message,
+      persistent: persistent,
+      style: 'width: 700px; max-width: 80vw',
+    });
+  },
+
+  setPasswordDialog() {
+    this.openDialog(
+      i18n.t('labels.password'),
+      i18n.t('hints.settings.needPasswordToChange'),
+      false
+    );
   },
 };

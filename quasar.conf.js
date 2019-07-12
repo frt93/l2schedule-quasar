@@ -7,7 +7,7 @@ module.exports = function(ctx) {
     preFetch: true,
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
-    boot: ['axios', 'i18n', { path: 'oAuth', server: false }],
+    boot: ['axios', 'i18n', { path: 'oauth', server: false }],
 
     css: ['app.styl'],
 

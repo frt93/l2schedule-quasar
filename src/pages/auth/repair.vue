@@ -171,7 +171,7 @@ export default {
                 autofocus: true,
                 autocomplete: false,
                 readonly: this.user !== null ? true : false,
-                placeholder: "youremail@adress.com",
+                placeholder: "your@email.com",
                 value: this.user !== null ? this.user.email : this.email,
                 error: this.emailError,
                 errorMessage: this.emailErrorMessage,
@@ -193,7 +193,7 @@ export default {
               }),
               h("q-icon", {
                 attrs: {
-                  name: "fas fa-envelope"
+                  name: "mdi-email-outline"
                 },
                 slot: "prepend"
               })
@@ -213,7 +213,7 @@ export default {
           attrs: {
             name: 2,
             color: this.repairKeyError ? "negative" : "warning",
-            icon: "fas fa-key",
+            icon: "mdi-code-braces",
             title: "Enter repair key",
             done: this.step > 2 ? true : false,
             doneColor: "green-6",
@@ -250,7 +250,7 @@ export default {
               [
                 h("q-icon", {
                   attrs: {
-                    name: "fas fa-key"
+                    name: "mdi-code-braces"
                   },
                   slot: "prepend"
                 })
@@ -271,7 +271,7 @@ export default {
           attrs: {
             name: 3,
             color: this.passwordError ? "negative" : "warning",
-            icon: "fas fa-unlock",
+            icon: "mdi-lock-reset",
             title: "Choose your new password",
             disable: this.step < 3 ? true : false
           }
@@ -313,7 +313,7 @@ export default {
                 h("q-icon", {
                   staticClass: "cursor-pointer q-ml-sm",
                   attrs: {
-                    name: this.hidePwd ? "fas fa-eye" : "fas fa-eye-slash"
+                    name: this.hidePwd ? "mdi-eye-off" : "mdi-eye"
                   },
                   on: {
                     click: () => {
@@ -325,7 +325,9 @@ export default {
                 h("q-icon", {
                   attrs: {
                     name:
-                      this.password.length < 7 ? "fas fa-unlock" : "fas fa-lock"
+                      this.password.length < 7
+                        ? "mdi-lock-open-outline"
+                        : "mdi-lock-outline"
                   },
                   slot: "prepend"
                 })

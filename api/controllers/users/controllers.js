@@ -221,7 +221,9 @@ module.exports.connectOauthProvider = async (req, res) => {
 
     let payload = { user: { id: data.id }, metadata: {} };
     payload.metadata[`${provider.providerName}ID`] = provider.id;
-    payload.metadata[`${provider.providerName}Data`] = helpers.stringifyProviderData(provider);
+    payload.metadata[`${provider.providerName}Data`] = await helpers.stringifyProviderData(
+      provider
+    );
 
     helpers.saveSettings(data.id, payload, res, succesMessageName);
   } else {

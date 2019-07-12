@@ -76,14 +76,47 @@ module.exports.createUser = async (credentials, res) => {
 module.exports.stringifyProviderData = provider => {
   let data = provider;
   data.updated = new Date();
-  delete data.id;
+
   if (data.email && data.providerName !== 'google') {
     delete data.email;
   }
-  delete data.providerName;
   if (data.avatar) {
     delete data.avatar;
   }
+
+  // Определим для каждого провайдера ссылку на профиль пользователя и сохраним ее
+  if (data.providerName === 'vk') {
+    let slug;
+
+    if (data.username) {
+      slug = data.username;
+    } else {
+      slug = `id${data.id}`;
+    }
+
+    data.link = `https://vk.com/${slug}`;
+  }
+
+  if (data.providerName === 'facebook') {
+    let slug;
+
+    if (data.username) {
+      slug = data.username;
+    } else {
+      slug = `profile.php?id=${data.id}`;
+    }
+
+    data.link = `https://www.facebook.com/${slug}`;
+  }
+
+  if (data.providerName === 'telegram') {
+    if (data.username) {
+      data.link = `https://t.me/${data.username}`;
+    }
+  }
+
+  delete data.id;
+  delete data.providerName;
 
   return JSON.stringify(data);
 };

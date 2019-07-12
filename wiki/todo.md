@@ -32,7 +32,7 @@
 
 #oauth
 
-> https://developers.facebook.com/apps/477463253007302/app-review/permissions/ - Получить разрешение на получение поля link пользователя
+> https://developers.facebook.com/apps/477463253007302/app-review/permissions/ - Получить разрешение на получение поля link пользователя. Затем добавить соответствующую обработку этого поля в контроллерах и в компоненте со списком провайдеров в настройках
 
 #Hasura
 

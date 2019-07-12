@@ -6,6 +6,7 @@ export default {
   tg: 'telegram',
   oApp: 'authorization app',
   oauth: {
+    title: 'Third-party authorization apps',
     link: 'You can associate this account with ',
     linked: 'Your account is associated with ',
     googleLinked: '@:oauth.linked @:ggl @:oApp',
@@ -36,10 +37,10 @@ export default {
     haveKey: 'Already have a key?',
     repair: {
       guest1:
-        'To start the process of restoring access to your account, enter the email you provided during registration. An email will be sent with the transaction confirmation key',
+        'To start the process of restoring access to your account, enter the email you provided during registration. An email will be sent with the confirmation key',
       user1:
         'You have been redirected to this page indicating that you have forgotten the password for your account. You can reset the current password and set a new one. Сlick "Next" to continue and we\'ll send a confirmation key to your email',
-      2: 'Enter the confirmation key from the message that came to your email',
+      2: 'Enter the confirmation key you received through email',
       3: 'Now you can enter your new password. After confirmation, you will be redirected to the login page',
     },
     add: 'Add',
@@ -94,11 +95,8 @@ export default {
         'To reduce the risk of losing access to this account - link your email to it. \n It will be hidden from other users.',
       safety: {
         email1:
-          "It was sent to the email you specified during registration. If you can't find the message - we can ",
-        email2: 'resend it',
-        email3: ". If that didn't help either - ",
-        email4: 'check',
-        email5: '  if you entered your email correctly',
+          "It was sent to the email you specified during registration. Check if you entered your email correctly. If you can't find the message - we can ",
+        email2: 'send you another one',
       },
     },
     auth: {

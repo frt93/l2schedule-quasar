@@ -102,21 +102,7 @@ export default {
             }
           },
           this.$t("hints.settings.safety.email2")
-        ),
-        h("span", this.$t("hints.settings.safety.email3")),
-        h(
-          "span",
-          {
-            staticClass: "cursor-pointer dashed",
-            on: {
-              click: () => {
-                this.$router.push({ name: "settings/account" });
-              }
-            }
-          },
-          this.$t("hints.settings.safety.email4")
-        ),
-        h("span", this.$t("hints.settings.safety.email5"))
+        )
       ];
     },
 

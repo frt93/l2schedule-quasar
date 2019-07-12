@@ -104,7 +104,7 @@ export default {
             h("q-icon", {
               staticClass: "cursor-pointer q-ml-sm",
               attrs: {
-                name: this.hidePwd ? "mdi-eye" : "mdi-eye-off"
+                name: this.hidePwd ? "mdi-eye-off" : "mdi-eye"
               },
               on: {
                 click: () => {

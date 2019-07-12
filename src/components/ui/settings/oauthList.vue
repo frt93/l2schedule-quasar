@@ -1,7 +1,10 @@
 <script>
+import { openURL } from "quasar";
+
 import userAPI from "handlers/user/api";
 import controllers from "handlers/user/controllers";
 import date from "handlers/date";
+import oauth from "boot/oauth";
 
 import askPassword from "components/auth/askPassword";
 
@@ -9,24 +12,19 @@ export default {
   name: "oauthProvidersList",
   beforeMount() {
     if (process.env.CLIENT) {
-      import("boot/oAuth").then(data => {
-        this.oauth = data.default;
-        // Загружаем и инициализируем SDK
-        this.oauth.install();
-        // Инициализируем telegram виджет
-        // const { script } = this.oauth.telegram();
-        // this.$refs.providers.appendChild(script);
-        // window.onTelegramAuth = this.telegram;
-      });
+      // Загружаем и инициализируем SDK
+      oauth.install();
     }
   },
 
-  props: ["user"],
-  data() {
-    return {
-      oauth: {}
-    };
+  mounted() {
+    // Инициализируем telegram виджет
+    const { script } = oauth.telegram();
+    this.$refs.telegram.appendChild(script);
+    window.onTelegramAuth = this.telegram;
   },
+
+  props: ["user"],
 
   computed: {
     google() {
@@ -49,7 +47,7 @@ export default {
         data: this.user.metadata.facebookData
       };
 
-      if (this.user.metadata.facebookData !== undefined) {
+      if (this.user.metadata.facebookData) {
         data.detail = this.user.metadata.facebookData.name;
       }
 
@@ -62,7 +60,7 @@ export default {
         data: this.user.metadata.vkData
       };
 
-      if (this.user.metadata.vkData !== undefined) {
+      if (this.user.metadata.vkData) {
         data.detail = this.user.metadata.vkData.name;
       }
 
@@ -73,20 +71,15 @@ export default {
         id: this.user.metadata.telegramID,
         data: this.user.metadata.telegramData
       };
-    },
-    isFacebookLinked() {
-      let message;
-      if (this.facebookID) {
-        message = this.$t("oauth.facebookLinked");
-      } else {
-        message = this.$t("oauth.linkFacebook");
-      }
-
-      return message;
     }
   },
 
   methods: {
+    /**
+     * Сообщение пользователю о статусе подключения к его аккаунту oauth-провайдера
+     *
+     *  @param provider               Наименование oauth-провайдера
+     */
     isAppConnected(provider) {
       let message;
       const providerID = this[provider].id;
@@ -109,7 +102,7 @@ export default {
     getProviderData(provider, propertyName) {
       const login = () => {
         return new Promise(resolve => {
-          this.oauth[provider].login().then(async res => {
+          oauth[provider].login().then(async res => {
             const providerData = await controllers[`${provider}Instance`](res); // Обработаем данные от oauth провайдера
             resolve(providerData);
           });
@@ -119,7 +112,7 @@ export default {
       return new Promise(resolve => {
         if (!window[propertyName]) {
           // Если SDK выбранного провайдера не инициализировано - загружаем и инициализируем
-          this.oauth[provider].load().then(() => {
+          oauth[provider].load().then(() => {
             login().then(res => {
               resolve(res);
             });
@@ -134,6 +127,37 @@ export default {
     },
 
     /**
+     * Подключим профиль oauth провайдера к аккаунту пользователя
+     *
+     * @param provider               Наименование oauth провайдера
+     * @param propertyName           Наименование window.свойства oauth провайдера, в котором вызывается его api
+     * @param isError                Если пользователь подтвердил операцию неправильным паролем - данный метод перезапускается и в этом параметре передается текст ошибки.
+     * @param data                   Данные, полученные от oauth провайдера. Если этот параметр передается - значит пользователь уже получил данные, но подтвердил операцию
+     *                               неверным паролем и метод вызвался рекурсивно для повторного запроса пароля.
+     */
+    async connectProvider(provider, propertyName, isError, data) {
+      console.log(provider);
+      if (provider === "telegram") {
+        return; //Вызов api телеграма происходим из iframe. Поэтому прерываем функцию
+      }
+
+      let payload = data; // Если операция была провалена из-за неправильного пароля - запишем переданные при перевызове функции данные, чтобы не запрашивать их снова
+
+      if (!data) {
+        await this.getProviderData(provider, propertyName).then(
+          providerData => {
+            payload = { id: this.user.id, providerData }; // Скомпонуем данные для запроса
+          }
+        );
+      }
+
+      this.askPassword(isError).then(async password => {
+        payload = { ...payload, password }; // добавим в данные указанный пароль
+        this.handleApiResponse("connect", payload, provider, propertyName);
+      });
+    },
+
+    /**
      * Отправим запрос на обновление данных об oauth провайдере
      *
      * @param provider               Наименование oauth провайдера
@@ -141,33 +165,15 @@ export default {
      *
      */
     async updateProviderData(provider, propertyName) {
+      if (provider === "telegram") {
+        return; //Вызов api телеграма происходим из iframe. Поэтому прерываем функцию
+      }
+
       this.getProviderData(provider, propertyName).then(async providerData => {
-        const providerID = this[`${provider}ID`],
+        const providerID = this[provider].id,
           payload = { id: this.user.id, providerID, providerData }; // Скомпонуем данные для отправки api запроса
 
         this.handleApiResponse("updateProviderData", payload, provider);
-      });
-    },
-
-    /**
-     * Подключим профиль oauth провайдера к аккаунту пользователя
-     *
-     * @param provider               Наименование oauth провайдера
-     * @param propertyName           Наименование window.свойства oauth провайдера, в котором вызывается его api
-     * @param isError                Если пользователь подтвердил операцию неправильным паролем - данный метод перезапускается и в этом параметре передается текст ошибки
-     */
-    connectProvider(provider, propertyName, isError) {
-      if (this.user.password === null) {
-        // Если у пользователя не установлен пароль от аккаунта - уведомим, что его необходимо установить для осуществления операции
-        return this.setPassword();
-      }
-      this.getProviderData(provider, propertyName).then(async providerData => {
-        this.askPassword(isError).then(async password => {
-          const payload = { id: this.user.id, providerData, password }; // Скомпонуем данные для запроса
-          this.handleApiResponse("connect", payload, provider, propertyName);
-        });
-
-        //@todo Переделать, чтобы в случа неверного пароля заново не логиниться у провайдера
       });
     },
 
@@ -178,11 +184,6 @@ export default {
      * @param isError                Если пользователь подтвердил операцию неправильным паролем - данный метод перезапускается и в этом параметре передается текст ошибки
      */
     disconnectProvider(provider, propertyName = null, isError) {
-      if (this.user.password === null) {
-        // Если у пользователя не установлен пароль от аккаунта - уведомим, что его необходимо установить для осуществления операции
-        return this.setPassword();
-      }
-
       this.askPassword(isError).then(async password => {
         const payload = { id: this.user.id, provider, password }; // Скомпонуем данные для запроса
         this.handleApiResponse("disconnect", payload, provider);
@@ -208,12 +209,12 @@ export default {
       if (error) {
         const { errorType, message } = controllers.handleErrors(error);
         if (errorType === "passwordError") {
-          // Если указан неправильный пароль - стриггерим функцию заново
-          this[`${action}Provider`](provider, propertyName, message);
+          // Если указан неправильный пароль - вызовем рекурсивно метод, результат вызова которого обрабатывается
+          this[`${action}Provider`](provider, propertyName, message, payload);
         }
-
         return;
       }
+
       // Обновим инстанс пользователя
       this.$store.commit("user/setUser", user);
 
@@ -221,15 +222,10 @@ export default {
     },
 
     /**
-     * Уведомим пользователя о необходимости установить пароль от аккаунта для осуществуления операции
+     * Спросим у пользователя пароль для подтверждения операции
+     *
+     * @param isError                Текст ошибки. Если параметр передается - пользователь указал неверный пароль и ему предложено указать его заново
      */
-    setPassword() {
-      return controllers.openDialog(
-        this.$t("labels.password"),
-        this.$t("hints.settings.needPasswordToChange")
-      );
-    },
-
     askPassword(isError) {
       return new Promise(resolve => {
         this.$q
@@ -245,146 +241,8 @@ export default {
     },
 
     /**
-     * Метод рендера блока управления привязанным профилем oauth провайдера
-     *
-     * @param provider               Наименование oauth провайдера
-     * @param propertyName           Наименование window.свойства oauth провайдера, в котором вызывается его api
-     *
+     * Метод рендера списка сторонних приложений авторизации
      */
-    controlSide(h, provider, propertyName) {
-      const providerID = this[provider].id;
-      let nodes = [];
-
-      if (providerID) {
-        nodes.push(
-          h("div", { ref: provider }, [
-            h(
-              "q-btn",
-              {
-                attrs: {
-                  round: true,
-                  flat: true,
-                  icon: "mdi-cached",
-                  color: "green-6"
-                },
-                on: {
-                  click: () => {
-                    this.updateProviderData(provider, propertyName);
-                  }
-                }
-              },
-              [
-                h("q-no-ssr", [
-                  h(
-                    "q-tooltip",
-                    {
-                      attrs: {
-                        transitionShow: "scale",
-                        transitionHide: "scale"
-                      }
-                    },
-                    this.$t("oauth.updateProvider")
-                  )
-                ])
-              ]
-            )
-          ]),
-          h(
-            "q-btn",
-            {
-              attrs: {
-                round: true,
-                flat: true,
-                icon: "mdi-link-off",
-                color: "red-6"
-              },
-              on: {
-                click: () => {
-                  this.disconnectProvider(provider);
-                }
-              }
-            },
-            [
-              h("q-no-ssr", [
-                h(
-                  "q-tooltip",
-                  {
-                    attrs: {
-                      transitionShow: "scale",
-                      transitionHide: "scale"
-                    }
-                  },
-                  this.$t("oauth.disconnectProvider")
-                )
-              ])
-            ]
-          )
-        );
-      } else {
-        nodes.push(
-          h("div", { ref: provider }, [
-            h(
-              "q-btn",
-              {
-                attrs: {
-                  round: true,
-                  flat: true,
-                  icon: "mdi-link-plus",
-                  color: "green-6"
-                },
-                on: {
-                  click: () => {
-                    this.connectProvider(provider, propertyName);
-                  }
-                }
-              },
-              [
-                h("q-no-ssr", [
-                  h(
-                    "q-tooltip",
-                    {
-                      attrs: {
-                        transitionShow: "scale",
-                        transitionHide: "scale"
-                      }
-                    },
-                    this.$t("oauth.connectProvider")
-                  )
-                ])
-              ]
-            )
-          ])
-        );
-      }
-
-      return nodes;
-    },
-
-    providerDetails(h, provider) {
-      const providerID = this[provider].id;
-
-      if (providerID !== undefined) {
-        return [
-          h("q-item-label", { attrs: { caption: true } }, [
-            h(
-              "span",
-              { staticClass: "cursor-pointer dashed" },
-              this[provider].detail
-            ),
-            h("span", { staticClass: "dot-separate" }),
-            h("span", [
-              h(
-                "span",
-                `${this.$t("oauth.lastUpdate")}: ${date.dateFromIso(
-                  this[provider].data.updated
-                )}`
-              )
-            ])
-          ])
-        ];
-      }
-    },
-
     providersList(h) {
       const providers = ["google", "facebook", "vk", "telegram"];
       let nodes = [];
@@ -415,35 +273,170 @@ export default {
       });
 
       return nodes;
+    },
+
+    providerDetails(h, provider) {
+      const providerID = this[provider].id;
+
+      if (providerID) {
+        return [
+          h("q-item-label", { attrs: { caption: true } }, [
+            h(
+              "span",
+              {
+                staticClass: "cursor-pointer dashed",
+                on: {
+                  click: () => {
+                    if (this[provider].data.link !== undefined) {
+                      openURL(this[provider].data.link);
+                    }
+                  }
+                }
+              },
+              this[provider].detail
+            ),
+            h("span", { staticClass: "dot-separate" }),
+            h("span", [
+              h(
+                "span",
+                `${this.$t("oauth.lastUpdate")}: ${date.dateFromIso(
+                  this[provider].data.updated
+                )}`
+              )
+            ])
+          ])
+        ];
+      }
+    },
+
+    /**
+     * Метод рендера блока управления привязанным профилем oauth провайдера
+     *
+     * @param provider               Наименование oauth провайдера
+     * @param propertyName           Наименование window.свойства oauth провайдера, в котором вызывается его api
+     *
+     */
+    controlSide(h, provider, propertyName) {
+      const providerID = this[provider].id;
+
+      if (providerID) {
+        return [
+          h("div", { ref: provider, attrs: { id: provider } }, [
+            h(
+              "q-btn",
+              {
+                attrs: {
+                  round: true,
+                  flat: true,
+                  icon: "mdi-cached",
+                  color: "green-6"
+                },
+                on: {
+                  click: () => {
+                    this.updateProviderData(provider, propertyName);
+                  }
+                }
+              },
+              [this.tooltip(h, this.$t("oauth.updateProvider"))]
+            )
+          ]),
+          h(
+            "q-btn",
+            {
+              attrs: {
+                round: true,
+                flat: true,
+                icon: "mdi-link-off",
+                color: "red-6"
+              },
+              on: {
+                click: () => {
+                  if (this.user.password === null) {
+                    // Если у пользователя не установлен пароль от аккаунта - уведомим, что его необходимо установить для осуществления операции
+                    return controllers.setPasswordDialog();
+                  }
+
+                  this.disconnectProvider(provider);
+                }
+              }
+            },
+            [this.tooltip(h, this.$t("oauth.disconnectProvider"))]
+          )
+        ];
+      } else {
+        return h("div", { ref: provider, attrs: { id: provider } }, [
+          h(
+            "q-btn",
+            {
+              attrs: {
+                round: true,
+                flat: true,
+                icon: "mdi-link-plus",
+                color: "green-6"
+              },
+              on: {
+                click: () => {
+                  if (this.user.password === null) {
+                    // Если у пользователя не установлен пароль от аккаунта - уведомим, что его необходимо установить для осуществления операции
+                    return controllers.setPasswordDialog();
+                  }
+
+                  this.connectProvider(provider, propertyName);
+                }
+              }
+            },
+            [this.tooltip(h, this.$t("oauth.connectProvider"))]
+          )
+        ]);
+      }
+    },
+
+    /**
+     * Метод рендера тултипов
+     *
+     * @param message                Текст тултипа
+     */
+    tooltip(h, message) {
+      return h("q-no-ssr", [
+        h(
+          "q-tooltip",
+          {
+            attrs: {
+              transitionShow: "scale",
+              transitionHide: "scale"
+            }
+          },
+          message
+        )
+      ]);
     }
   },
 
   render(h) {
-    return h("div", { staticClass: "form column" }, [
-      h("q-list", { attrs: { padding: true } }, [
-        h(
-          "q-item-label",
-          { attrs: { header: true } },
-          "Third-party authorization apps"
-        ),
+    return h("div", [
+      h("q-list", [
+        h("q-item-label", { attrs: { header: true } }, this.$t("oauth.title")),
         this.providersList(h)
-        // h("q-item", [
-        //   h("q-item-section", { attrs: { avatar: true } }, [
-        //     h("q-icon", {
-        //       staticClass: "facebook-color",
-        //       attrs: { name: "mdi-facebook" }
-        //     })
-        //   ]),
-        //   h("q-item-section", [
-        //     h("q-item-label", "Facebook"),
-        //     this.getProviderData(h).data
-        //   ]),
-        //   h("q-item-section", { attrs: { side: true, noWrap: true } }, [
-        //     this.controlSide(h, "facebook", "FB")
-        //   ])
-        // ])
       ])
     ]);
   }
 };
 </script>
+
+<style scope>
+#telegram {
+  position: relative;
+}
+#telegram button {
+  pointer-events: none; /*Чтобы событие клика проходило сквозь кнопку и достигала iframe, вызывая срабатывание api telegram. Проверить работу на продакшене*/
+}
+
+#telegram iframe {
+  position: absolute;
+  right: 0;
+  height: 3em;
+  width: 3em;
+  opacity: 1;
+  z-index: -1; /* @todo разобраться с всплывание и погружением события клик. Чтобы был эффект hover на кнопке и прокликивался iframe */
+}
+</style>

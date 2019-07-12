@@ -2,7 +2,7 @@ const { returningPattern, responsePattern } = require('./userInstancePattern');
 /**
  * Компонуем запрос данных искомого пользователя
  *
- * @param {String} providerName   Название oAuth провайдера, с помощью которого авторизуется пользователь
+ * @param {String} providerName   Название oauth провайдера, с помощью которого авторизуется пользователь
  * @param {String} id             ID аккаунта пользователя в приложении oauth провайдера
  */
 const composeQuery = (providerName, id) => {

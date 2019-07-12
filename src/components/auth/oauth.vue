@@ -2,6 +2,7 @@
 import userAPI from "handlers/user/api";
 import controllers from "handlers/user/controllers";
 import dateAPI from "handlers/date";
+import oauth from "boot/oauth";
 
 import chooseUsername from "./oauthChooseUsername";
 export default {
@@ -12,24 +13,19 @@ export default {
     this.tz = await dateAPI.isTimezoneInList(lang);
 
     if (process.env.CLIENT) {
-      import("boot/oAuth").then(data => {
-        this.oauth = data.default;
+      // Загружаем и инициализируем SDK
+      oauth.install();
 
-        // Загружаем и инициализируем SDK
-        this.oauth.install();
-
-        // Инициализируем telegram виджет
-        const { script } = this.oauth.telegram();
-        this.$refs.providers.appendChild(script);
-        window.onTelegramAuth = this.telegram;
-      });
+      // Инициализируем telegram виджет
+      const { script } = oauth.telegram();
+      this.$refs.providers.appendChild(script);
+      window.onTelegramAuth = this.telegram;
     }
   },
 
   data() {
     return {
       username: "",
-      oauth: null,
       tz: null,
       lang: this.$store.state.user.language
     };
@@ -37,7 +33,7 @@ export default {
 
   methods: {
     google() {
-      this.oauth.google.login().then(async res => {
+      oauth.google.login().then(async res => {
         const credentials = controllers.googleInstance(res);
 
         if (credentials) {
@@ -46,7 +42,7 @@ export default {
       });
     },
     facebook() {
-      this.oauth.facebook.login().then(res => {
+      oauth.facebook.login().then(res => {
         const credentials = controllers.facebookInstance(res);
 
         if (credentials) {
@@ -62,7 +58,7 @@ export default {
       }
     },
     vk() {
-      this.oauth.vk.login().then(res => {
+      oauth.vk.login().then(res => {
         const credentials = controllers.vkInstance(res);
 
         if (credentials) {
