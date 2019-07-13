@@ -60,6 +60,8 @@ export default {
     confirmEmail: 'Email confirmation key',
     confirm: 'Confirm',
     resendConfirmKey: 'The confirmation key will be resend to the email',
+    expand: 'Expand',
+    collapse: 'Collapse',
   },
   errors: {
     spaces: 'Spaces are prohibited',

@@ -161,3 +161,25 @@ export default {
     },
   },
 };
+
+// const us = {
+//   id: 127,
+//   username: 'fbuuusser',
+//   email: 'ectoprime@gmail.comsd',
+//   password: null,
+//   metadata: {
+//     emailVerification: true,
+//     language: 'ru',
+//     timezone: 'Europe/Kiev',
+//     country: 'ua',
+//     createdAt: '2019-07-10T07:46:43.07428+00:00',
+//     googleID: '113496127877801721583',
+//     googleData: { email: 'ectoprime@gmail.com', name: 'frt', updated: '2019-07-12T08:39:50.669Z' },
+//     facebookID: '2422251334505529',
+//     facebookData: {
+//       name: 'Александр Петров',
+//       updated: '2019-07-13T09:04:24.529Z',
+//       link: 'https://www.facebook.com/profile.php?id=2422251334505529',
+//     },
+//   },
+// };

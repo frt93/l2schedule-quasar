@@ -77,6 +77,7 @@ export default {
       {
         attrs: {
           elevated: true,
+          reveal: true,
           class: "bg-primary text-white"
         }
       },

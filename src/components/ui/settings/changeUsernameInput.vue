@@ -150,7 +150,7 @@ export default {
                   type: "submit",
                   round: true,
                   flat: true,
-                  icon: "mdi-cached",
+                  icon: this.user.password !== null ? "mdi-cached" : "",
                   color: this.canSubmit ? "green-6" : "red-6",
                   disable: !this.canSubmit,
                   loading: this.sending

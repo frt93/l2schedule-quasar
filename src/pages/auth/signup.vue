@@ -196,7 +196,7 @@ export default {
               }),
               h("q-icon", {
                 attrs: {
-                  name: "fas fa-user-alt"
+                  name: "mdi-account-outline"
                 },
                 slot: "prepend"
               })
@@ -231,7 +231,7 @@ export default {
               }),
               h("q-icon", {
                 attrs: {
-                  name: "fas fa-envelope"
+                  name: "mdi-email-outline"
                 },
                 slot: "prepend"
               })
@@ -272,7 +272,7 @@ export default {
                 staticClass: "cursor-pointer q-ml-sm",
                 slot: "append",
                 attrs: {
-                  name: this.hidePwd ? "fas fa-eye" : "fas fa-eye-slash"
+                  name: this.hidePwd ? "mdi-eye-off" : "mdi-eye"
                 },
                 on: {
                   click: () => {
@@ -283,7 +283,9 @@ export default {
               h("q-icon", {
                 attrs: {
                   name:
-                    this.password.length < 7 ? "fas fa-unlock" : "fas fa-lock"
+                    this.password.length < 7
+                      ? "mdi-lock-open-outline"
+                      : "mdi-lock-outline"
                 },
                 slot: "prepend"
               })

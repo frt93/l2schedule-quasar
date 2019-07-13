@@ -28,6 +28,9 @@ module.exports = function(ctx) {
         'QHeader',
         'QPageContainer',
         'QPage',
+        'QPageSticky',
+        'QDrawer',
+        'QScrollArea',
         'QRouteTab',
         'QTabs',
         'QTab',
@@ -57,14 +60,15 @@ module.exports = function(ctx) {
         'QSpinnerPuff',
         'QSpinnerDots',
         'QTooltip',
+        'QBadge',
       ],
 
       directives: ['Ripple', 'ClosePopup'],
 
       // Quasar plugins
-      plugins: ['Notify', 'Cookies', 'Dialog', 'Meta'],
+      plugins: ['Notify', 'Cookies', 'Dialog', 'Meta', 'LocalStorage'],
 
-      iconSet: 'fontawesome-v5',
+      iconSet: 'mdi-v3',
       lang: 'ru', // Quasar language
     },
 

@@ -281,7 +281,7 @@ export default {
             staticClass: "cursor-pointer q-ml-sm",
             slot: "append",
             attrs: {
-              name: "fas fa-times"
+              name: this.tz ? "mdi-close" : ""
             },
             on: {
               click: () => {
@@ -337,7 +337,7 @@ export default {
             staticClass: "cursor-pointer q-ml-sm",
             slot: "append",
             attrs: {
-              name: "fas fa-times"
+              name: this.country ? "mdi-close" : ""
             },
             on: {
               click: () => {

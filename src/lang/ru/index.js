@@ -60,6 +60,8 @@ export default {
     confirmEmail: 'Ключ подтверждения email адреса',
     confirm: 'Подтвердить',
     resendConfirmKey: 'Ключ подтверждения будет снова отправлен на электронный адрес',
+    expand: 'Развернуть',
+    collapse: 'Свернуть',
   },
   errors: {
     spaces: 'Пробелы запрещены',

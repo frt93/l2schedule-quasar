@@ -144,8 +144,8 @@ export default {
                 attrs: {
                   name:
                     this.loginKey === "username"
-                      ? "fas fa-user-alt"
-                      : "fas fa-envelope"
+                      ? "mdi-account-outline"
+                      : "mdi-email-outline"
                 },
                 slot: "prepend"
               })
@@ -185,7 +185,7 @@ export default {
                 class: "cursor-pointer q-ml-sm",
                 slot: "append",
                 attrs: {
-                  name: this.hidePwd ? "fas fa-eye" : "fas fa-eye-slash"
+                  name: this.hidePwd ? "mdi-eye-off" : "mdi-eye"
                 },
                 on: {
                   click: () => {
@@ -197,8 +197,8 @@ export default {
                 attrs: {
                   name:
                     this.password.length < 7 || this.passwordError
-                      ? "fas fa-unlock"
-                      : "fas fa-lock"
+                      ? "mdi-lock-open-outline"
+                      : "mdi-lock-outline"
                 },
                 slot: "prepend"
               })

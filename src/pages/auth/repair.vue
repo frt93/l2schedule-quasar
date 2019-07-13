@@ -156,8 +156,7 @@ export default {
             name: 1,
             color: this.emailError ? "negative" : "warning",
             title: "Enter your email",
-            done: this.step > 1 ? true : false,
-            doneColor: "green-6"
+            done: this.step > 1 ? true : false
           }
         },
         [
@@ -180,7 +179,6 @@ export default {
               on: {
                 input: value => {
                   this.email = value;
-                  this.loading = true;
                 }
               }
             },
@@ -216,7 +214,6 @@ export default {
             icon: "mdi-code-braces",
             title: "Enter repair key",
             done: this.step > 2 ? true : false,
-            doneColor: "green-6",
             disable: this.step < 2 ? true : false
           }
         },
@@ -271,7 +268,7 @@ export default {
           attrs: {
             name: 3,
             color: this.passwordError ? "negative" : "warning",
-            icon: "mdi-lock-reset",
+            icon: "mdi-lock-outline",
             title: "Choose your new password",
             disable: this.step < 3 ? true : false
           }
@@ -420,20 +417,6 @@ export default {
     }
   },
 
-  watch: {
-    email: debounce(async function(email) {
-      this.emailError = false;
-      this.emailErrorMessage = "";
-
-      this.emailErrorMessage = controllers.validateEmail(email);
-      if (this.emailErrorMessage) {
-        this.emailError = true;
-      }
-
-      this.loading = false;
-    }, 1500)
-  },
-
   render(h) {
     return h("q-page", [
       h(
@@ -445,6 +428,7 @@ export default {
             flat: true,
             contracted: true,
             animated: true,
+            doneColor: "green-6",
             transitionPrev: "fade",
             transitionNext: "fade",
             value: this.step

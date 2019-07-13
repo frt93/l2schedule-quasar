@@ -205,6 +205,7 @@ module.exports.connectOauthProvider = async (req, res) => {
     provider = data.providerData;
   succesMessageName = `${provider.providerName} application connected`;
 
+  // Проверим, чтобы подключаемый профиль не был привязан к другому аккаунту
   const alreadyConnected = await helpers.findOauthUser(provider, res);
 
   if (alreadyConnected) {

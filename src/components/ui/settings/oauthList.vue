@@ -337,7 +337,7 @@ export default {
                   }
                 }
               },
-              [this.tooltip(h, this.$t("oauth.updateProvider"))]
+              [this.__tooltip(h, this.$t("oauth.updateProvider"))]
             )
           ]),
           h(
@@ -360,7 +360,7 @@ export default {
                 }
               }
             },
-            [this.tooltip(h, this.$t("oauth.disconnectProvider"))]
+            [this.__tooltip(h, this.$t("oauth.disconnectProvider"))]
           )
         ];
       } else {
@@ -385,7 +385,7 @@ export default {
                 }
               }
             },
-            [this.tooltip(h, this.$t("oauth.connectProvider"))]
+            [this.__tooltip(h, this.$t("oauth.connectProvider"))]
           )
         ]);
       }
@@ -396,7 +396,7 @@ export default {
      *
      * @param message                Текст тултипа
      */
-    tooltip(h, message) {
+    __tooltip(h, message) {
       return h("q-no-ssr", [
         h(
           "q-tooltip",
