@@ -22,6 +22,7 @@ router.use((req, res, next) => {
 // const raidbosses = require('./routes/rb');
 // const items = require('./routes/items');
 const users = require('api/routes/users'),
+  groups = require('api/routes/groups'),
   service = require('api/routes/service');
 // const accounts = require('./routes/accounts');
 
@@ -30,6 +31,7 @@ const users = require('api/routes/users'),
 // router.use('/items', items);
 // router.use('/accounts', accounts);
 router.use('/users', users);
+router.use('/groups', groups);
 router.use('/service', service);
 
 app.use('/api', router);

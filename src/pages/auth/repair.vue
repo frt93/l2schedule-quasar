@@ -30,6 +30,7 @@ export default {
 
       user: this.$store.state.user.instance,
 
+      hidePwd: true,
       loading: false,
       sending: false
     };
@@ -142,7 +143,7 @@ export default {
 
       const redirectTo = this.user !== null ? "home" : "signin";
       this.$router.push({ name: redirectTo });
-      this.successNotify(success);
+      controllers.successNotify(success);
     },
 
     /**

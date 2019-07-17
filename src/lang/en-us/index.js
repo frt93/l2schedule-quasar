@@ -1,5 +1,8 @@
 export default {
+  create: 'create',
+  find: 'find',
   eg: 'e.g.',
+  or: 'or',
   fb: 'facebook',
   ggl: 'google',
   vk: 'vk.com',
@@ -50,10 +53,11 @@ export default {
     back: 'Back',
     change: 'Change',
     update: 'Update',
-    language: 'Language',
     timezone: 'Timezone',
+    dateFormat: 'Date format',
     noTimezone: 'The specified time zone not found',
     country: 'Country',
+    language: 'Language',
     noCountry: 'The specified country not found',
     sending: 'Sending',
     settings: 'Settings',
@@ -83,8 +87,12 @@ export default {
       password: 'Password',
       safety: 'Safety',
     },
+    party: {
+      main: 'Party',
+    },
   },
   hints: {
+    pattern: 'Only latin letters, numbers and',
     settings: {
       needPasswordToChange: 'To make changes you need first to set an account password',
       email: 'Email will not be publicly displayed',
@@ -102,7 +110,7 @@ export default {
       },
     },
     auth: {
-      username: 'Only latin letters, numbers and - _ or .',
+      username: '@:hints.pattern - _ or .',
       email: 'A confirmation message will be sent to the specified email',
       password: 'From 7 to 30 characters',
       confirmOperation: 'Enter your account password to confirm the operation',
@@ -115,11 +123,23 @@ export default {
       forum: 'Forum',
       signup: 'Sign up',
       signin: 'Sign in',
+      party: 'Party',
     },
     settings: {
       account: 'Account',
       password: 'Password',
       safety: 'Safety',
+    },
+  },
+  party: {
+    noParty: { 1: 'You have no party', 2: 'Create your own', 3: 'find one that interests you' },
+    createDialogTitle: 'Name your party',
+    labels: {
+      name: 'Your party name',
+      slug: 'Party page link',
+    },
+    hints: {
+      slug: '@:hints.pattern {and}',
     },
   },
 };

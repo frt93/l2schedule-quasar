@@ -2,6 +2,7 @@ import jsCookie from 'js-cookie';
 import { DateTime, Settings } from 'luxon';
 
 export default {
+  defaultFormat: 'dd.LL.yyyy HH:mm',
   /**
    * Устанавливаем язык пакета по умолчанию
    *
@@ -137,10 +138,17 @@ export default {
     }
     let now = DateTime.local().setZone(timezone);
 
-    return now.toFormat('dd.LL.yyyy HH.mm.ss');
+    return now;
+  },
+
+  setFormat(date, format) {
+    if (!format) {
+      format = this.defaultFormat;
+    }
+    return date.toFormat(format);
   },
 
   dateFromIso(date) {
-    return DateTime.fromISO(date).toFormat('dd.LL.yyyy HH.mm');
+    return DateTime.fromISO(date).toFormat(this.defaultFormat);
   },
 };

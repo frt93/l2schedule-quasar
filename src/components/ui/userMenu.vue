@@ -34,7 +34,7 @@ export default {
             {
               class:
                 typeof this.user === "object" &&
-                this.user.metadata.emailVerification
+                this.user.safety.emailVerification
                   ? "bg-red-6 menu-link"
                   : null,
               attrs: {

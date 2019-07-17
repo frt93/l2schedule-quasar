@@ -80,6 +80,29 @@ const routes = [
       },
     ],
   },
+  {
+    path: '/party',
+    component: () => import('layouts/mainLayout.vue'),
+    children: [
+      {
+        path: '',
+        name: 'party',
+        component: () => import('pages/party/main.vue'),
+      },
+    ],
+  },
+
+  {
+    path: '/parties',
+    component: () => import('layouts/mainLayout.vue'),
+    children: [
+      {
+        path: '',
+        name: 'parties',
+        component: () => import('pages/party/all.vue'),
+      },
+    ],
+  },
 ];
 
 // Always leave this as last one

@@ -191,11 +191,19 @@ export default {
    * @param {String} message   Текст ошибки
    */
   errorNotify(message) {
+    let text = message,
+      icon = 'mdi-emoticon-sad-outline';
+
+    if (typeof message === 'object') {
+      text = message.message;
+      icon = message.icon;
+    }
+
     Notify.create({
       color: 'negative',
       position: 'bottom',
-      icon: 'mdi-emoticon-sad-outline',
-      message,
+      icon,
+      message: text,
     });
   },
 
@@ -205,11 +213,19 @@ export default {
    * @param {String} message   Текст оповещения
    */
   successNotify(message) {
+    let text = message,
+      icon = 'mdi-emoticon-wink-outline';
+
+    if (typeof message === 'object') {
+      text = message.message;
+      icon = message.icon;
+    }
+
     Notify.create({
       color: 'green-6',
       position: 'bottom-right',
-      icon: 'mdi-emoticon-wink-outline',
-      message,
+      icon,
+      message: text,
     });
   },
 

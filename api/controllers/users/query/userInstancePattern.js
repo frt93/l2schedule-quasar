@@ -7,9 +7,9 @@ email
 password
 metadata {
   avatar
-  emailVerification
   language
   timezone
+  dateFormat
   country
   createdAt
   googleID
@@ -20,6 +20,9 @@ metadata {
   vkData
   telegramID
   telegramData
+}
+safety {
+  emailVerification
 }
 party {
   name
@@ -47,15 +50,18 @@ const responsePattern = user => {
     if (!user.email) delete user.email;
 
     // Если email уже подтвержден - удаляем строку из экземпляра пользователя
-    if (user.metadata.emailVerification === null) {
-      delete user.metadata.emailVerification;
+    if (user.safety.emailVerification === null) {
+      delete user.safety.emailVerification;
     } else {
       // Если не подтвержден - заменяем сам код подтверждения на значение true
-      user.metadata.emailVerification = true;
+      user.safety.emailVerification = true;
     }
 
     if (user.metadata.avatar === null) {
       delete user.metadata.avatar;
+    }
+    if (user.metadata.dateFormat === null) {
+      delete user.metadata.dateFormat;
     }
     if (user.metadata.googleID === null) {
       delete user.metadata.googleID;

@@ -45,6 +45,7 @@ export default {
       this.hide();
     }
   },
+
   watch: {
     username: debounce(async function(username) {
       this.error = false;

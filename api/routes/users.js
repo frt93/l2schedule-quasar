@@ -21,7 +21,7 @@ router.post('/settings/account', users.accountSettings);
 router.post('/settings/change/password', users.savePassword);
 router.post('/settings/change/email', users.saveEmail);
 router.post('/settings/change/username', users.saveUsername);
-router.post('/settings/safety', users.safetySettings);
+// router.post('/settings/safety', users.safetySettings);
 router.post('/settings/oauth/updateProviderData', users.updateProviderData);
 router.post('/settings/oauth/connect', users.connectOauthProvider);
 router.post('/settings/oauth/disconnect', users.disconnectOauthProvider);

@@ -15,7 +15,8 @@ export default {
       const tabs = [
         { to: "/", label: this.$t("tabs.routes.homepage") },
         { to: "/rb", label: this.$t("tabs.routes.rb") },
-        { to: "/forum", label: this.$t("tabs.routes.forum") }
+        { to: "/forum", label: this.$t("tabs.routes.forum") },
+        { to: "/party", label: this.$t("tabs.routes.party") }
       ];
 
       if (!this.user)

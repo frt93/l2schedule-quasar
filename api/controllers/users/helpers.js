@@ -42,7 +42,7 @@ module.exports.createUser = async (credentials, res) => {
   if (credentials.email) {
     // Если есть email - сгенерируем ключ подтверждения
     const { key } = await this.generateToken();
-    credentials.metadata.data.emailVerification = key;
+    credentials.safety.data.emailVerification = key;
   }
 
   const { mutation, variable, response } = require('api/controllers/users/mutations/create');
@@ -74,49 +74,48 @@ module.exports.createUser = async (credentials, res) => {
  * @return {String}
  */
 module.exports.stringifyProviderData = provider => {
-  let data = provider;
-  data.updated = new Date();
+  let data = {
+    updated: new Date(),
+  };
 
-  if (data.email && data.providerName !== 'google') {
-    delete data.email;
-  }
-  if (data.avatar) {
-    delete data.avatar;
+  if (provider.email && provider.providerName === 'google') {
+    data.email = provider.email;
   }
 
   // Определим для каждого провайдера ссылку на профиль пользователя и сохраним ее
-  if (data.providerName === 'vk') {
+  if (provider.providerName === 'vk') {
     let slug;
 
-    if (data.username) {
-      slug = data.username;
+    if (provider.username) {
+      slug = provider.username;
     } else {
-      slug = `id${data.id}`;
+      slug = `id${provider.id}`;
     }
 
     data.link = `https://vk.com/${slug}`;
   }
 
-  if (data.providerName === 'facebook') {
+  if (provider.providerName === 'facebook') {
     let slug;
 
-    if (data.username) {
-      slug = data.username;
+    if (provider.username) {
+      slug = provider.username;
     } else {
-      slug = `profile.php?id=${data.id}`;
+      slug = `profile.php?id=${provider.id}`;
     }
 
     data.link = `https://www.facebook.com/${slug}`;
   }
 
-  if (data.providerName === 'telegram') {
-    if (data.username) {
-      data.link = `https://t.me/${data.username}`;
+  if (provider.providerName === 'telegram') {
+    if (provider.username) {
+      data.link = `https://t.me/${provider.username}`;
     }
   }
 
-  delete data.id;
-  delete data.providerName;
+  if (provider.name) {
+    data.name = provider.name;
+  }
 
   return JSON.stringify(data);
 };
@@ -327,14 +326,16 @@ module.exports.findEmail = async (email, res) => {
 /**
  * Сохраняем внесенные пользователем изменения данных аккаунта
  *
- * @param {Integer} id              Идентификатор пользователя
- * @param {Object} payload          Измененные данные, требующие сохранения
- * @param res                       Экземпляр ответа сервера
- * @param {String} successMessage   Название сообщения об успешном сохранении
+ * @param {Integer} id                  Идентификатор пользователя
+ * @param {Object} payload              Измененные данные, требующие сохранения
+ * @param res                           Экземпляр ответа сервера
+ * @param {String} successMessage       Название сообщения об успешном сохранении
+ * @param {String} successMessageIcon   Название иконки, которое отобразится в оповещении вместе с самим сообщением
  */
-module.exports.saveSettings = (id, payload, res, successMessage) => {
-  const { mutation, variables, response } = require('./mutations/settings/account');
-  const data = variables(id, payload);
+module.exports.saveSettings = (id, payload, res, successMessage, successMessageIcon) => {
+  const { mutation, variables, response } = require('./mutations/settings/account'),
+    data = variables(id, payload);
+  let message;
 
   GraphQLClient.request(mutation, data)
     .then(async updated => {
@@ -343,7 +344,14 @@ module.exports.saveSettings = (id, payload, res, successMessage) => {
       this.saveUserInRedis(updatedUser); // Сохраняем пользователя в Redis
 
       updatedUser = await this.cutPassword(updatedUser); // Убираем из возвращаемого экземпляра пароль
-      const message = messages(res.lang).success[successMessage];
+      const messageText = messages(res.lang).success[successMessage];
+
+      if (successMessageIcon) {
+        message = { message: messageText, icon: successMessageIcon };
+      } else {
+        message = messageText;
+      }
+
       res.send({ user: updatedUser, message });
     })
     .catch(e => {

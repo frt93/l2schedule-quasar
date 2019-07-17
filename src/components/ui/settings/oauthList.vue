@@ -136,7 +136,6 @@ export default {
      *                               неверным паролем и метод вызвался рекурсивно для повторного запроса пароля.
      */
     async connectProvider(provider, propertyName, isError, data) {
-      console.log(provider);
       if (provider === "telegram") {
         return; //Вызов api телеграма происходим из iframe. Поэтому прерываем функцию
       }

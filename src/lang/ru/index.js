@@ -1,6 +1,8 @@
 export default {
+  create: 'create',
+  find: 'find',
   eg: 'Например',
-  eg: 'e.g.',
+  or: 'или',
   fb: 'facebook',
   ggl: 'google',
   vk: 'vk.com',
@@ -50,10 +52,11 @@ export default {
     back: 'Назад',
     change: 'Сменить',
     update: 'Обновить',
-    language: 'Язык',
     timezone: 'Часовой пояс',
+    dateFormat: 'Формат дат',
     noTimezone: 'Указанный часовой пояс не найден',
     country: 'Страна',
+    language: 'Язык',
     noCountry: 'Указанная страна не найдена',
     sending: 'Отправка',
     settings: 'Настройки',
@@ -84,8 +87,12 @@ export default {
       password: 'Пароль',
       safety: 'Безопасность',
     },
+    party: {
+      main: 'Пати',
+    },
   },
   hints: {
+    pattern: 'Только латинские буквы, числа, а также',
     settings: {
       needPasswordToChange:
         'Для внесения изменений вам необходимо сначала установить пароль от аккаунта',
@@ -106,7 +113,7 @@ export default {
       },
     },
     auth: {
-      username: 'Только латинские буквы, числа, а также - _ и .',
+      username: '@:hints.pattern - _ и .',
       email: 'На указанный адрес придет письмо для подтверждения',
       password: 'От 7 до 30 символов',
       confirmOperation: 'Укажите ваш пароль от аккаунта для подтверждения операции',
@@ -119,11 +126,27 @@ export default {
       forum: 'Форум',
       signup: 'Регистрация',
       signin: 'Войти',
+      party: 'Пати',
     },
     settings: {
       account: 'Учетная запись',
       password: 'Пароль',
       safety: 'Безопасность',
+    },
+  },
+  party: {
+    noParty: {
+      1: 'Вы не состоите в пати',
+      2: 'Создайте свою',
+      3: 'найдите интересующую вас',
+    },
+    createDialogTitle: 'Назовите свою пати',
+    labels: {
+      name: 'Название',
+      slug: 'Адрес страницы',
+    },
+    hints: {
+      slug: '@:hints.pattern {and}',
     },
   },
 };

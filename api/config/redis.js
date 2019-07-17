@@ -7,3 +7,7 @@ module.exports.redisUsersDB = new Redis({
   password: 'pass',
   db: 0,
 });
+module.exports.redisPartiesDB = new Redis({
+  password: 'pass',
+  db: 1,
+});

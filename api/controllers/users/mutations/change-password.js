@@ -7,12 +7,12 @@
  */
 const composeMutation = (email, key, password) => {
   return `mutation change_password {
-    update_users(where: {email: {_like: "${email}"}, metadata: {repairKey: {_eq: "${key}"}}}, _set: {password: "${password}"}) {
+    update_users(where: {email: {_like: "${email}"}, safety: {repairKey: {_eq: "${key}"}}}, _set: {password: "${password}"}) {
       returning {
         email
       }
     }
-    update_user_metadata(where: {user: {email: {_ilike: "${email}"}}}, _set: {repairKey: null}) {
+    update_user_safety(where: {user: {email: {_ilike: "${email}"}}}, _set: {repairKey: null}) {
       returning {
         repairKey
       }
@@ -30,7 +30,7 @@ const composeMutation = (email, key, password) => {
  */
 const composeResponse = data => {
   const user = data.update_users.returning[0];
-  const key = data.update_user_metadata.returning[0].repairKey;
+  const key = data.update_user_safety.returning[0].repairKey;
   if (user && key === null) {
     return true;
   } else {

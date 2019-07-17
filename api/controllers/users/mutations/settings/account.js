@@ -1,6 +1,10 @@
 const { returningPattern, responsePattern } = require('../../query/userInstancePattern');
-const mutation = `mutation update_settings_account($id: Int, $user: users_set_input, $metadata: user_metadata_set_input) {
+const mutation = `mutation update_settings_account($id: Int, $user: users_set_input, $metadata: user_metadata_set_input, $safety: user_safety_set_input) {
   update_user_metadata(where: {user_id: {_eq: $id}}, _set: $metadata) {
+    affected_rows
+  }
+
+  update_user_safety(where: {user_id: {_eq: $id}}, _set: $safety) {
     affected_rows
   }
   
@@ -23,6 +27,7 @@ const variables = (id, payload) => {
     id,
     user: payload.user,
     metadata: payload.metadata,
+    safety: payload.safety,
   };
 };
 

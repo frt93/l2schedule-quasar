@@ -6,7 +6,7 @@
  */
 const composeMutation = (email, key) => {
   return `mutation repair_access {
-    update_user_metadata(where: {user: {email: {_ilike: "${email}"}}}, _set: {repairKey: "${key}"}) {
+    update_user_safety(where: {user: {email: {_ilike: "${email}"}}}, _set: {repairKey: "${key}"}) {
       returning {
         user {
           email
@@ -24,7 +24,7 @@ const composeMutation = (email, key) => {
  * @return {Object} user
  */
 const composeResponse = data => {
-  const returning = data.update_user_metadata.returning[0];
+  const returning = data.update_user_safety.returning[0];
   if (returning) {
     return true;
   } else {

@@ -42,7 +42,7 @@ export default {
 
   destroyed() {
     // Удаляем таймер
-    clearInterval(this.clockID._id);
+    clearInterval(this.clockID);
   },
 
   props: [
@@ -51,12 +51,14 @@ export default {
     "languagesList",
     "timezoneList",
     "timezone",
-    "countriesList"
+    "countriesList",
+    "formatDate"
   ],
   data() {
     return {
       language: this.lang,
       tz: this.timezone,
+      dateFormat: this.formatDate,
       country: this.userInstance.metadata.country,
 
       timezoneOptions: this.timezoneList,
@@ -74,7 +76,8 @@ export default {
       return {
         language: this.language,
         timezone: this.tz,
-        country: this.country
+        country: this.country || this.userInstance.metadata.country,
+        dateFormat: this.dateFormat
       };
     },
 
@@ -88,6 +91,36 @@ export default {
       }
 
       return false;
+    },
+
+    dateFormatOptions() {
+      const formats = [
+        "dd.LL.yyyy HH:mm",
+        "dd.LL.yyyy HH:mm:ss",
+        "dd.LL.yyyy h:mm a",
+        "dd.LL.yyyy h:mm:ss a",
+        "ccc, dd.LL.yyyy HH:mm",
+        "ccc, dd.LL.yyyy HH:mm:ss",
+        "ccc, dd.LL.yyyy h:mm a",
+        "ccc, dd.LL.yyyy h:mm:ss a",
+        "dd MMMM yyyy HH:mm",
+        "dd MMMM yyyy HH:mm:ss",
+        "dd MMMM yyyy h:mm a",
+        "dd MMMM yyyy h:mm:ss a",
+        "ccc, dd MMMM yyyy HH:mm",
+        "ccc, dd MMMM yyyy HH:mm:ss",
+        "ccc, dd MMMM yyyy h:mm a",
+        "ccc, dd MMMM yyyy h:mm:ss a"
+      ];
+      let options = [];
+      formats.forEach(format => {
+        options.push({
+          label: date.setFormat(this.time, format),
+          value: format
+        });
+      });
+
+      return options;
     }
   },
 
@@ -132,6 +165,8 @@ export default {
             });
         }
 
+        this.$store.commit("user/changeDateFormat", this.dateFormat);
+
         // Устанавливаем новый инстанс пользователя
         this.$store.commit("user/setUser", user);
 
@@ -169,7 +204,10 @@ export default {
     __timezoneHint(h) {
       const timezone = this.tz;
 
-      let message = `${this.$t("hints.settings.now")} - ${this.time}`;
+      let message = `${this.$t("hints.settings.now")} - ${date.setFormat(
+        this.time,
+        this.dateFormat
+      )}`;
       if (date.isTimezoneInDST(timezone)) {
         message += `. ${this.$t("hints.settings.DST")}`;
       }
@@ -227,10 +265,11 @@ export default {
     return h("div", { staticClass: "form" }, [
       h(usernameInput, { props: { user: this.userInstance } }),
       h(emailInput, { props: { user: this.userInstance } }),
-      h("q-separator"),
+
       h(
         "q-select",
         {
+          staticClass: "col",
           style: {
             "max-width": "500px"
           },
@@ -255,7 +294,7 @@ export default {
               this.timezonesFilterFn(value, update, abort);
             },
             blur: () => {
-              this.timezoneOptions = this.timezoneList; // При потери фокуса на селекте записываем в свойство с опциями стандартный список
+              this.timezoneOptions = this.timezoneList; // При потери фокуса на селекте записываем в свойство с опциями изначальный (не отфильтрованный) список
             }
           },
           scopedSlots: {
@@ -292,6 +331,26 @@ export default {
         ]
       ),
 
+      h("q-select", {
+        staticClass: "col",
+        style: {
+          "max-width": "300px"
+        },
+        props: {
+          value: this.dateFormat,
+          label: this.$t("labels.dateFormat"),
+          options: this.dateFormatOptions,
+          optionsSelectedClass: "selected",
+          emitValue: true,
+          mapOptions: true
+        },
+        on: {
+          input: value => {
+            this.dateFormat = value;
+          }
+        }
+      }),
+
       h(
         "q-select",
         {
@@ -320,7 +379,7 @@ export default {
               this.countriesFilterFn(value, update, abort);
             },
             blur: () => {
-              this.countriesOptions = this.countriesList; // При потери фокуса на селекте записываем в свойство с опциями стандартный список
+              this.countriesOptions = this.countriesList; // При потери фокуса на селекте записываем в свойство с опциями изначальный (не отфильтрованный) список
             }
           },
           scopedSlots: {

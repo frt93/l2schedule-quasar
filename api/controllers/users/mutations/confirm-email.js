@@ -5,7 +5,7 @@
  */
 const composeMutation = key => {
   return `mutation confirm_email {
-    update_user_metadata(where: {emailVerification: {_eq: "${key}"}}, _set: {emailVerification: null}) {
+    update_user_safety(where: {emailVerification: {_eq: "${key}"}}, _set: {emailVerification: null}) {
       returning {
         user {
           email
@@ -24,7 +24,7 @@ const composeMutation = key => {
  * @return {Integer} raws
  */
 const composeResponse = data => {
-  const response = data.update_user_metadata.returning[0];
+  const response = data.update_user_safety.returning[0];
   if (response) {
     return response.user.email;
   } else {

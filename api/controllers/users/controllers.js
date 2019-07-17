@@ -2,7 +2,6 @@ const jwt = require('jsonwebtoken');
 
 const { GraphQLClient } = require('api/config/graphql'),
   { jwtKey } = require('api/config/auth'),
-  { replaceSpaces } = require('api/utils/filters'),
   validator = require('./validator'),
   helpers = require('./helpers'),
   messages = require('./lang');
@@ -19,7 +18,18 @@ const { GraphQLClient } = require('api/config/graphql'),
  */
 module.exports.create = async (req, res) => {
   let credentials = req.body,
-    user;
+    payload = {
+      username: credentials.username,
+      email: credentials.email,
+      metadata: {
+        data: {
+          country: credentials.country,
+          timezone: credentials.timezone,
+          language: credentials.language,
+        },
+      },
+      safety: {},
+    };
 
   const valid = await validator.signupValidation(credentials, res);
   //Если валидация провалилась - прекращаем выполнение
@@ -27,9 +37,9 @@ module.exports.create = async (req, res) => {
 
   const unhashedPassword = credentials.password;
   const hashedPassword = await helpers.hashPassword(unhashedPassword);
-  credentials.password = hashedPassword;
+  payload.password = hashedPassword;
 
-  helpers.createUser(credentials, res);
+  helpers.createUser(payload, res);
 };
 
 /**
@@ -113,7 +123,7 @@ module.exports.oauthLogin = async (req, res) => {
 
 module.exports.oauthCreate = async (req, res) => {
   const credentials = req.body,
-    provider = credentials.provider;
+    provider = req.body.provider;
   let instance = {
     username: '',
     email: null,
@@ -124,7 +134,24 @@ module.exports.oauthCreate = async (req, res) => {
         country: credentials.country,
       },
     },
+    safety: { data: {} },
   };
+
+  if (credentials.customUsername) {
+    // Если не получилось автоматически подобрать никнейм в блоке else ниже и пользователю было
+    // предложено указать его самостоятельно
+    instance.username = credentials.customUsername;
+  } else {
+    // Попытаемся подобрать пользователю никнейм на основе полученных от oauth провайдера данных
+    const { username } = await helpers.oauthChooseUsername(provider, res);
+    if (!username) {
+      // Подобрать не удалось. Выбросим ошибку и на клиенте пользователю будет предложено указать его самостоятельно.
+      // И этот указанный никнейм будет отправлен в свойстве credentials.customUsername
+      return validator.throwErrors('oauth: username is not chosen', res);
+    } else {
+      instance.username = username;
+    }
+  }
 
   instance.metadata.data[`${provider.providerName}ID`] = provider.id;
   instance.metadata.data[`${provider.providerName}Data`] = helpers.stringifyProviderData(provider);
@@ -142,22 +169,6 @@ module.exports.oauthCreate = async (req, res) => {
     }
 
     instance.email = provider.email;
-  }
-
-  if (credentials.customUsername) {
-    // Если не получилось автоматически подобрать никнейм в блоке else ниже и пользователю было
-    // предложено указать его самостоятельно
-    instance.username = credentials.customUsername;
-  } else {
-    // Попытаемся подобрать пользователю никнейм на основе полученных от oauth провайдера данных
-    const { username } = await helpers.oauthChooseUsername(provider, res);
-    if (!username) {
-      // Подобрать не удалось. Выбросим ошибку и на клиенте пользователю будет предложено указать его самостоятельно.
-      // И этот указанный никнейм будет отправлен в свойстве credentials.customUsername
-      return validator.throwErrors('oauth: username is not chosen', res);
-    } else {
-      instance.username = username;
-    }
   }
 
   if (provider.name) {
@@ -181,17 +192,17 @@ module.exports.updateProviderData = async (req, res) => {
   const data = req.body,
     id = data.id,
     providerID = data.providerID,
-    provider = data.providerData;
-  succesMessageName = `${provider.providerName} data updated`;
+    provider = data.providerData,
+    succesMessageName = `${provider.providerName} data updated`;
 
   if (providerID !== provider.id) {
     return validator.throwErrors('Wrong provider account', res, provider.providerName);
   }
 
-  let payload = { user: { id }, metadata: {} };
+  let payload = { user: { id }, metadata: {}, safety: {} };
   payload.metadata[`${provider.providerName}Data`] = helpers.stringifyProviderData(provider);
 
-  helpers.saveSettings(id, payload, res, succesMessageName);
+  helpers.saveSettings(id, payload, res, succesMessageName, `mdi-${provider.providerName}`);
 };
 
 /**
@@ -202,8 +213,8 @@ module.exports.updateProviderData = async (req, res) => {
  */
 module.exports.connectOauthProvider = async (req, res) => {
   const data = req.body,
-    provider = data.providerData;
-  succesMessageName = `${provider.providerName} application connected`;
+    provider = data.providerData,
+    succesMessageName = `${provider.providerName} application connected`;
 
   // Проверим, чтобы подключаемый профиль не был привязан к другому аккаунту
   const alreadyConnected = await helpers.findOauthUser(provider, res);
@@ -220,13 +231,13 @@ module.exports.connectOauthProvider = async (req, res) => {
       return validator.throwErrors('Wrong password', res);
     }
 
-    let payload = { user: { id: data.id }, metadata: {} };
+    let payload = { user: { id: data.id }, metadata: {}, safety: {} };
     payload.metadata[`${provider.providerName}ID`] = provider.id;
     payload.metadata[`${provider.providerName}Data`] = await helpers.stringifyProviderData(
       provider
     );
 
-    helpers.saveSettings(data.id, payload, res, succesMessageName);
+    helpers.saveSettings(data.id, payload, res, succesMessageName, `mdi-${provider.providerName}`);
   } else {
     return res.status(404).send({ type: 'error', message: 'User not found.' });
   }
@@ -240,8 +251,8 @@ module.exports.connectOauthProvider = async (req, res) => {
  */
 module.exports.disconnectOauthProvider = async (req, res) => {
   const data = req.body,
-    succesMessageName = `${data.provider} application disconnected`;
-  user = await helpers.findUser('id', data.id, res);
+    succesMessageName = `${data.provider} application disconnected`,
+    user = await helpers.findUser('id', data.id, res);
 
   const comparePasswords = await helpers.comparePasswords(data.password, user.password);
   if (!comparePasswords) {
@@ -249,11 +260,11 @@ module.exports.disconnectOauthProvider = async (req, res) => {
     return validator.throwErrors('Wrong password', res);
   }
 
-  let payload = { user: { id: data.id }, metadata: {} };
+  let payload = { user: { id: data.id }, metadata: {}, safety: {} };
   payload.metadata[`${data.provider}ID`] = null;
   payload.metadata[`${data.provider}Data`] = null;
 
-  helpers.saveSettings(data.id, payload, res, succesMessageName);
+  helpers.saveSettings(data.id, payload, res, succesMessageName, `mdi-${data.provider}`);
 };
 
 /**
@@ -364,7 +375,7 @@ module.exports.saveUsername = async (req, res) => {
     return validator.throwErrors('Wrong password', res);
   }
 
-  const payload = { user: { username }, metadata: {} };
+  const payload = { user: { username }, metadata: {}, safety: {} };
 
   helpers.saveSettings(id, payload, res, 'Username changed');
 };
@@ -401,7 +412,7 @@ module.exports.saveEmail = async (req, res) => {
   // Сгенерируем ключ подтверждения
   const { key } = await helpers.generateToken();
 
-  const payload = { user: { email }, metadata: { emailVerification: key } };
+  const payload = { user: { email }, metadata: {}, safety: { emailVerification: key } };
 
   helpers.saveSettings(id, payload, res, succesMessageName);
 };
@@ -551,7 +562,7 @@ module.exports.repairChangePassword = async (req, res) => {
       if (!response) {
         return validator.throwErrors('Password change failed', res);
       }
-      const message = messages(res.lang).success.passwordChanged;
+      const message = messages(res.lang).success['Password changed'];
       res.send({ response, message });
     })
     .catch(e => {
@@ -573,6 +584,7 @@ module.exports.accountSettings = async (req, res) => {
     payload = {
       user: { id },
       metadata: req.body.data,
+      safety: {},
     };
 
   // Пароль верен. Отправляем запрос на изменение данных
@@ -619,32 +631,9 @@ module.exports.savePassword = async (req, res) => {
   }
 
   const hashPassword = await helpers.hashPassword(password); // Хэшируем пароль
-  let payload = { user: { password: hashPassword }, metadata: {} };
+  let payload = { user: { password: hashPassword }, metadata: {}, safety: {} };
 
   helpers.saveSettings(id, payload, res, succesMessageName);
-};
-
-/**
- * Изменяем настройки безопасности аккаунта пользователя
- *
- * @param req               Объект запроса сервера
- * @param res               Объект ответа сервера
- *
- * @todo Организовать отправку письма в случае установки email адреса
- */
-module.exports.safetySettings = async (req, res) => {
-  // const settings = req.body,
-  //   id = settings.id;
-  // let payload = { user: {}, metadata: {} };
-  // if (settings.email) {
-  //   payload.user.email = settings.email;
-  //   // Сгенерируем ключ подтверждения
-  //   const { key } = await helpers.generateToken();
-  //   payload.metadata = {
-  //     emailVerification: key,
-  //   };
-  // }
-  // helpers.saveSettings(id, payload, res, 'safetySettings');
 };
 
 /**
@@ -658,7 +647,7 @@ module.exports.safetySettings = async (req, res) => {
 module.exports.resendEmailConfirmationKey = async (req, res) => {
   const id = req.body.id,
     user = await helpers.findUser('id', id, res), // Получить надо не по id, т.к. в redis не хранится ключ подтверждения. Ну или просто сгенерировать новый
-    key = user.metadata.emailVerification;
+    key = user.safety.emailVerification;
   let message;
 
   if (key) {

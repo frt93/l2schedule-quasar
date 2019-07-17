@@ -5,7 +5,7 @@
  */
 const composeQuery = key => {
   return `query find_user{
-  users(where: {metadata: {repairKey: {_eq: "${key}"}}}) {
+  users(where: {safety: {repairKey: {_eq: "${key}"}}}) {
     email
   }
 }`;

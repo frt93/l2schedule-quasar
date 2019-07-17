@@ -22,7 +22,7 @@ module.exports = {
           type: 'run_sql',
           args: {
             sql:
-              'CREATE TABLE "public"."users"("id" serial NOT NULL, "username" citext NOT NULL, "email" citext, "password" text, "verified" boolean NOT NULL DEFAULT false, "group_id" uuid , PRIMARY KEY ("id") , UNIQUE ("id"), UNIQUE ("username"), UNIQUE ("email"));',
+              'CREATE TABLE "public"."users"("id" serial NOT NULL, "username" citext NOT NULL, "email" citext, "password" text, "verified" boolean NOT NULL DEFAULT false, "group_id" integer , PRIMARY KEY ("id") , UNIQUE ("id"), UNIQUE ("username"), UNIQUE ("email"));',
           },
         },
         { type: 'add_existing_table_or_view', args: { name: 'users', schema: 'public' } },
@@ -32,10 +32,20 @@ module.exports = {
           type: 'run_sql',
           args: {
             sql:
-              'CREATE TABLE "public"."user_metadata"("user_id" serial NOT NULL, "avatar" text, "name" text,"emailVerification" uuid, "repairKey" uuid, "language" text NOT NULL DEFAULT "ru", "timezone" text, "country" text, "googleID" text, "googleData" text, "facebookID" text,"facebookData" text, "vkID" text, "vkData" text,"telegramID" text, "telegramData" text, "createdAt" timestamp with time zone NOT NULL DEFAULT now(), PRIMARY KEY ("user_id") , UNIQUE ("user_id"), UNIQUE("repairKey"), UNIQUE("googleID"), UNIQUE("facebookID"), UNIQUE("vkID"), UNIQUE("telegramID"));',
+              'CREATE TABLE "public"."user_metadata"("user_id" serial NOT NULL, "avatar" text, "name" text, "language" text, "timezone" text, "dateFormat" text, "country" text, "googleID" text, "googleData" text, "facebookID" text,"facebookData" text, "vkID" text, "vkData" text,"telegramID" text, "telegramData" text, "createdAt" timestamp with time zone NOT NULL DEFAULT now(), PRIMARY KEY ("user_id") , UNIQUE ("user_id"), UNIQUE("googleID"), UNIQUE("facebookID"), UNIQUE("vkID"), UNIQUE("telegramID"));',
           },
         },
         { type: 'add_existing_table_or_view', args: { name: 'user_metadata', schema: 'public' } },
+
+        // Создаем таблицу настреок приватности и безопасности пользователя пользователя
+        {
+          type: 'run_sql',
+          args: {
+            sql:
+              'CREATE TABLE "public"."user_safety"("user_id" serial NOT NULL, "emailVerification" uuid, "repairKey" uuid,  PRIMARY KEY ("user_id") , UNIQUE ("user_id"), UNIQUE("emailVerification"), UNIQUE("repairKey"))',
+          },
+        },
+        { type: 'add_existing_table_or_view', args: { name: 'user_safety', schema: 'public' } },
 
         // Связываем таблицы пользователей и метаданных пользователя. Каждому пользователю соответствует 1 строчка из таблицы метаданных
         {
@@ -67,12 +77,42 @@ module.exports = {
           },
         },
 
+        // Связываем таблицы пользователей и настроек безопасности пользователя. Каждому пользователю соответствует 1 строчка из таблицы user_safety
+        {
+          type: 'create_object_relationship',
+          args: {
+            name: 'safety',
+            table: { name: 'users', schema: 'public' },
+            using: {
+              manual_configuration: {
+                remote_table: { name: 'user_safety', schema: 'public' },
+                column_mapping: { id: 'user_id' },
+              },
+            },
+          },
+        },
+
+        // В свою очередь каждому экземпляру user_safety соответствует 1 пользователь
+        {
+          type: 'create_object_relationship',
+          args: {
+            name: 'user',
+            table: { name: 'user_safety', schema: 'public' },
+            using: {
+              manual_configuration: {
+                remote_table: { name: 'users', schema: 'public' },
+                column_mapping: { user_id: 'id' },
+              },
+            },
+          },
+        },
+
         // Создаем таблицу групп
         {
           type: 'run_sql',
           args: {
             sql:
-              'CREATE TABLE "public"."groups"("id" uuid NOT NULL DEFAULT gen_random_uuid(), "name" citext NOT NULL, "leader_id" serial NOT NULL, "clan_id" uuid, "createdAt" timestamp with time zone NOT NULL DEFAULT now(), PRIMARY KEY ("id") , UNIQUE ("id"), UNIQUE ("leader_id"));',
+              'CREATE TABLE "public"."groups"("id" serial NOT NULL, "name" citext NOT NULL, "slug" citext NOT NULL, "leader_id" integer NOT NULL, "clan_id" integer, "createdAt" timestamp with time zone NOT NULL DEFAULT now(), PRIMARY KEY ("id") , UNIQUE ("id"), UNIQUE ("name"), UNIQUE ("slug"), UNIQUE ("leader_id"));',
           },
         },
         { type: 'add_existing_table_or_view', args: { name: 'groups', schema: 'public' } },
@@ -131,7 +171,7 @@ module.exports = {
           type: 'run_sql',
           args: {
             sql:
-              'CREATE TABLE "public"."group_invitations"("id" serial NOT NULL, "invitee_user_id" integer NOT NULL, "group_id" uuid NOT NULL, "inviter_user_id" integer NOT NULL, "date" timestamp with time zone NOT NULL DEFAULT now(), PRIMARY KEY ("id") , UNIQUE ("id"));',
+              'CREATE TABLE "public"."group_invitations"("id" serial NOT NULL, "invitee_user_id" integer NOT NULL, "group_id" integer NOT NULL, "inviter_user_id" integer NOT NULL, "date" timestamp with time zone NOT NULL DEFAULT now(), PRIMARY KEY ("id") , UNIQUE ("id"));',
           },
         },
         {
@@ -208,7 +248,7 @@ module.exports = {
           type: 'run_sql',
           args: {
             sql:
-              'CREATE TABLE "public"."clans"("id" uuid DEFAULT gen_random_uuid() NOT NULL, "name" citext NOT NULL, "leader_id" serial NOT NULL, "createdAt" timestamp with time zone NOT NULL DEFAULT now(), PRIMARY KEY ("id") , UNIQUE ("id"), UNIQUE ("name"), UNIQUE ("leader_id"));',
+              'CREATE TABLE "public"."clans"("id" serial NOT NULL, "name" citext NOT NULL, "slug" citext NOT NULL, "leader_id" integer NOT NULL, "createdAt" timestamp with time zone NOT NULL DEFAULT now(), PRIMARY KEY ("id") , UNIQUE ("id"), UNIQUE ("name"), UNIQUE ("slug"), UNIQUE ("leader_id"));',
           },
         },
         { type: 'add_existing_table_or_view', args: { name: 'clans', schema: 'public' } },
@@ -263,7 +303,7 @@ module.exports = {
           type: 'run_sql',
           args: {
             sql:
-              'CREATE TABLE "public"."clan_invitations"("id" serial NOT NULL, "group_id" uuid NOT NULL, "clan_id" uuid NOT NULL, "inviter_id" integer NOT NULL, "date" timestamp with time zone NOT NULL DEFAULT now(), PRIMARY KEY ("id") , UNIQUE ("id"));',
+              'CREATE TABLE "public"."clan_invitations"("id" serial NOT NULL, "group_id" integer NOT NULL, "clan_id" integer NOT NULL, "inviter_id" integer NOT NULL, "date" timestamp with time zone NOT NULL DEFAULT now(), PRIMARY KEY ("id") , UNIQUE ("id"));',
           },
         },
         {

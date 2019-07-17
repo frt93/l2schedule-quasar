@@ -140,7 +140,7 @@ export default {
   },
 
   render(h) {
-    if (this.user.metadata.emailVerification) {
+    if (this.user.safety.emailVerification) {
       return h(
         "form",
         {

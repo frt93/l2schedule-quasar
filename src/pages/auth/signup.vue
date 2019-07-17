@@ -56,13 +56,9 @@ export default {
         username: this.username,
         email: this.email,
         password: this.password,
-        metadata: {
-          data: {
-            country: this.countryISO,
-            timezone: this.tz,
-            language: this.lang
-          }
-        }
+        country: this.countryISO,
+        timezone: this.tz,
+        language: this.lang
       };
     },
 
