@@ -2,7 +2,7 @@
 
 > Если пользователь кикнут из группы - его инвайты другим пользователем в эту группу должны быть удалены.
 
-> group_invitations - связать поле group_id с таблицей group. В query findUser добавить поле groups в слой groupInvitations
+> party_invitations - связать поле party_id с таблицей parties. В query findUser добавить поле parties в слой partyInvitations
 
 > После переключения между типом text/password у инпутов пароля при рефокусе переводить курсор в конец содержимого, а не в начало
 

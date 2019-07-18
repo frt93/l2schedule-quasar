@@ -1,10 +1,11 @@
 const { GraphQLClient } = require('api/config/graphql'),
   validator = require('./validator'),
   helpers = require('./helpers'),
-  messages = require('./lang');
+  messages = require('./lang'),
+  users = require('api/controllers/users/helpers');
 
 module.exports.create = async (req, res) => {
-  let party = req.body.party,
+  let party = req.body,
     userID = req.body.userID,
     payload = {
       name: party.name,
@@ -16,7 +17,12 @@ module.exports.create = async (req, res) => {
   //Если валидация провалилась - прекращаем выполнение
   if (!valid) return;
 
-  helpers.createGroup(payload, res);
+  const user = await users.findUser('id', userID, res);
+  if (user.party) {
+    return validator.throwErrors('You already have party', res);
+  }
+
+  helpers.createParty(payload, res);
 };
 
 /**
@@ -65,4 +71,22 @@ module.exports.checkSlug = async (req, res) => {
   }
 
   res.send(isExist);
+};
+
+/**
+ * Получаем экземпляр пати
+ *
+ * @param req               Объект запроса сервера
+ * @param res               Объект ответа сервера
+ */
+module.exports.getParty = async (req, res) => {
+  const key = req.body.key,
+    value = req.body.value;
+
+  const party = await helpers.findParty(key, value, res);
+  if (party) {
+    res.send({ party });
+  } else {
+    res.status(404).send('Party not found');
+  }
 };

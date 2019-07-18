@@ -22,7 +22,7 @@ module.exports = {
           type: 'run_sql',
           args: {
             sql:
-              'CREATE TABLE "public"."users"("id" serial NOT NULL, "username" citext NOT NULL, "email" citext, "password" text, "verified" boolean NOT NULL DEFAULT false, "group_id" integer , PRIMARY KEY ("id") , UNIQUE ("id"), UNIQUE ("username"), UNIQUE ("email"));',
+              'CREATE TABLE "public"."users"("id" serial NOT NULL, "username" citext NOT NULL, "email" citext, "password" text, "verified" boolean NOT NULL DEFAULT false, "party_id" integer , PRIMARY KEY ("id") , UNIQUE ("id"), UNIQUE ("username"), UNIQUE ("email"));',
           },
         },
         { type: 'add_existing_table_or_view', args: { name: 'users', schema: 'public' } },
@@ -112,10 +112,10 @@ module.exports = {
           type: 'run_sql',
           args: {
             sql:
-              'CREATE TABLE "public"."groups"("id" serial NOT NULL, "name" citext NOT NULL, "slug" citext NOT NULL, "leader_id" integer NOT NULL, "clan_id" integer, "createdAt" timestamp with time zone NOT NULL DEFAULT now(), PRIMARY KEY ("id") , UNIQUE ("id"), UNIQUE ("name"), UNIQUE ("slug"), UNIQUE ("leader_id"));',
+              'CREATE TABLE "public"."parties"("id" serial NOT NULL, "name" citext NOT NULL, "slug" citext NOT NULL, "leader_id" integer NOT NULL, "clan_id" integer, "createdAt" timestamp with time zone NOT NULL DEFAULT now(), PRIMARY KEY ("id") , UNIQUE ("id"), UNIQUE ("name"), UNIQUE ("slug"), UNIQUE ("leader_id"));',
           },
         },
-        { type: 'add_existing_table_or_view', args: { name: 'groups', schema: 'public' } },
+        { type: 'add_existing_table_or_view', args: { name: 'parties', schema: 'public' } },
 
         // Связываем таблицы пользователей и групп
         // В группе может состоять множество пользователей (members)
@@ -123,11 +123,11 @@ module.exports = {
           type: 'create_array_relationship',
           args: {
             name: 'members',
-            table: { name: 'groups', schema: 'public' },
+            table: { name: 'parties', schema: 'public' },
             using: {
               manual_configuration: {
                 remote_table: { name: 'users', schema: 'public' },
-                column_mapping: { id: 'group_id' },
+                column_mapping: { id: 'party_id' },
               },
             },
           },
@@ -141,8 +141,8 @@ module.exports = {
             table: { name: 'users', schema: 'public' },
             using: {
               manual_configuration: {
-                remote_table: { name: 'groups', schema: 'public' },
-                column_mapping: { group_id: 'id' },
+                remote_table: { name: 'parties', schema: 'public' },
+                column_mapping: { party_id: 'id' },
               },
             },
           },
@@ -153,7 +153,7 @@ module.exports = {
           type: 'create_object_relationship',
           args: {
             name: 'leader',
-            table: { name: 'groups', schema: 'public' },
+            table: { name: 'parties', schema: 'public' },
             using: {
               manual_configuration: {
                 remote_table: { name: 'users', schema: 'public' },
@@ -171,25 +171,25 @@ module.exports = {
           type: 'run_sql',
           args: {
             sql:
-              'CREATE TABLE "public"."group_invitations"("id" serial NOT NULL, "invitee_user_id" integer NOT NULL, "group_id" integer NOT NULL, "inviter_user_id" integer NOT NULL, "date" timestamp with time zone NOT NULL DEFAULT now(), PRIMARY KEY ("id") , UNIQUE ("id"));',
+              'CREATE TABLE "public"."party_invitations"("id" serial NOT NULL, "invitee_user_id" integer NOT NULL, "party_id" integer NOT NULL, "inviter_user_id" integer NOT NULL, "date" timestamp with time zone NOT NULL DEFAULT now(), PRIMARY KEY ("id") , UNIQUE ("id"));',
           },
         },
         {
           type: 'add_existing_table_or_view',
-          args: { name: 'group_invitations', schema: 'public' },
+          args: { name: 'party_invitations', schema: 'public' },
         },
 
-        // Связываем таблицу group_invitations с таблицами групп и пользователей
+        // Связываем таблицу party_invitations с таблицами групп и пользователей
         // У каждой группы может быть много инвайтов (т.е. в нее можно приглашать множество пользователей)
         {
           type: 'create_array_relationship',
           args: {
             name: 'membersInvitations',
-            table: { name: 'groups', schema: 'public' },
+            table: { name: 'parties', schema: 'public' },
             using: {
               manual_configuration: {
-                remote_table: { name: 'group_invitations', schema: 'public' },
-                column_mapping: { id: 'group_id' },
+                remote_table: { name: 'party_invitations', schema: 'public' },
+                column_mapping: { id: 'party_id' },
               },
             },
           },
@@ -199,11 +199,11 @@ module.exports = {
         {
           type: 'create_array_relationship',
           args: {
-            name: 'groupInvitations',
+            name: 'partyInvitations',
             table: { name: 'users', schema: 'public' },
             using: {
               manual_configuration: {
-                remote_table: { name: 'group_invitations', schema: 'public' },
+                remote_table: { name: 'party_invitations', schema: 'public' },
                 column_mapping: { id: 'invitee_user_id' },
               },
             },
@@ -215,7 +215,7 @@ module.exports = {
           type: 'create_object_relationship',
           args: {
             name: 'inviter',
-            table: { name: 'group_invitations', schema: 'public' },
+            table: { name: 'party_invitations', schema: 'public' },
             using: {
               manual_configuration: {
                 remote_table: { name: 'users', schema: 'public' },
@@ -225,16 +225,16 @@ module.exports = {
           },
         },
 
-        // Связываем приглашение в группу с самим экземпляром этой группы из таблицы groups
+        // Связываем приглашение в группу с самим экземпляром этой группы из таблицы parties
         {
           type: 'create_object_relationship',
           args: {
-            name: 'group',
-            table: { name: 'group_invitations', schema: 'public' },
+            name: 'party',
+            table: { name: 'party_invitations', schema: 'public' },
             using: {
               manual_configuration: {
-                remote_table: { name: 'groups', schema: 'public' },
-                column_mapping: { group_id: 'id' },
+                remote_table: { name: 'parties', schema: 'public' },
+                column_mapping: { party_id: 'id' },
               },
             },
           },
@@ -276,7 +276,7 @@ module.exports = {
             table: { name: 'clans', schema: 'public' },
             using: {
               manual_configuration: {
-                remote_table: { name: 'groups', schema: 'public' },
+                remote_table: { name: 'parties', schema: 'public' },
                 column_mapping: { id: 'clan_id' },
               },
             },
@@ -288,7 +288,7 @@ module.exports = {
           type: 'create_object_relationship',
           args: {
             name: 'clan',
-            table: { name: 'groups', schema: 'public' },
+            table: { name: 'parties', schema: 'public' },
             using: {
               manual_configuration: {
                 remote_table: { name: 'clans', schema: 'public' },
@@ -303,7 +303,7 @@ module.exports = {
           type: 'run_sql',
           args: {
             sql:
-              'CREATE TABLE "public"."clan_invitations"("id" serial NOT NULL, "group_id" integer NOT NULL, "clan_id" integer NOT NULL, "inviter_id" integer NOT NULL, "date" timestamp with time zone NOT NULL DEFAULT now(), PRIMARY KEY ("id") , UNIQUE ("id"));',
+              'CREATE TABLE "public"."clan_invitations"("id" serial NOT NULL, "party_id" integer NOT NULL, "clan_id" integer NOT NULL, "inviter_id" integer NOT NULL, "date" timestamp with time zone NOT NULL DEFAULT now(), PRIMARY KEY ("id") , UNIQUE ("id"));',
           },
         },
         {
@@ -331,11 +331,11 @@ module.exports = {
           type: 'create_array_relationship',
           args: {
             name: 'clanInvitations',
-            table: { name: 'groups', schema: 'public' },
+            table: { name: 'parties', schema: 'public' },
             using: {
               manual_configuration: {
                 remote_table: { name: 'clan_invitations', schema: 'public' },
-                column_mapping: { id: 'group_id' },
+                column_mapping: { id: 'party_id' },
               },
             },
           },

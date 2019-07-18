@@ -5,5 +5,6 @@ module.exports = {
       return `Пати с названием ${name} уже существует`;
     },
     'Slug already exists': 'Указанный адрес уже занят',
+    'You already have party': 'Вы уже состоите в пати',
   },
 };

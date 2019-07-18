@@ -10,18 +10,15 @@ export default {
   props: ["user"],
   methods: {
     create() {
-      this.$q
-        .dialog({
-          component: create,
-          root: this.$root
-        })
-        .onOk(payload => {
-          groupAPI.create(payload);
-        });
+      this.$q.dialog({
+        component: create,
+        user: this.user,
+        root: this.$root
+      });
     }
   },
   render(h) {
-    if (typeof this.user === "object" && !this.user.metadata.group) {
+    if (!this.user.party) {
       return h("div", { staticClass: "column" }, [
         h(
           "div",

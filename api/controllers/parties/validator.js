@@ -30,6 +30,12 @@ module.exports.throwErrors = (name, res, params) => {
       message: messages(res.lang).errors[name],
     });
   }
+
+  if (name === 'You already have party') {
+    return res.status(403).send({
+      message: messages(res.lang).errors[name],
+    });
+  }
 };
 
 /**
@@ -58,7 +64,7 @@ module.exports.handleErrors = (e, res, params) => {
  *  @param res                    Экземпляр ответа сервера
  *
  */
-module.exports.signupValidation = async (party, res) => {
+module.exports.createValidation = async (party, res) => {
   if (!party.name || !party.slug || !party.leader_id) {
     // Форма заполнена неполностью - выбрасываем ошибку
     this.throwErrors('Empty fields', res);
@@ -67,11 +73,11 @@ module.exports.signupValidation = async (party, res) => {
 
   let valid;
 
-  valid = await this.validatePartyName(party.name, res);
-  if (!valid) return false;
+  // valid = await this.validatePartyName(party.name, res);
+  // if (!valid) return false;
 
-  valid = await this.validatePartySlug(party.slug, res);
-  if (!valid) return false;
+  // valid = await this.validatePartySlug(party.slug, res);
+  // if (!valid) return false;
 
   return true;
 };

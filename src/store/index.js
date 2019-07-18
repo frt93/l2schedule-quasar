@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import user from './modules/user';
+import party from './modules/party';
 
 // import example from './module-example'
 
@@ -15,6 +16,7 @@ export default function(/* { ssrContext } */) {
   const Store = new Vuex.Store({
     modules: {
       user,
+      party,
     },
 
     // enable strict mode (adds overhead!)

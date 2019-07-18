@@ -5,5 +5,6 @@ module.exports = {
       return `Party with name ${name} already exist`;
     },
     'Slug already exists': 'This page already exist',
+    'You already have party': 'You already have party',
   },
 };

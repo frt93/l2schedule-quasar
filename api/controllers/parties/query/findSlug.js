@@ -5,7 +5,7 @@
  */
 const query = slug => {
   return `query findGroupBySlug {
-  groups(where: {slug: {_ilike: "${slug}"}}) {
+  parties(where: {slug: {_ilike: "${slug}"}}) {
     slug
   }
 }`;
@@ -19,7 +19,7 @@ const query = slug => {
  * @return {String} slug
  */
 const response = data => {
-  const party = data.groups;
+  const party = data.parties;
   return party.length ? party[0].slug : null;
 };
 

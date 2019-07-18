@@ -1,7 +1,8 @@
 /**
  * Шаблон экземпляра пользователя
  */
-const returningPattern = `id
+const returningPattern = `
+id
 username
 email
 password
@@ -25,15 +26,14 @@ safety {
   emailVerification
 }
 party {
+  id
   name
   leader {
     username
   }
   createdAt
-  members {
-    username
-  }
-}`;
+}
+`;
 
 /**
  * Обрабатываем полученные в результате запроса данные, добираясь до необходимого уровня вложенности,

@@ -5,7 +5,7 @@
  */
 const query = name => {
   return `query findGroupByName {
-  groups(where: {name: {_ilike: "${name}"}}) {
+  parties(where: {name: {_ilike: "${name}"}}) {
     name
   }
 }`;
@@ -19,7 +19,7 @@ const query = name => {
  * @return {String} name
  */
 const response = data => {
-  const party = data.groups;
+  const party = data.parties;
   return party.length ? party[0].name : null;
 };
 

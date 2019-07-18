@@ -1,10 +1,11 @@
 <script>
 import { debounce } from "quasar";
 
-import partyAPI from "handlers/group/api";
-import controllers from "handlers/group/controllers";
+import partyAPI from "handlers/party/api";
+import controllers from "handlers/party/controllers";
 export default {
   name: "createPartyDialog",
+  props: ["user"],
   data() {
     return {
       name: "",
@@ -22,14 +23,22 @@ export default {
   },
 
   computed: {
+    payload() {
+      return {
+        name: this.name,
+        slug: this.slug,
+        userID: this.user.id
+      };
+    },
     canSubmit() {
-      return;
-      this.loading ||
-      this.nameError ||
-      this.slugError ||
-      !this.name.length ||
-      this.slug.length < 3 ||
-      this.slug.length > 20
+      return this.loading.name ||
+        this.loading.slug ||
+        this.nameError ||
+        this.slugError ||
+        !this.name.length ||
+        this.name.length > 30 ||
+        !this.slug.length ||
+        this.slug.length > 20
         ? false
         : true;
     }
@@ -48,7 +57,15 @@ export default {
       this.$emit("hide");
     },
 
-    onConfirm() {
+    async onConfirm() {
+      const { party, user, error } = await partyAPI.create(this.payload);
+      if (error) {
+        console.log(error.response);
+        return;
+      }
+      // Устанавливаем новый инстанс пользователя
+      this.$store.commit("user/setUser", user);
+      //@todo коммит в модуль пати
       this.$emit("ok");
       this.hide();
     },
@@ -80,7 +97,7 @@ export default {
 
       if (slug.length) {
         const { message } = await controllers.checkSlug(slug);
-        console.log(message);
+
         if (message) {
           this.slugError = true;
           this.slugErrorMessage = message;
@@ -175,6 +192,7 @@ export default {
                       attrs: {
                         autocomplete: false,
                         maxlength: "20",
+                        prefix: `${process.env.APP_URL}party/`,
                         value: this.slug,
                         label: this.$t("party.labels.slug"),
                         hint: this.$t("party.hints.slug", { and: "-" }),
@@ -218,4 +236,11 @@ export default {
   }
 };
 </script>
+ 
+ <style lang="stylus" scope>
+ .q-field__prefix {
+   padding-right: 0;
+   color: rgba(0, 0, 0, 0.54);
+ }
+</style>
  

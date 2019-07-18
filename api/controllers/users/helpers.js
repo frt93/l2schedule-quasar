@@ -46,7 +46,7 @@ module.exports.createUser = async (credentials, res) => {
   }
 
   const { mutation, variable, response } = require('api/controllers/users/mutations/create');
-  user = variable(credentials);
+  let user = variable(credentials);
 
   GraphQLClient.request(mutation, user)
     .then(async data => {
@@ -225,9 +225,9 @@ module.exports.comparePasswords = async (unhashed, hashed) => {
 /**
  * Ищем пользователя в Redis кэше или в базе данных
  *
- * @param {String} key        Ключ (поле) по которому осуществляется поиск (id/username/email, etc)
- * @param {String} value      Значение ключа поиска
- * @param res                 Экземпляр ответа сервера
+ * @param {String} key           Ключ (поле) по которому осуществляется поиск (id/username/email, etc)
+ * @param {String | Int} value   Значение ключа поиска
+ * @param res                    Экземпляр ответа сервера
  */
 module.exports.findUser = async (key, value, res) => {
   let user;
@@ -332,31 +332,38 @@ module.exports.findEmail = async (email, res) => {
  * @param {String} successMessage       Название сообщения об успешном сохранении
  * @param {String} successMessageIcon   Название иконки, которое отобразится в оповещении вместе с самим сообщением
  */
-module.exports.saveSettings = (id, payload, res, successMessage, successMessageIcon) => {
+module.exports.saveSettings = async (id, payload, res, successMessage, successMessageIcon) => {
   const { mutation, variables, response } = require('./mutations/settings/account'),
     data = variables(id, payload);
-  let message;
+  let message, user;
 
-  GraphQLClient.request(mutation, data)
+  await GraphQLClient.request(mutation, data)
     .then(async updated => {
-      let updatedUser = response(updated);
+      user = response(updated);
 
-      this.saveUserInRedis(updatedUser); // Сохраняем пользователя в Redis
+      this.saveUserInRedis(user); // Сохраняем пользователя в Redis
 
-      updatedUser = await this.cutPassword(updatedUser); // Убираем из возвращаемого экземпляра пароль
-      const messageText = messages(res.lang).success[successMessage];
-
-      if (successMessageIcon) {
-        message = { message: messageText, icon: successMessageIcon };
-      } else {
-        message = messageText;
-      }
-
-      res.send({ user: updatedUser, message });
+      user = await this.cutPassword(user); // Убираем из возвращаемого экземпляра пароль
     })
     .catch(e => {
       return validator.handleErrors(e, res, payload.user);
     });
+
+  if (res) {
+    // Если вместо экземпляра ответа сервера передано значение false - значит вызвавший метод требует вернуть экземпляр пользователя ему,
+    // для дальнейшего формирования ответа на api запрос пользователя
+    const messageText = messages(res.lang).success[successMessage];
+
+    if (successMessageIcon) {
+      message = { message: messageText, icon: successMessageIcon };
+    } else {
+      message = messageText;
+    }
+
+    res.send({ user, message });
+  } else {
+    return { user };
+  }
 };
 
 /**

@@ -2,17 +2,17 @@ import { axiosInstance } from 'boot/axios';
 
 export default {
   async create(payload) {
-    let user, error;
+    let party, user, error;
     await axiosInstance
-      .post('/users/create', credentials)
+      .post('/parties/create', payload)
       .then(res => {
+        party = res.data.party;
         user = res.data.user;
-        cookies.set('auth', res.data.token, { expires: 3650 });
       })
       .catch(e => {
         error = e;
       });
-    return { user, error };
+    return { party, user, error };
   },
 
   /**
@@ -22,7 +22,7 @@ export default {
    */
   async checkName(name) {
     let error;
-    await axiosInstance.post('/groups/check/name', { name }).catch(e => {
+    await axiosInstance.post('/parties/check/name', { name }).catch(e => {
       error = e;
     });
     return { error };
@@ -35,9 +35,28 @@ export default {
    */
   async checkSlug(slug) {
     let error;
-    await axiosInstance.post('/groups/check/slug', { slug }).catch(e => {
+    await axiosInstance.post('/parties/check/slug', { slug }).catch(e => {
       error = e;
     });
     return { error };
+  },
+
+  /**
+   * Отправим запрос на получение экземпляра пати
+   *
+   * @param {String} key        Ключ поиска (id/name)
+   * @param {String} value      Значение ключа поиска
+   */
+  async getParty(key, value) {
+    let party, error;
+    await axiosInstance
+      .post('/parties/get', { key: key, value })
+      .then(res => {
+        party = res.data.party;
+      })
+      .catch(e => {
+        error = e;
+      });
+    return { party, error };
   },
 };

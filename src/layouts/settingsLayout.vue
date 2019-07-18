@@ -216,7 +216,7 @@ export default {
                   "q-tab",
                   {
                     props: {
-                      icon: this.miniState ? "mdi-menu-open" : "mdi-menu-left",
+                      icon: this.miniState ? "mdi-menu-open mdi-rotate-180" : "mdi-menu-left",
                       label: !this.miniState ? this.$t("labels.collapse") : ""
                     },
                     on: {

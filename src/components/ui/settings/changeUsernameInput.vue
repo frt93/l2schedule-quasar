@@ -73,7 +73,7 @@ export default {
     },
 
     __hint(h) {
-      let hint = `localhost/@${this.username}`;
+      let hint = `${process.env.APP_URL}@${this.username}`;
 
       if (this.user.password === null) {
         hint += `. ${this.$t("hints.settings.needPasswordToChange")}`;
