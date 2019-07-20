@@ -183,6 +183,26 @@ module.exports.oauthCreate = async (req, res) => {
 };
 
 /**
+ * Получим экземпляр искомого пользователя
+ *
+ * @param req                    Объект запроса сервера
+ * @param res                    Объект ответа сервера
+ */
+module.exports.getUser = async (req, res) => {
+  const key = req.query.key,
+    value = req.query.value;
+
+  let user = await helpers.findUser(key, value, res);
+
+  if (user) {
+    delete user.password;
+    res.send(user);
+  } else {
+    res.status(404).send('User not found');
+  }
+};
+
+/**
  * Обновляем данные oauth провайдера, с помощью которого авторизовался пользователь
  *
  * @param req                    Объект запроса сервера

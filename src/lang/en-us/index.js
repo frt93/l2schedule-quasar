@@ -8,6 +8,7 @@ export default {
   vk: 'vk.com',
   tg: 'telegram',
   oApp: 'authorization app',
+  pl: 'Party leader',
   oauth: {
     title: 'Third-party authorization apps',
     link: 'You can associate this account with ',
@@ -89,6 +90,8 @@ export default {
     },
     party: {
       main: 'Party',
+      all: 'All parties',
+      members: 'Party members',
     },
   },
   hints: {
@@ -132,7 +135,7 @@ export default {
     },
   },
   party: {
-    noParty: { 1: 'You have no party', 2: 'Create your own', 3: 'find one that interests you' },
+    notFound: 'Party {name} not found',
     createDialogTitle: 'Name your party',
     labels: {
       name: 'Your party name',

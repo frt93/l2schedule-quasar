@@ -7,6 +7,7 @@ export default {
   ggl: 'google',
   vk: 'vk.com',
   tg: 'telegram',
+  pl: 'Пати лидер',
   oauth: {
     title: 'Сторонние приложения авторизации',
     link: 'Вы можете подключить к своему аккаунту приложение авторизации ',
@@ -89,6 +90,8 @@ export default {
     },
     party: {
       main: 'Пати',
+      all: 'Пати лист',
+      members: 'Пати мемберы',
     },
   },
   hints: {
@@ -135,11 +138,7 @@ export default {
     },
   },
   party: {
-    noParty: {
-      1: 'Вы не состоите в пати',
-      2: 'Создайте свою',
-      3: 'найдите интересующую вас',
-    },
+    notFound: 'Пати {name} не найдена',
     createDialogTitle: 'Назовите свою пати',
     labels: {
       name: 'Название',

@@ -80,14 +80,32 @@ const routes = [
       },
     ],
   },
+
   {
-    path: '/party',
+    path: '/@:username',
     component: () => import('layouts/mainLayout.vue'),
     children: [
       {
         path: '',
+        name: 'user',
+        component: () => import('pages/user.vue'),
+      },
+    ],
+  },
+
+  {
+    path: '/party',
+    component: () => import('layouts/party.vue'),
+    children: [
+      {
+        path: ':name',
         name: 'party',
         component: () => import('pages/party/main.vue'),
+      },
+      {
+        path: 'members',
+        name: 'party/members',
+        component: () => import('pages/party/members.vue'),
       },
     ],
   },

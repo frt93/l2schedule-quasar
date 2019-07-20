@@ -8,7 +8,7 @@ export default {
 
   meta() {
     return {
-      title: this.$t("titles.party.main"),
+      title: this.$t("titles.party.all"),
       titleTemplate: title => `${title} - L2Schedule`
     };
   },

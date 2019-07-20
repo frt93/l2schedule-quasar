@@ -25,6 +25,8 @@ membersInvitations {
 clanInvitations {
   id
 }
+about
+createdAt
 `;
 
 /**

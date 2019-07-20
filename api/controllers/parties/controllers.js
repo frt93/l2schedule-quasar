@@ -80,10 +80,11 @@ module.exports.checkSlug = async (req, res) => {
  * @param res               Объект ответа сервера
  */
 module.exports.getParty = async (req, res) => {
-  const key = req.body.key,
-    value = req.body.value;
-
-  const party = await helpers.findParty(key, value, res);
+  const key = req.query.key,
+    value = req.query.value,
+    party = await helpers.findParty(key, value, res);
+  console.log(value);
+  console.log(party);
   if (party) {
     res.send({ party });
   } else {

@@ -270,7 +270,7 @@ export default {
 };
 </script>
 
-<style lang="stylus" scope>
+<style lang="stylus" scoped>
 .form {
   .q-field {
     margin-bottom: $spaces.md.y;

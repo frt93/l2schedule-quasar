@@ -14,14 +14,19 @@ export default {
     setCurrentParty(state, party) {
       state.current = party;
     },
+
+    resetParty(state) {
+      state.current = null;
+    },
   },
 
   actions: {
-    async prefetch({ commit }, partyID) {
-      const { party, error } = await partyAPI.getParty('id', partyID);
-      if (!error) {
-        commit('setCurrentParty', party);
+    async prefetch({ commit }, query) {
+      const { party, error } = await partyAPI.getParty(query);
+      if (error) {
+        return commit('resetParty');
       }
+      commit('setCurrentParty', party);
     },
   },
 

@@ -12,6 +12,7 @@ export default {
     languagesList: null,
     timezoneList: null,
     countriesList: null,
+    viewedUser: null,
   },
 
   mutations: {
@@ -53,6 +54,13 @@ export default {
     changeDateFormat(state, format) {
       dateAPI.defaultFormat = format;
     },
+
+    /**
+     * Запишем в state экземпляр пользователя, чью страницу просматриваем
+     */
+    viewedUser(state, user) {
+      state.viewedUser = user;
+    },
   },
 
   actions: {
@@ -73,6 +81,20 @@ export default {
        * @todo Желательно бы с этим разобраться
        */
       dispatch('internationalization');
+    },
+
+    /**
+     * Авторизуем пользователя и обрабатываем его метаданные
+     *
+     * @param {Object} user     Экземпляр данных пользователя
+     */
+    signin({ commit, dispatch }, user) {
+      commit('setUser', user);
+      /**
+       * Установим часовой пояс и язык. Это на случай, если пользователь менял эти данные аккаунта на другом устройстве
+       */
+      dispatch('internationalization');
+      dispatch('setTimezone');
     },
 
     /**
@@ -111,20 +133,6 @@ export default {
     },
 
     /**
-     * Авторизуем пользователя и обрабатываем его метаданные
-     *
-     * @param {Object} user     Экземпляр данных пользователя
-     */
-    signin({ commit, dispatch }, user) {
-      commit('setUser', user);
-      /**
-       * Установим часовой пояс и язык. Это на случай, если пользователь менял эти данные аккаунта на другом устройстве
-       */
-      dispatch('internationalization');
-      dispatch('setTimezone');
-    },
-
-    /**
      * Пользователь вышел из аккаунта.
      * Сбрасываем авторизацию. Удаляем информацию о пользователе из стора
      *
@@ -138,6 +146,19 @@ export default {
         router.push({ name: 'home' });
       }
       commit('reset');
+    },
+
+    /**
+     * Получим экземпляр искомого пользователя
+     *
+     * @param {String} username   Никнейм пользователя
+     */
+    async getUser({ commit }, username) {
+      const { user } = await userAPI.getUser('username', username);
+
+      if (user) {
+        commit('viewedUser', user);
+      }
     },
   },
 

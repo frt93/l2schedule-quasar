@@ -44,13 +44,12 @@ export default {
   /**
    * Отправим запрос на получение экземпляра пати
    *
-   * @param {String} key        Ключ поиска (id/name)
-   * @param {String} value      Значение ключа поиска
+   * @param {String} query      Данные для запроса, содержащие поисковые ключ и значение
    */
-  async getParty(key, value) {
+  async getParty(query) {
     let party, error;
     await axiosInstance
-      .post('/parties/get', { key: key, value })
+      .get(`/parties/get?key=${query.key}&value=${query.value}`)
       .then(res => {
         party = res.data.party;
       })

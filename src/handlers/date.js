@@ -141,6 +141,9 @@ export default {
     return now;
   },
 
+  /**
+   * Установим дате выбранный пользователем формат
+   */
   setFormat(date, format) {
     if (!format) {
       format = this.defaultFormat;
@@ -148,7 +151,17 @@ export default {
     return date.toFormat(format);
   },
 
+  /**
+   * Переведем дату из ISO формата
+   */
   dateFromIso(date) {
     return DateTime.fromISO(date).toFormat(this.defaultFormat);
+  },
+
+  /**
+   * Вернем дату в календарном виде (день месяц год)
+   */
+  calendarDate(date) {
+    return DateTime.fromISO(date).toFormat('dd.LL.yyyy');
   },
 };

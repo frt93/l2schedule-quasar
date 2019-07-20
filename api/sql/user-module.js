@@ -112,7 +112,7 @@ module.exports = {
           type: 'run_sql',
           args: {
             sql:
-              'CREATE TABLE "public"."parties"("id" serial NOT NULL, "name" citext NOT NULL, "slug" citext NOT NULL, "leader_id" integer NOT NULL, "clan_id" integer, "createdAt" timestamp with time zone NOT NULL DEFAULT now(), PRIMARY KEY ("id") , UNIQUE ("id"), UNIQUE ("name"), UNIQUE ("slug"), UNIQUE ("leader_id"));',
+              'CREATE TABLE "public"."parties"("id" serial NOT NULL, "name" citext NOT NULL, "slug" citext NOT NULL, "about" text, "leader_id" integer NOT NULL, "clan_id" integer, "createdAt" timestamp with time zone NOT NULL DEFAULT now(), PRIMARY KEY ("id") , UNIQUE ("id"), UNIQUE ("name"), UNIQUE ("slug"), UNIQUE ("leader_id"));',
           },
         },
         { type: 'add_existing_table_or_view', args: { name: 'parties', schema: 'public' } },

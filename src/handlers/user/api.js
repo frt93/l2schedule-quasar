@@ -266,22 +266,22 @@ export default {
     return { user, success, error };
   },
 
-  // /**
-  //  * Отправляем запрос на изменение пароля от аккаунта аккаунта пользователя
-  //  *
-  //  * @param {String} id          ID пользователя
-  //  */
-  // async resendEmailConfirmationKey(id) {
-  //   let success, error;
-  //   await axiosInstance
-  //     .post('/users/settings/resendEmailConfirmationKey', { id })
-  //     .then(res => {
-  //       success = res.data.message;
-  //     })
-  //     .catch(e => {
-  //       error = e;
-  //     });
+  /**
+   * Отправим запрос на получение экземпляра искомого пользователя
+   *
+   * @param {String}       key     Ключ, по которому осуществляется поиск пользователя (никнейм/id)
+   * @param {String | Int} value   Значение ключа
+   */
+  async getUser(key, value) {
+    let user, error;
 
-  //   return { success, error };
-  // },
+    await axiosInstance
+      .get(`/users/get?key=${key}&value=${value}`)
+      .then(res => {
+        user = res.data;
+      })
+      .catch(e => {});
+
+    return { user, error };
+  },
 };

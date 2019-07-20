@@ -5,6 +5,6 @@ const { Router } = require('express'),
 router.post('/create', parties.create);
 router.post('/check/name', parties.checkName);
 router.post('/check/slug', parties.checkSlug);
-router.post('/get', parties.getParty);
+router.get('/get', parties.getParty);
 
 module.exports = router;

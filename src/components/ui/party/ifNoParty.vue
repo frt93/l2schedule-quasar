@@ -2,11 +2,7 @@
 import create from "components/ui/party/createDialog";
 export default {
   name: "noPartyComponent",
-  beforeMount() {
-    if (!this.user.id) {
-      this.$router.replace({ name: "parties" });
-    }
-  },
+
   props: ["user"],
   methods: {
     create() {
@@ -18,42 +14,17 @@ export default {
     }
   },
   render(h) {
-    if (!this.user.party) {
-      return h("div", { staticClass: "column" }, [
-        h(
-          "div",
-          { staticClass: "row justify-center" },
-          this.$t("party.noParty.1")
-        ),
-        h("div", { staticClass: " justify-center" }, [
-          h(
-            "span",
-            {
-              staticClass: "dashed cursor-pointer",
-              on: {
-                click: () => {
-                  this.create();
-                }
-              }
-            },
-            this.$t("party.noParty.2")
-          ),
-          h("span", {}, [`  ${this.$t("or")} `]),
-          h(
-            "span",
-            {
-              staticClass: "dashed cursor-pointer",
-              on: {
-                click: () => {
-                  this.$router.push({ name: "parties" });
-                }
-              }
-            },
-            this.$t("party.noParty.3")
-          )
-        ])
-      ]);
-    }
+    return h("div", { staticClass: "column items-center" }, [
+      h("div", { staticClass: "row" }, [
+        h("q-icon", {
+          attrs: { name: "mdi-alert-circle-outline", size: "150px" }
+        })
+      ]),
+
+      h("div", { staticClass: "row" }, [
+        h("p", this.$t("party.notFound", { name: this.$route.params.name }))
+      ])
+    ]);
   }
 };
 </script>
