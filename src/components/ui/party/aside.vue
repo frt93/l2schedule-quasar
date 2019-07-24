@@ -1,9 +1,127 @@
 <script>
 import dateAPI from "handlers/date";
+
+import inviteDialog from "components/ui/party/inviteDialog";
+import invitesList from "components/ui/party/invitesList";
 export default {
   name: "asideColumn",
-  props: ["user", "party"],
+  props: ["user", "party", "userParty"],
+  computed: {
+    isPL() {
+      if (this.user.id == this.party.leader.id) {
+        return true;
+      }
+
+      return false;
+    },
+    isMember() {
+      if (this.userParty && this.userParty.id == this.party.id) {
+        return true;
+      }
+      return false;
+    }
+  },
   methods: {
+    invite() {
+      this.$q.dialog({
+        component: inviteDialog,
+        user: this.user,
+        root: this.$root
+      });
+    },
+
+    invitesDialog() {
+      this.$q.dialog({
+        component: invitesList,
+        party: this.userParty,
+        root: this.$root
+      });
+    },
+
+    __invites(h) {
+      if (this.party.membersInvitations) {
+        return h(
+          "q-item",
+          {
+            attrs: { clickable: true },
+            on: {
+              click: () => {
+                this.invitesDialog();
+              }
+            }
+          },
+          [
+            h("q-item-section", { attrs: { avatar: true } }, [
+              h("q-icon", {
+                attrs: { name: "mdi-account-multiple-plus-outline" }
+              })
+            ]),
+            h("q-item-section", [h("q-item-label", this.$t("party.invites"))])
+          ]
+        );
+      }
+    },
+
+    __inviteButton(h) {
+      if (this.isMember) {
+        return h(
+          "q-item",
+          {
+            attrs: { clickable: true },
+            on: {
+              click: () => {
+                this.invite();
+              }
+            }
+          },
+          [
+            h("q-item-section", { attrs: { avatar: true } }, [
+              h("q-icon", {
+                attrs: { name: "mdi-account-plus-outline" }
+              })
+            ]),
+            h("q-item-section", [h("q-item-label", this.$t("party.invite"))])
+          ]
+        );
+      }
+    },
+
+    __leaveButton(h) {
+      if (this.isMember) {
+        const caption = () => {
+          if (this.isPL) {
+            return h(
+              "q-item-label",
+              { attrs: { caption: true } },
+              this.$t("party.PLleave")
+            );
+          }
+        };
+
+        return h(
+          "q-item",
+          {
+            staticClass: "text-red",
+            attrs: {
+              disable: this.isPL ? true : false,
+              clickable: true
+            }
+          },
+          [
+            h("q-item-section", { attrs: { avatar: true } }, [
+              h("q-icon", {
+                attrs: { name: "mdi-account-minus-outline", color: "red-6" }
+              })
+            ]),
+            h("q-item-section", [
+              h("q-item-label", this.$t("party.leave")),
+              caption()
+            ])
+          ]
+        );
+      }
+    },
+
     __tooltip(h, message) {
       return h("q-no-ssr", [
         h(
@@ -39,7 +157,7 @@ export default {
                   click: () => {
                     this.$router.push({
                       name: "party",
-                      params: { name: this.party.name }
+                      params: { name: this.party.slug }
                     });
                   }
                 }
@@ -71,94 +189,74 @@ export default {
           ])
         ]),
         h("q-separator"),
-        h("q-item", [
-          h("q-item-section", { attrs: { avatar: true } }, [
-            h("q-avatar", [
-              h("img", {
-                attrs: {
-                  src: this.party.leader.avatar
-                    ? this.party.leader.avatar
-                    : "statics/avatar.png"
-                }
-              }),
-              h(
-                "q-icon",
-                {
-                  staticClass: "pl absolute",
-                  attrs: {
-                    name: "mdi-crown",
-                    color: "orange-6"
-                  }
-                },
-                [this.__tooltip(h, "pl")]
-              )
-            ])
-          ]),
-          h(
-            "q-item-section",
-            {
-              staticClass: "cursor-pointer",
-              on: {
-                click: () => {
-                  this.$router.push({
-                    name: "user",
-                    params: { username: this.party.leader.username }
-                  });
-                }
+        h(
+          "q-item",
+          {
+            props: {
+              clickable: true,
+              to: {
+                name: "user",
+                params: { username: this.party.leader.username }
               }
-            },
-            [
+            }
+          },
+          [
+            h("q-item-section", { attrs: { avatar: true } }, [
+              h("q-avatar", [
+                h("img", {
+                  attrs: {
+                    src: this.party.leader.avatar
+                      ? this.party.leader.avatar
+                      : "statics/avatar.png"
+                  }
+                }),
+                h(
+                  "q-icon",
+                  {
+                    staticClass: "pl absolute",
+                    attrs: {
+                      name: "mdi-crown",
+                      color: "orange-6"
+                    }
+                  },
+                  [this.__tooltip(h, "pl")]
+                )
+              ])
+            ]),
+            h("q-item-section", [
               h("q-item-label", this.party.leader.name),
               h(
                 "q-item-label",
                 { attrs: { caption: true } },
                 `@${this.party.leader.username}`
               )
-            ]
-          )
-        ]),
+            ])
+          ]
+        ),
         h("q-separator"),
-        h("q-item", { staticClass: "cursor-pointer" }, [
-          h("q-item-section", { attrs: { avatar: true } }, [
-            h("q-icon", {
-              attrs: { name: "mdi-account-group-outline" }
-            })
-          ]),
-          h(
-            "q-item-section",
-            {
-              on: {
-                click: () => {
-                  this.$router.push({
-                    name: "party/members",
-                    params: { name: this.party.name }
-                  });
-                }
+        h(
+          "q-item",
+          {
+            props: {
+              clickable: true,
+              to: {
+                name: "party/members",
+                params: { name: this.party.slug }
               }
-            },
-            [h("q-item-label", { staticClass: "text-capitalize" }, "Members")]
-          )
-        ]),
-        h("q-item", { staticClass: "cursor-pointer" }, [
-          h("q-item-section", { attrs: { avatar: true } }, [
-            h("q-icon", {
-              attrs: { name: "mdi-account-plus-outline" }
-            })
-          ]),
-          h("q-item-section", [
-            h("q-item-label", { staticClass: "text-capitalize" }, "Invite user")
-          ])
-        ]),
-        h("q-item", { staticClass: "cursor-pointer" }, [
-          h("q-item-section", { attrs: { avatar: true } }, [
-            h("q-icon", {
-              attrs: { name: "mdi-account-minus-outline" }
-            })
-          ]),
-          h("q-item-section", [
-            h("q-item-label", { staticClass: "text-capitalize" }, "Leave party")
-          ])
-        ])
+            }
+          },
+          [
+            h("q-item-section", { attrs: { avatar: true } }, [
+              h("q-icon", {
+                attrs: { name: "mdi-account-group-outline" }
+              })
+            ]),
+            h("q-item-section", [h("q-item-label", this.$t("party.members"))])
+          ]
+        ),
+        this.__invites(h),
+        this.__inviteButton(h),
+        this.__leaveButton(h)
       ])
     ]);
   }

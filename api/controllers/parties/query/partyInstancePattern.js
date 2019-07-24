@@ -1,13 +1,16 @@
 /**
- * Шаблон экземпляра пользователя
+ * Шаблон экземпляра пати
  */
 const returningPattern = `
 id
 name
 slug
+about
+createdAt
 leader{
   id
   username
+  verified
   metadata {
     name
     avatar
@@ -15,18 +18,57 @@ leader{
 }
 clan {
   id
+  name
+  slug
 }
 members {
   id
+  username
+  verified
+  metadata {
+    avatar
+    name
+  }
 }
 membersInvitations {
   id
+  date
+  invitee {
+    id
+    username
+    verified
+    metadata {
+      avatar
+      name
+    }
+  }
+  inviter {
+    id
+    username
+    verified
+    metadata {
+      avatar
+      name
+    }
+  }
 }
 clanInvitations {
-  id
+  date
+  clan {
+    id
+    name
+    slug
+  }
+  inviter {
+    id
+    username
+    verified
+    metadata {
+      avatar
+      name
+    }
+  }
 }
-about
-createdAt
 `;
 
 /**
@@ -47,6 +89,14 @@ const responsePattern = party => {
       party.leader.avatar = party.leader.metadata.avatar;
     }
     delete party.leader.metadata;
+
+    if (!party.clan) {
+      delete party.clan;
+    }
+
+    if (!party.clanInvitations.legth) {
+      delete party.clanInvitations;
+    }
   }
   return party;
 };

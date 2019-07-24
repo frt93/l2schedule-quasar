@@ -285,7 +285,10 @@ export default {
                 type: this.hidePwd ? "password" : "text",
                 maxlength: 30,
                 counter: true,
-                hint: this.$t("hints.auth.password"),
+                hint: this.$t("hints.length", {
+                  from: 7,
+                  to: 30
+                }),
                 value: this.password,
                 error: this.passwordError,
                 errorMessage: this.passwordErrorMessage

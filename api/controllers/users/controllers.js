@@ -4,7 +4,8 @@ const { GraphQLClient } = require('api/config/graphql'),
   { jwtKey } = require('api/config/auth'),
   validator = require('./validator'),
   helpers = require('./helpers'),
-  messages = require('./lang');
+  parties = require('api/controllers/parties/helpers');
+messages = require('./lang');
 /**
  * Создаем нового пользователя.
  * Предварительно валидируем полученные данные.
@@ -28,7 +29,7 @@ module.exports.create = async (req, res) => {
           language: credentials.language,
         },
       },
-      safety: {},
+      safety: { data: {} },
     };
 
   const valid = await validator.signupValidation(credentials, res);
@@ -51,7 +52,7 @@ module.exports.create = async (req, res) => {
  * @return {Object}              Экземпляр пользователя
  */
 module.exports.signin = async (req, res) => {
-  let user, error, query;
+  let user, party, error, query;
   const credentials = req.body;
 
   const valid = await validator.signinValidation(credentials, res);
@@ -86,12 +87,56 @@ module.exports.signin = async (req, res) => {
       const { token } = await helpers.generateToken(user.id);
       user = await helpers.cutPassword(user);
 
-      res.send({ token, user });
+      if (user.party) {
+        party = await parties.findParty('id', user.party.id); // Если пользователь состоит в пати - вместе с экземпляром данных его аккаунта передадим ему и экземпляр пат
+        delete user.party; // Удалим непосредственно из экземпляра данных аккаунта информацию о пати пользователя, т.к. более она там не нужна
+      }
+
+      res.send({ token, user, party });
     } else {
       // Пароль неверен.Выбрасываем ошибку
       return validator.throwErrors('Wrong password', res);
     }
   }
+};
+
+/**
+ * Авторизуем пользователя на основании переданного при инициализации приложения токена
+ *
+ * @param req                    Объект запроса сервера
+ * @param res                    Объект ответа сервера
+ *
+ * @return {Object}              Экземпляр пользователя
+ */
+module.exports.authorize = (req, res) => {
+  const token = req.body.token;
+
+  if (!token)
+    return res.status(401).send({ type: 'error', message: 'Authorization header not found.' });
+
+  jwt.verify(token, jwtKey, async (error, result) => {
+    if (error)
+      return res
+        .status(403)
+        .send({ type: 'error', message: 'Provided authorization token is invalid.', error });
+
+    // Пытаемся получить экземпляр пользователя из базы данных
+    let user = await helpers.findUser('id', result.id, res),
+      party;
+
+    if (!user) {
+      res.status(404).send('User not found.');
+    } else {
+      user = await helpers.cutPassword(user);
+
+      if (user.party) {
+        party = await parties.findParty('id', user.party.id); // Если пользователь состоит в пати - вместе с экземпляром данных его аккаунта передадим ему и экземпляр пат
+        delete user.party; // Удалим непосредственно из экземпляра данных аккаунта информацию о пати пользователя, т.к. более она там не нужна
+      }
+
+      res.send({ user, party });
+    }
+  });
 };
 
 /**
@@ -106,7 +151,8 @@ module.exports.oauthLogin = async (req, res) => {
   const provider = req.body;
 
   // Пытаемся получить экземпляр пользователя из базы данных
-  let user = await helpers.findOauthUser(provider, res);
+  let user = await helpers.findOauthUser(provider, res),
+    party;
 
   if (user) {
     helpers.saveUserInRedis(user);
@@ -114,7 +160,12 @@ module.exports.oauthLogin = async (req, res) => {
     user = await helpers.cutPassword(user);
     const { token } = await helpers.generateToken(user.id);
 
-    res.send({ token, user });
+    if (user.party) {
+      party = await parties.findParty('id', user.party.id); // Если пользователь состоит в пати - вместе с экземпляром данных его аккаунта передадим ему и экземпляр пат
+      delete user.party; // Удалим непосредственно из экземпляра данных аккаунта информацию о пати пользователя, т.к. более она там не нужна
+    }
+
+    res.send({ token, user, party });
   } else {
     // Пользователь не найден. Попытаемся зарегистрировать его
     return validator.throwErrors('oauth: no user', res);
@@ -285,37 +336,6 @@ module.exports.disconnectOauthProvider = async (req, res) => {
   payload.metadata[`${data.provider}Data`] = null;
 
   helpers.saveSettings(data.id, payload, res, succesMessageName, `mdi-${data.provider}`);
-};
-
-/**
- * Авторизуем пользователя на основании переданного при инициализации приложения токена
- *
- * @param req                    Объект запроса сервера
- * @param res                    Объект ответа сервера
- *
- * @return {Object}              Экземпляр пользователя
- */
-module.exports.authorize = (req, res) => {
-  const token = req.body.token;
-  if (!token)
-    return res.status(401).send({ type: 'error', message: 'Authorization header not found.' });
-
-  jwt.verify(token, jwtKey, async (error, result) => {
-    if (error)
-      return res
-        .status(403)
-        .send({ type: 'error', message: 'Provided authorization token is invalid.', error });
-
-    // Пытаемся получить экземпляр пользователя из базы данных
-    let user = await helpers.findUser('id', result.id, res);
-
-    if (!user) {
-      res.status(404).send('User not found.');
-    } else {
-      user = await helpers.cutPassword(user);
-      res.send(user);
-    }
-  });
 };
 
 /**

@@ -1,6 +1,7 @@
 const redis = require('api/config/redis').redisPartiesDB,
   { GraphQLClient } = require('api/config/graphql'),
   validator = require('./validator'),
+  messages = require('./lang'),
   users = require('api/controllers/users/helpers');
 
 /**
@@ -97,9 +98,9 @@ module.exports.createParty = async (payload, res) => {
 /**
  * Ищем пати в Redis кэше или в базе данных
  *
- * @param {String} key        Ключ (поле) по которому осуществляется поиск (id/name/slug, etc)
- * @param {String} value      Значение ключа поиска
- * @param res                 Экземпляр ответа сервера
+ * @param {String} key           Ключ (поле) по которому осуществляется поиск (id/name/slug, etc)
+ * @param {String | Int} value   Значение ключа поиска
+ * @param res                    Экземпляр ответа сервера
  */
 module.exports.findParty = async (key, value, res) => {
   let party;
@@ -128,4 +129,65 @@ module.exports.findParty = async (key, value, res) => {
     });
 
   return party;
+};
+
+/**
+ * Перед сохранением инвайта пользователя в пати сделаем некоторые проверки. Во-первых, проверим, нет ли уже у приглашаемого пользователя инвайта в эту пати.
+ * Также, проверим, чтобы приглашаемый пользователь уже не состоял в пати, в которую его приглашают
+ *
+ * @param {Int} inviteeID     ID приглашаемого пользователя
+ * @param {Int} partyID       ID пати, в которую пользователь приглашается
+ * @param res                 Экземпляр ответа сервера
+ */
+module.exports.checksBeforeInvite = async (inviteeID, partyID, res) => {
+  let isInviteExist = false,
+    inviteeUserParty = null;
+  const { query, response } = require('api/controllers/parties/query/checksBeforeInvite');
+  const payload = query(inviteeID, partyID);
+
+  await GraphQLClient.request(payload)
+    .then(async data => {
+      const { invite, user } = response(data);
+      if (invite.length) {
+        isInviteExist = true;
+      }
+      if (user) {
+        inviteeUserParty = user.party;
+      }
+    })
+    .catch(e => {
+      validator.handleErrors(e, res);
+    });
+
+  return { isInviteExist, inviteeUserParty };
+};
+
+/**
+ * Сохраняем в базе данных приглашение пользователя в пати
+ *
+ * @param {Object} invitee    Данные приглашаемого пользователя
+ * @param {Int} inviterID     ID приглашающего пользователя
+ * @param {Int} partyID       ID пати, в которую пользователь приглашается
+ * @param res                 Экземпляр ответа сервера
+ */
+module.exports.sendInvite = (invitee, inviterID, partyID, res) => {
+  const { mutation, variable, response } = require('api/controllers/parties/mutations/inviteUser');
+  let invite = { invitee_user_id: invitee.id, inviter_user_id: inviterID, party_id: partyID };
+  invite = variable(invite);
+
+  GraphQLClient.request(mutation, invite)
+    .then(async data => {
+      let { party, inviteeUser } = response(data);
+      this.savePartyInRedis(party);
+      users.saveUserInRedis(inviteeUser);
+      //@todo socket оповещение
+      message = {
+        message: messages(res.lang).success['Invite send'](invitee.username),
+        icon: 'mdi-account-check-outline',
+      };
+      res.send({ party, message });
+    })
+    .catch(e => {
+      validator.handleErrors(e, res);
+    });
 };

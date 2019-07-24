@@ -121,7 +121,7 @@ export default {
                         autocomplete: false,
                         maxlength: "16",
                         value: this.username,
-                        hint: this.$t("hints.auth.username"),
+                        hint: this.$t("hints.namePattern"),
                         counter: true,
                         error: this.error,
                         errorMessage: this.errorMessage,

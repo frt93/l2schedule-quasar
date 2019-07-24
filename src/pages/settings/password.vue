@@ -164,7 +164,10 @@ export default {
                     counter: true,
                     value: this.newPassword,
                     label: this.$t("labels.newPassword"),
-                    hint: this.$t("hints.auth.password"),
+                    hint: this.$t("hints.length", {
+                      from: 7,
+                      to: 30
+                    }),
                     error: this.newPasswordError,
                     errorMessage: this.newPasswordErrorMessage
                   },

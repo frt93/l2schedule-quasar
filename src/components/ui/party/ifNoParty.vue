@@ -1,18 +1,8 @@
 <script>
-import create from "components/ui/party/createDialog";
 export default {
   name: "noPartyComponent",
 
   props: ["user"],
-  methods: {
-    create() {
-      this.$q.dialog({
-        component: create,
-        user: this.user,
-        root: this.$root
-      });
-    }
-  },
   render(h) {
     return h("div", { staticClass: "column items-center" }, [
       h("div", { staticClass: "row" }, [

@@ -1,5 +1,6 @@
 import { axiosInstance } from 'boot/axios';
 import cookies from 'js-cookie';
+import controllers from './controllers';
 
 export default {
   /**
@@ -8,17 +9,18 @@ export default {
    * @param {String} token    Токен авторизации пользователя
    */
   async authenticate(token) {
-    let user;
+    let user, party;
     await axiosInstance
       .post('/users/authorize', { token })
       .then(res => {
-        user = res.data;
+        user = res.data.user;
+        party = res.data.party;
       })
       .catch(e => {
         user = null;
       });
 
-    return user;
+    return { user, party };
   },
 
   /**
@@ -27,17 +29,18 @@ export default {
    * @param {Object} credentials   Регистрационные данные пользователя
    */
   async signin(credentials) {
-    let user, error;
+    let user, party, error;
     await axiosInstance
       .post('/users/signin', credentials)
       .then(res => {
         user = res.data.user;
+        party = res.data.party;
         cookies.set('auth', res.data.token, { expires: 3650 });
       })
       .catch(e => {
         error = e;
       });
-    return { user, error };
+    return { user, party, error };
   },
 
   /**
@@ -46,19 +49,20 @@ export default {
    * @param {Object} credentials   Регистрационные данные пользователя
    */
   async oauthLogin(credentials) {
-    let user, error;
+    let user, party, error;
 
     await axiosInstance
       .post('/users/signin/oauth', credentials)
       .then(res => {
         user = res.data.user;
+        party = res.data.party;
         cookies.set('auth', res.data.token, { expires: 3650 });
       })
       .catch(e => {
         error = e;
       });
 
-    return { user, error };
+    return { user, party, error };
   },
 
   /**
@@ -240,7 +244,7 @@ export default {
   /**
    * Отправляем запрос на сохранение внесенных пользователем настроек аккаунта
    *
-   * @param {String} clause      "Раздел" настроек. Необходим для формирования url запроса
+   * @param {String} sub         "Раздел" настроек. Необходим для формирования url запроса
    * @param {Object} payload     Отправляемые данные пользователя
    * @param {String} lang        Язык пользователя
    */
@@ -280,7 +284,9 @@ export default {
       .then(res => {
         user = res.data;
       })
-      .catch(e => {});
+      .catch(e => {
+        error = e;
+      });
 
     return { user, error };
   },

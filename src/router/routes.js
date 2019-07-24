@@ -101,11 +101,13 @@ const routes = [
         path: ':name',
         name: 'party',
         component: () => import('pages/party/main.vue'),
-      },
-      {
-        path: 'members',
-        name: 'party/members',
-        component: () => import('pages/party/members.vue'),
+        children: [
+          {
+            path: 'members',
+            name: 'party/members',
+            component: () => import('pages/party/members.vue'),
+          },
+        ],
       },
     ],
   },

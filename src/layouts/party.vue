@@ -12,9 +12,10 @@ export default {
     if (currentRoute.params.name) {
       query = { key: "name", value: currentRoute.params.name };
     } else {
-      const user = store.state.user.instance;
-      if (user !== null && user.party) {
-        redirect(`/party/${user.party.name}`);
+      const user = store.state.user.instance,
+        userParty = store.state.party.userParty;
+      if (user !== null && userParty !== null) {
+        redirect(`/party/${userParty.name}`);
       } else {
         redirect("/parties");
       }
@@ -33,7 +34,8 @@ export default {
 
   computed: {
     ...mapState({
-      party: state => state.party.current
+      party: state => state.party.browseParty,
+      userParty: state => state.party.userParty
     }),
 
     ...mapGetters({
@@ -44,7 +46,13 @@ export default {
   methods: {
     __renderAside(h) {
       if (this.party !== null) {
-        return h(aside, { props: { user: this.user, party: this.party } });
+        return h(aside, {
+          props: {
+            user: this.user,
+            party: this.party,
+            userParty: this.userParty
+          }
+        });
       }
     }
   },
@@ -55,7 +63,12 @@ export default {
       h("q-page-container", [
         h("q-page", { staticClass: "flex flex-center" }, [
           this.__renderAside(h),
-          h("router-view", { attrs: { user: this.user, party: this.party } })
+          h("router-view", {
+            attrs: {
+              user: this.user,
+              party: this.party
+            }
+          })
         ])
       ])
     ]);

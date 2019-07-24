@@ -1,7 +1,7 @@
 <script>
 export default {
   name: "userDropdownMenu",
-  props: ["user"],
+  props: ["user", "userParty"],
   data() {
     return {
       uu: null
@@ -14,7 +14,7 @@ export default {
     },
 
     __party(h) {
-      if (this.user.party) {
+      if (this.userParty) {
         return [
           h("q-separator"),
           h("q-item", { props: { clickable: true } }, [
@@ -25,12 +25,12 @@ export default {
                   click: () => {
                     this.$router.push({
                       name: "party",
-                      params: { name: this.user.party.name }
+                      params: { name: this.userParty.slug }
                     });
                   }
                 }
               },
-              this.user.party.name
+              this.userParty.name
             )
           ]),
           h("q-separator"),
@@ -42,12 +42,12 @@ export default {
                   click: () => {
                     this.$router.push({
                       name: "party",
-                      params: { name: 'weda2' }
+                      params: { name: "weda2" }
                     });
                   }
                 }
               },
-              'weda2'
+              "weda2"
             )
           ])
         ];

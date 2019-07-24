@@ -8,6 +8,7 @@ export default {
   vk: 'vk.com',
   tg: 'telegram',
   pl: 'Пати лидер',
+  noResults: 'Поиск не дал результатов',
   oauth: {
     title: 'Сторонние приложения авторизации',
     link: 'Вы можете подключить к своему аккаунту приложение авторизации ',
@@ -95,7 +96,8 @@ export default {
     },
   },
   hints: {
-    pattern: 'Только латинские буквы, числа, а также',
+    namePattern: 'Только латинские буквы, числа, а также _ или .',
+    length: 'От {from} до {to} символов',
     settings: {
       needPasswordToChange:
         'Для внесения изменений вам необходимо сначала установить пароль от аккаунта',
@@ -116,9 +118,7 @@ export default {
       },
     },
     auth: {
-      username: '@:hints.pattern - _ и .',
       email: 'На указанный адрес придет письмо для подтверждения',
-      password: 'От 7 до 30 символов',
       confirmOperation: 'Укажите ваш пароль от аккаунта для подтверждения операции',
     },
   },
@@ -143,9 +143,18 @@ export default {
     labels: {
       name: 'Название',
       slug: 'Адрес страницы',
+      filterUsers: 'Никнейм или имя',
     },
     hints: {
-      slug: '@:hints.pattern {and}',
+      slug: '@:hints.namePattern \n @:hints.length',
     },
+    members: 'Пати мемберы',
+    invite: 'Пригласить',
+    invites: 'Приглашенные пользователи',
+    invited: 'уже приглашен',
+    leave: 'Выйти из пати',
+    PLleave: 'Сначала передайте ПЛа другому мемберу',
+    sendInvite: 'Отправить @{name} приглашение в пати',
+    cancelInvite: 'Отменить приглашение @{name} в пати',
   },
 };

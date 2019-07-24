@@ -9,6 +9,7 @@ export default {
   tg: 'telegram',
   oApp: 'authorization app',
   pl: 'Party leader',
+  noResults: 'The search has not given any results',
   oauth: {
     title: 'Third-party authorization apps',
     link: 'You can associate this account with ',
@@ -95,7 +96,8 @@ export default {
     },
   },
   hints: {
-    pattern: 'Only latin letters, numbers and',
+    namePattern: 'Only latin letters, numbers and _ or .',
+    length: 'From {from} to {to} characters',
     settings: {
       needPasswordToChange: 'To make changes you need first to set an account password',
       email: 'Email will not be publicly displayed',
@@ -113,9 +115,7 @@ export default {
       },
     },
     auth: {
-      username: '@:hints.pattern - _ or .',
       email: 'A confirmation message will be sent to the specified email',
-      password: 'From 7 to 30 characters',
       confirmOperation: 'Enter your account password to confirm the operation',
     },
   },
@@ -140,9 +140,18 @@ export default {
     labels: {
       name: 'Your party name',
       slug: 'Party page link',
+      filterUsers: 'Username or name',
     },
     hints: {
-      slug: '@:hints.pattern {and}',
+      slug: '@:hints.namePattern \n @:hints.length',
     },
+    members: 'Party members',
+    invite: 'Invite',
+    invites: 'Invited users',
+    invited: 'already invited',
+    leave: 'Leave party',
+    PLleave: "First you must to transfer the party leader's powers",
+    sendInvite: 'Invite @{name} to party',
+    cancelInvite: 'Cancel invite @{name} to party',
   },
 };

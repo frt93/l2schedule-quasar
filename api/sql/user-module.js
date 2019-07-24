@@ -210,7 +210,7 @@ module.exports = {
           },
         },
 
-        // Связываем приглашение в группу с пользователем, отправившим его (inviter)
+        // Связываем приглашение в группу с пользователем-отправителем (inviter)
         {
           type: 'create_object_relationship',
           args: {
@@ -220,6 +220,21 @@ module.exports = {
               manual_configuration: {
                 remote_table: { name: 'users', schema: 'public' },
                 column_mapping: { inviter_user_id: 'id' },
+              },
+            },
+          },
+        },
+
+        // Связываем приглашение в группу с пользователем-получателем (invitee)
+        {
+          type: 'create_object_relationship',
+          args: {
+            name: 'invitee',
+            table: { name: 'party_invitations', schema: 'public' },
+            using: {
+              manual_configuration: {
+                remote_table: { name: 'users', schema: 'public' },
+                column_mapping: { invitee_user_id: 'id' },
               },
             },
           },
@@ -311,7 +326,7 @@ module.exports = {
           args: { name: 'clan_invitations', schema: 'public' },
         },
 
-        // Каждый клан может приглашать множество групп в свой состав
+        //Связываем таблицу кланов с таблицей приглашений в клан
         {
           type: 'create_array_relationship',
           args: {
@@ -341,7 +356,7 @@ module.exports = {
           },
         },
 
-        // Связываем приглашение в клан с пользователем, отправившим его (inviter)
+        // Связываем приглашение в клан с пользователем-отправителем (inviter)
         {
           type: 'create_object_relationship',
           args: {
@@ -351,6 +366,36 @@ module.exports = {
               manual_configuration: {
                 remote_table: { name: 'users', schema: 'public' },
                 column_mapping: { inviter_id: 'id' },
+              },
+            },
+          },
+        },
+
+        //Связываем приглашение в клан с экземпляром приглашаемой пати
+        {
+          type: 'create_object_relationship',
+          args: {
+            name: 'party',
+            table: { name: 'clan_invitations', schema: 'public' },
+            using: {
+              manual_configuration: {
+                remote_table: { name: 'parties', schema: 'public' },
+                column_mapping: { party_id: 'id' },
+              },
+            },
+          },
+        },
+
+        //Связываем приглашение в клан с экземпляром этого самого клана
+        {
+          type: 'create_object_relationship',
+          args: {
+            name: 'clan',
+            table: { name: 'clan_invitations', schema: 'public' },
+            using: {
+              manual_configuration: {
+                remote_table: { name: 'clans', schema: 'public' },
+                column_mapping: { clan_id: 'id' },
               },
             },
           },

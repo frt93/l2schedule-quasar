@@ -60,17 +60,12 @@ export default {
     async onConfirm() {
       const { party, user, error } = await partyAPI.create(this.payload);
       if (error) {
-        console.log(error.response);
         return;
       }
       // Устанавливаем новый инстанс пользователя
       this.$store.commit("user/setUser", user);
       //@todo коммит в модуль пати
       this.$emit("ok");
-      this.hide();
-    },
-
-    onCancel() {
       this.hide();
     }
   },
@@ -80,7 +75,7 @@ export default {
       this.nameError = false;
       this.nameErrorMessage = "";
 
-      if (name.length) {
+      if (name.length > 2) {
         const { message } = await controllers.checkName(name);
 
         if (message) {
@@ -95,7 +90,7 @@ export default {
       this.slugError = false;
       this.slugErrorMessage = "";
 
-      if (slug.length) {
+      if (slug.length > 2) {
         const { message } = await controllers.checkSlug(slug);
 
         if (message) {
@@ -138,7 +133,7 @@ export default {
                 },
                 on: {
                   click: () => {
-                    this.onCancel();
+                    this.hide();
                   }
                 }
               })
@@ -165,6 +160,10 @@ export default {
                         maxlength: "30",
                         value: this.name,
                         label: this.$t("party.labels.name"),
+                        hint: this.$t("hints.length", {
+                          from: 3,
+                          to: 30
+                        }),
                         counter: true,
                         error: this.nameError,
                         errorMessage: this.nameErrorMessage,
@@ -195,7 +194,7 @@ export default {
                         prefix: `${process.env.APP_URL}party/`,
                         value: this.slug,
                         label: this.$t("party.labels.slug"),
-                        hint: this.$t("party.hints.slug", { and: "-" }),
+                        hint: this.$t("party.hints.slug", { from: 3, to: 20 }),
                         counter: true,
                         error: this.slugError,
                         errorMessage: this.slugErrorMessage,

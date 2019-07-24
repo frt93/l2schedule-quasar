@@ -216,7 +216,9 @@ export default {
                   "q-tab",
                   {
                     props: {
-                      icon: this.miniState ? "mdi-menu-open mdi-rotate-180" : "mdi-menu-left",
+                      icon: this.miniState
+                        ? "mdi-menu-open mdi-rotate-180"
+                        : "mdi-menu-left",
                       label: !this.miniState ? this.$t("labels.collapse") : ""
                     },
                     on: {
@@ -289,8 +291,8 @@ export default {
 
 .q-drawer--mini {
   .settings-tabs {
-    @media screen and (max-width: 767px) {
-      .q-tab__label {
+    .q-tab__label {
+      @media screen and (max-width: 767px) {
         display: none;
       }
     }

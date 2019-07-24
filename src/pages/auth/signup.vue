@@ -170,7 +170,7 @@ export default {
                 maxlength: "16",
                 value: this.username,
                 label: this.$t("labels.username"),
-                hint: this.$t("hints.auth.username"),
+                hint: this.$t("hints.namePattern"),
                 counter: true,
                 error: this.usernameError,
                 errorMessage: this.usernameErrorMessage,
@@ -242,7 +242,10 @@ export default {
                 type: this.hidePwd ? "password" : "text",
                 value: this.password,
                 label: this.$t("labels.password"),
-                hint: this.$t("hints.auth.password"),
+                hint: this.$t("hints.length", {
+                  from: 7,
+                  to: 30
+                }),
                 counter: true,
                 error: this.passwordError,
                 errorMessage: this.passwordErrorMessage

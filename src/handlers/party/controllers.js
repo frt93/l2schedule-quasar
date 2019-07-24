@@ -44,7 +44,7 @@ export default {
       const err = e.response.data;
       const status = e.response.status;
 
-      if (status >= 500) {
+      if (status >= 500 || err.alert) {
         this.errorNotify(err.message);
         return false;
       } else {

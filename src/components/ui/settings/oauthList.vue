@@ -320,7 +320,7 @@ export default {
 
       if (providerID) {
         return [
-          h("div", { ref: provider, attrs: { id: provider } }, [
+          h("div", { ref: provider }, [
             h(
               "q-btn",
               {

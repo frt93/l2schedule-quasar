@@ -70,7 +70,7 @@ export default {
   methods: {
     async submit() {
       this.sending = true;
-      const { user, error } = await userAPI.signin(this.credentials);
+      const { user, party, error } = await userAPI.signin(this.credentials);
       this.sending = false;
 
       if (error) {
@@ -85,6 +85,10 @@ export default {
         return;
       }
       this.$store.dispatch("user/signin", user);
+
+      if (party) {
+        this.$store.commit("party/setUserParty", party);
+      }
 
       // Проверяем наличие параметра переадресации в текущем роуте.
       // Если он есть - перенаправляем пользователя на указанный маршрут. В противном случае отправляем на главную страницу

@@ -54,7 +54,9 @@ module.exports = {
     FetchError: 'Не удалось связаться с базой данных. Попробуйте снова',
     'Username spaces': 'Пробелы запрещены',
     'username length': 'Не более 16 символов',
-    'username pattern': 'Только латинские буквы, числа, а также - _ и .',
+    'username pattern': 'Только латинские буквы, числа, а также _ и .',
+    'Special characters location':
+      'Символы _ и . не должны распологаться в начале или конце никнейма',
     'Email spaces': 'Пробелы в email адресе запрещены',
     'Wrong email pattern': 'Неверный формат email адреса',
     'Password min length': 'Пароль должен состоять минимум из 7 символов',

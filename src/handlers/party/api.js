@@ -1,4 +1,5 @@
 import { axiosInstance } from 'boot/axios';
+import controllers from './controllers';
 
 export default {
   async create(payload) {
@@ -57,5 +58,70 @@ export default {
         error = e;
       });
     return { party, error };
+  },
+
+  /**
+   * Отправим запрос на получение списка пользователей, которых можно заинвайтить в пати
+   *
+   * @param {String} name        Имя/никнейм, по которому производится фильтрация
+   * @param {Int} partyID        ID пати, в которую должны приглашаться полученные пользователи
+   */
+  async usersToInvite(name, partyID) {
+    let users, error;
+
+    await axiosInstance
+      .get(`/parties/invite/users-can-be-invited?name=${name}&partyID=${partyID}`)
+      .then(res => {
+        users = res.data;
+      })
+      .catch(e => {
+        controllers.handleErrors(e);
+      });
+
+    return { users, error };
+  },
+
+  /**
+   * Запрос на отправку инвайта в пати
+   *
+   * @param {Object} payload    Данные приглашения
+   */
+  async sendInvite(payload) {
+    let party, message;
+    await axiosInstance
+      .post('/parties/invite', payload)
+      .then(res => {
+        party = res.data.party;
+        message = res.data.message;
+
+        controllers.successNotify(message);
+      })
+      .catch(e => {
+        controllers.handleErrors(e);
+      });
+
+    return party;
+  },
+
+  /**
+   * Запрос на "отмену" инвайта пользователя в группу
+   *
+   * @param {Object} id         ID приглашения
+   */
+  async cancelInvite(id) {
+    let party, message;
+    await axiosInstance
+      .post('/parties/invite/cancel', { id })
+      .then(res => {
+        party = res.data.party;
+        message = res.data.message;
+
+        controllers.successNotify(message);
+      })
+      .catch(e => {
+        controllers.handleErrors(e);
+      });
+
+    return party;
   },
 };

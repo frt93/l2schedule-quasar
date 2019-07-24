@@ -168,7 +168,8 @@ export default {
 
         if (
           err.type === 'Wrong provider account' ||
-          err.type === 'Oauth profile already connected'
+          err.type === 'Oauth profile already connected' ||
+          err.type === 'oauth: email already used'
         ) {
           // Если пользователь пытается перезаписать данные одного аккаунта данными другого - оповестим его об этом
           this.openDialog(i18n.t('errors.authError'), err.message);
@@ -236,7 +237,7 @@ export default {
    * @param {String} message       Текст оповещения
    * @param {Boolean} persistent   false - Можно закрыть диалог кликом на бэкграунде, true - только нажатием кнопки OK
    */
-  openDialog(title, message, persistent) {
+  openDialog(title, message, persistent = true) {
     Dialog.create({
       title,
       message,

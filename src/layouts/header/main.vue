@@ -3,12 +3,10 @@ import { mapState } from "vuex";
 import userMenu from "components/ui/userMenu";
 export default {
   name: "headerComponent",
-  components: {
-    userMenu
-  },
   computed: {
     ...mapState({
-      user: state => state.user.instance
+      user: state => state.user.instance,
+      userParty: state => state.party.userParty
     }),
 
     __routeTabs() {
@@ -64,7 +62,9 @@ export default {
                     : "statics/avatar.png"
               }
             }),
-            h("userMenu", { props: { user: this.user } })
+            h(userMenu, {
+              props: { user: this.user, userParty: this.userParty }
+            })
           ])
         ])
       ];

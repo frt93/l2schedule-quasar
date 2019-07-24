@@ -49,12 +49,14 @@ module.exports = {
     'Wrong email confirm key': 'Invalid confirmation key pattern. Email not confirmed',
     'Wrong password': 'Wrong password',
     'No password':
-      'This account has no password. Log in using a third-party application or go through the procedure to restore access',
+      'This account has no password. Log in using a third-party application or go through the restore access procedure',
     'Password change failed': 'Password change failed. Try again',
     FetchError: "Couldn't connect to database. Try again",
     'Username spaces': 'Spaces are prohibited',
     'username length': 'Up to 16 characters',
-    'username pattern': 'Only latin letters, numbers and - _ or .',
+    'username pattern': 'Only latin letters, numbers and _ or .',
+    'Special characters location':
+      "Characters _ and . shouldn't be at the beginning or end of username",
     'Email spaces': 'Spaces are prohibited',
     'Wrong email pattern': 'Wrong email pattern',
     'Password min length': 'Password must be at least 7 characters',

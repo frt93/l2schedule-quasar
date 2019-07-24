@@ -70,8 +70,12 @@ export default {
      * @param {String} token    Токен авторизации пользователя
      */
     async authorize({ dispatch, commit }, token) {
-      const user = await userAPI.authenticate(token);
+      const { user, party } = await userAPI.authenticate(token);
       commit('setUser', user);
+
+      if (party) {
+        commit('party/setUserParty', party, { root: true });
+      }
       /**
        * На случай, если пользователь пользуется разными типами приложения (сайт, мобильное приложение, десктопное) с разных устройств и меняет в одном из них
        * язык в настройках аккаунта-  необходимо, чтобы при заходе с другого устройства приложение среагировало на изменение настроек и отобразилось на новом языке.

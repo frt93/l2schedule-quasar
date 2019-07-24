@@ -204,9 +204,15 @@ module.exports.validateUsername = (username, res, doRespond = true) => {
     message += `${messages(res.lang).errors['Username spaces']}\n`;
   }
 
-  const pattern = /^[a-zA-Z0-9_\.-]+$/.test(username);
+  const pattern = /^[a-zA-Z0-9_\.]+$/.test(username);
   if (!pattern) {
-    message += `${messages(res.lang).errors['username pattern']}`;
+    message += `${messages(res.lang).errors['username pattern']}\n`;
+  }
+
+  const specialСharactersATtheBeginning = /^[_\.]/.test(username);
+  const specialСharactersATtheEnd = /[_\.]$/.test(username);
+  if (specialСharactersATtheBeginning || specialСharactersATtheEnd) {
+    message += `${messages(res.lang).errors['Special characters location']}`;
   }
 
   if (message.length) {

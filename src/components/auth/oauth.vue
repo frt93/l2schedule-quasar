@@ -68,19 +68,20 @@ export default {
     },
 
     async oauthLogin(credentials) {
-      const { user, error } = await userAPI.oauthLogin(credentials);
+      const { user, party, error } = await userAPI.oauthLogin(credentials);
 
       if (error) {
         const { errorType } = controllers.handleErrors(error);
 
         if (errorType === "oauth: no user") {
+          // Пользователь не найден. Значит зарегистрируем
           return this.oauthRegister({ provider: credentials });
         }
 
         return;
       }
 
-      this.dispatch(user);
+      this.dispatch(user, party);
     },
 
     async oauthRegister(credentials) {
@@ -95,17 +96,6 @@ export default {
 
       if (error) {
         const { errorType, message } = controllers.handleErrors(error);
-        if (errorType === "oauth: email already used") {
-          // Полученный от oauth провайдера email уже занят
-          this.$q
-            .dialog({
-              title: this.$t("errors.authError"),
-              message,
-              persistent: true,
-              style: "width: 700px; max-width: 80vw"
-            })
-            .onOk(async () => {});
-        }
 
         if (errorType === "oauth: username is not chosen") {
           // Не удалось подобрать пользователю никнейм
@@ -125,9 +115,12 @@ export default {
       this.dispatch(user);
     },
 
-    dispatch(user) {
+    dispatch(user, party) {
       if (typeof user === "object") {
         this.$store.dispatch("user/signin", user);
+        if (party) {
+          this.$store.commit("party/setUserParty", party);
+        }
         // Проверяем наличие параметра переадресации в текущем роуте.
         // Если он есть - перенаправляем пользователя на указанный маршрут. В противном случае отправляем на главную страницу
         const redirectTo = this.$route.params.redirect;

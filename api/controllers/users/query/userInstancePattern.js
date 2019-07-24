@@ -28,10 +28,22 @@ safety {
 party {
   id
   name
-  leader {
+  slug
+}
+partyInvitations{
+  id
+  date
+  inviter{
+    id
     username
+    metadata {
+      avatar
+      name
+    }
   }
-  createdAt
+  party {
+    id
+  }
 }
 `;
 
@@ -87,6 +99,10 @@ const responsePattern = user => {
       delete user.metadata.telegramData;
     } else {
       user.metadata.telegramData = JSON.parse(user.metadata.telegramData);
+    }
+
+    if (!user.partyInvitations.length) {
+      delete user.partyInvitations;
     }
   }
   return user;
