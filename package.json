@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@quasar/extras": "^1.1.2",
-    "ajv": "4.11.8",
+    "ajv": "6.12.3",
     "axios": "^0.18.0",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",
