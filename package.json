@@ -34,7 +34,7 @@
     "ioredis": "^4.9.5",
     "js-cookie": "^2.2.0",
     "jsonwebtoken": "^8.5.1",
-    "luxon": "^1.16.0",
+    "luxon": "^1.28.1",
     "pg": "^7.11.0",
     "quasar": "^1.0.5",
     "stylint": "^1.5.9",
